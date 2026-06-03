@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.awt.print.Book;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -31,4 +34,7 @@ public class Author {
     @Column(name = "\"created_at\"")
     @CreationTimestamp
     private Instant createdAt;
+
+    @OneToMany(mappedBy = "author")
+    private List<Book> bookList = new ArrayList<>();
 }
