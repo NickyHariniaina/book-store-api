@@ -1,11 +1,5 @@
 package com.onlydevs.bookstore.model;
 
-import java.time.Instant;
-import java.util.UUID;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,11 +9,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @AllArgsConstructor
@@ -30,29 +28,29 @@ import lombok.Setter;
 @Setter
 public class InventoryItem {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @Column(name = "\"quantity_on_hand\"", nullable = false)
-    private Integer quantityOnHand;
+  @Column(name = "\"quantity_on_hand\"", nullable = false)
+  private Integer quantityOnHand;
 
-    @Column(name="\"reorder_level\"", nullable = false)
-    private Integer reorderLevel;
+  @Column(name = "\"reorder_level\"", nullable = false)
+  private Integer reorderLevel;
 
-    @CreationTimestamp
-    @Column(name="\"created_at\"", updatable = false)
-    private Instant createdAt;
+  @CreationTimestamp
+  @Column(name = "\"created_at\"", updatable = false)
+  private Instant createdAt;
 
-    @UpdateTimestamp
-    @Column(name="\"updated_at\"")
-    private Instant updatedAt;
+  @UpdateTimestamp
+  @Column(name = "\"updated_at\"")
+  private Instant updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "\"book_store_id\"", nullable = false)
-    private BookStore bookStore;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "\"book_store_id\"", nullable = false)
+  private BookStore bookStore;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="\"book_edition_id\"", nullable = false)
-    private BookEdition bookEdition;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "\"book_edition_id\"", nullable = false)
+  private BookEdition bookEdition;
 }

@@ -1,9 +1,8 @@
 package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.UUID;
+import lombok.*;
 
 @Entity
 @Table(name = "\"genre\"")
@@ -14,13 +13,12 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Genre {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
+  @Column(nullable = false, unique = true)
+  private String name;
 
-    @Column
-    private String description;
+  @Column private String description;
 }
