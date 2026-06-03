@@ -57,10 +57,10 @@ public class Sale {
     @Column(name = "\"book_store\"")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="\"book_store_id\"", nullable = false)
-    private String bookStore;
+    private BookStore bookStore;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "\"customer_id\"", nullable = false)
-    private String customer;
+    private Customer customer;
 
 }
