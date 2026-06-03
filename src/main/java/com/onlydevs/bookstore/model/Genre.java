@@ -9,6 +9,7 @@ import java.util.UUID;
 @Table(name = "\"genre\"")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Genre {
