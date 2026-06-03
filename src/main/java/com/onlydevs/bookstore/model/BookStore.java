@@ -20,13 +20,13 @@ public class BookStore {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Column(name = "\"name\"", unique = true, nullable = false)
+  @Column(unique = true, nullable = false)
   private String name;
 
-  @Column(name = "\"phone\"", unique = true)
+  @Column(unique = true)
   private String phone;
 
-  @Column(name = "\"email\"", unique = true)
+  @Column(unique = true)
   private String email;
 
   @CreationTimestamp
