@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -38,4 +39,7 @@ public class BookStore {
   @UpdateTimestamp
   @Column(name = "\"updated_at\"")
   private Instant updatedAt;
+
+  @OneToMany(mappedBy = "bookStore", cascade = CascadeType.ALL)
+  private List<Sale> sales;
 }
