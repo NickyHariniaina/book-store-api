@@ -42,17 +42,20 @@ public class BookEdition {
   @Column(name = "\"updated_at\"")
   private Instant updatedAt;
 
-  @ManyToOne
-  @JoinColumn(name = "publisher_id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "\"publisher_id\"")
   private Publisher publisher;
 
-  @ManyToOne
-  @JoinColumn(name = "book_id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "\"book_id\"")
   private Book book;
 
   @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
-  private List<InventoryItem> InventoryItems;
+  private List<InventoryItem> inventoryItems;
 
   @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
   private List<InventoryMovement> inventoryMovements;
+
+  @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
+  private List<BookPriceHistory> priceHistory;
 }
