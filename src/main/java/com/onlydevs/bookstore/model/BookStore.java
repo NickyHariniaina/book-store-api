@@ -42,4 +42,7 @@ public class BookStore {
 
   @OneToMany(mappedBy = "bookStore", cascade = CascadeType.ALL)
   private List<Sale> sales;
+
+  @OneToMany(mappedBy = "bookStore", cascade = CascadeType.ALL)
+  private List<InventoryMovement> inventoryMovements;
 }

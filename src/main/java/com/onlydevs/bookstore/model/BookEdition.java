@@ -52,4 +52,7 @@ public class BookEdition {
 
   @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
   private List<InventoryItem> InventoryItems;
+
+  @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
+  private List<InventoryMovement> inventoryMovements;
 }
