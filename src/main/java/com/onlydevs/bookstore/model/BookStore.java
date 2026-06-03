@@ -20,20 +20,20 @@ public class BookStore {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Column(unique = true, nullable = false)
+  @Column(name = "\"name\"", unique = true, nullable = false)
   private String name;
 
-  @Column(unique = true)
+  @Column(name = "\"phone\"", unique = true)
   private String phone;
 
-  @Column(unique = true)
+  @Column(name = "\"email\"", unique = true)
   private String email;
 
   @CreationTimestamp
-  @Column(name = "created_at")
+  @Column(name = "\"created_at\"")
   private Instant createdAt;
 
   @UpdateTimestamp
-  @Column(name = "updated_at")
+  @Column(name = "\"updated_at\"")
   private Instant updatedAt;
 }
