@@ -27,6 +27,7 @@ public class BookEdition {
   private String edition;
 
   @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
   private BookFormat format;
 
   private Boolean active = true;
@@ -42,4 +43,8 @@ public class BookEdition {
   @ManyToOne
   @JoinColumn(name = "publisher_id")
   private Publisher publisher;
+
+  @ManyToOne
+  @JoinColumn(name = "book_id")
+  private Book book;
 }

@@ -23,6 +23,8 @@ public class BookStore {
   @Column(unique = true, nullable = false)
   private String name;
 
+  private String address;
+
   @Column(unique = true)
   private String phone;
 
