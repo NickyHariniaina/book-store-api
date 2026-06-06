@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.*;
@@ -40,9 +41,11 @@ public class BookStore {
   @Column(name = "\"updated_at\"")
   private Instant updatedAt;
 
+  @Builder.Default
   @OneToMany(mappedBy = "bookStore", cascade = CascadeType.ALL)
-  private List<Sale> sales;
+  private List<Sale> sales = new ArrayList<>();
 
+  @Builder.Default
   @OneToMany(mappedBy = "bookStore", cascade = CascadeType.ALL)
-  private List<InventoryMovement> inventoryMovements;
+  private List<InventoryMovement> inventoryMovements = new ArrayList<>();
 }

@@ -63,6 +63,7 @@ public class Sale {
   @JoinColumn(name = "\"customer_id\"", nullable = false)
   private Customer customer;
 
+  @Builder.Default
   @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL)
   private List<SaleItem> saleItems = new ArrayList<>();
 }

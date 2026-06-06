@@ -5,16 +5,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "\"publisher\"")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Publisher {
@@ -38,6 +36,7 @@ public class Publisher {
   @CreationTimestamp
   private Instant createdAt;
 
+  @Builder.Default
   @OneToMany(mappedBy = "publisher")
   private List<BookEdition> bookEditions = new ArrayList<>();
 }

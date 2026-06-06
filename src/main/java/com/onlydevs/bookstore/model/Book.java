@@ -40,9 +40,11 @@ public class Book {
   @Column(name = "\"updated_at\"")
   private Instant updatedAt;
 
+  @Builder.Default
   @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
   private List<BookGenre> bookGenres = new ArrayList<>();
 
+  @Builder.Default
   @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<BookAuthor> bookAuthors = new ArrayList<>();
 }

@@ -3,6 +3,7 @@ package com.onlydevs.bookstore.model;
 import com.onlydevs.bookstore.model.enums.BookFormat;
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.*;
@@ -49,12 +50,15 @@ public class BookEdition {
   @JoinColumn(name = "\"book_id\"")
   private Book book;
 
+  @Builder.Default
   @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
-  private List<InventoryItem> inventoryItems;
+  private List<InventoryItem> inventoryItems = new ArrayList<>();
 
+  @Builder.Default
   @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
-  private List<InventoryMovement> inventoryMovements;
+  private List<InventoryMovement> inventoryMovements = new ArrayList<>();
 
+  @Builder.Default
   @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
-  private List<BookPriceHistory> priceHistory;
+  private List<BookPriceHistory> priceHistory = new ArrayList<>();
 }

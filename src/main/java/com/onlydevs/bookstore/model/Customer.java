@@ -5,16 +5,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "\"customer\"")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Customer {
@@ -38,6 +36,7 @@ public class Customer {
   @Column(name = "\"created_at\"")
   private Instant createdAt;
 
+  @Builder.Default
   @OneToMany(mappedBy = "customer")
   private List<Sale> sales = new ArrayList<>();
 }
