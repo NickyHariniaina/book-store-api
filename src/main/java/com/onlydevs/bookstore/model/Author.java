@@ -33,5 +33,5 @@ public class Author {
   private Instant createdAt;
 
   @OneToMany(mappedBy = "author")
-  private List<Book> bookList = new ArrayList<>();
+  private List<BookAuthor> bookAuthors = new ArrayList<>();
 }

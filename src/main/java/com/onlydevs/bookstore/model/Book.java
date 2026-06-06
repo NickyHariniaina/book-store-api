@@ -42,4 +42,7 @@ public class Book {
 
   @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
   private List<BookGenre> bookGenres = new ArrayList<>();
+
+  @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<BookAuthor> bookAuthors = new ArrayList<>();
 }
