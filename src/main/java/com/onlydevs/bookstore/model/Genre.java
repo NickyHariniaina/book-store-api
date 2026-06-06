@@ -1,6 +1,8 @@
 package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.*;
 
@@ -23,4 +25,8 @@ public class Genre {
   private String name;
 
   @Column private String description;
+
+  @ManyToMany(mappedBy = "genres")
+  @Builder.Default
+  private Set<Book> books = new HashSet<>();
 }

@@ -3,8 +3,8 @@ package com.onlydevs.bookstore.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -46,9 +46,13 @@ public class Book {
   @Column(name = "\"updated_at\"")
   private Instant updatedAt;
 
+  @ManyToMany
+  @JoinTable(
+      name = "\"book_genre\"",
+      joinColumns = @JoinColumn(name = "\"book_id\""),
+      inverseJoinColumns = @JoinColumn(name = "\"genre_id\""))
   @Builder.Default
-  @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-  private List<BookGenre> bookGenres = new ArrayList<>();
+  private Set<Genre> genres = new HashSet<>();
 
   @Builder.Default
   @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
