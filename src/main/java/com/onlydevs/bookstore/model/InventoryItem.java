@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,6 +43,9 @@ public class InventoryItem {
   @UpdateTimestamp
   @Column(name = "\"updated_at\"")
   private Instant updatedAt;
+
+  @Version
+  private Long version;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_store_id\"", nullable = false)
