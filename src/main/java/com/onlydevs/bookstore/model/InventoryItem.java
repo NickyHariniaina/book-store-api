@@ -22,6 +22,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "\"inventory_item\"")
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
+@ToString(of = "id")
 public class InventoryItem {
 
   @Id

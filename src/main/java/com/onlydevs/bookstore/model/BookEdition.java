@@ -18,6 +18,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Table(name = "\"book_edition\"")
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(of = "id")
 public class BookEdition {
 
   @Id

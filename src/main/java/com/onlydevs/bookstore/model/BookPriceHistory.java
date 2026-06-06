@@ -16,6 +16,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(of = "id")
 public class BookPriceHistory {
 
   @Id

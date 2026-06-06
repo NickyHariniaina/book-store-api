@@ -16,6 +16,8 @@ import org.hibernate.annotations.CreationTimestamp;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(of = "id")
 public class SaleItem {
 
   @Id

@@ -34,6 +34,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Setter
 @Getter
 @Builder
+@EqualsAndHashCode(of = "id")
+@ToString(of = "id")
 public class Sale {
 
   @Id
@@ -41,6 +43,7 @@ public class Sale {
   private UUID id;
 
   @Enumerated(EnumType.STRING)
+  @Column
   private SaleStatus status;
 
   @Enumerated(EnumType.STRING)

@@ -20,6 +20,8 @@ import org.hibernate.annotations.CreationTimestamp;
 @Setter
 @Getter
 @Builder
+@EqualsAndHashCode(of = "id")
+@ToString(of = "id")
 public class InventoryMovement {
 
   @Id
