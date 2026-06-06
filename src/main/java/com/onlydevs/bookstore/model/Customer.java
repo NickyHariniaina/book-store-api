@@ -1,6 +1,8 @@
 package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,16 +22,19 @@ public class Customer {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotBlank
   @Column(name = "\"first_name\"", nullable = false)
   private String firstName;
 
+  @NotBlank
   @Column(name = "\"last_name\"", nullable = false)
   private String lastName;
 
+  @Email
   @Column(unique = true)
   private String email;
 
-  @Column(unique = true, nullable = true)
+  @Column(unique = true)
   private String phone;
 
   @CreationTimestamp

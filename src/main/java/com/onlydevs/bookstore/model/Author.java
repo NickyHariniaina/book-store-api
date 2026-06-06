@@ -1,6 +1,7 @@
 package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +21,11 @@ public class Author {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotBlank
   @Column(nullable = false, name = "\"first_name\"")
   private String firstName;
 
+  @NotBlank
   @Column(nullable = false, name = "\"last_name\"")
   private String lastName;
 

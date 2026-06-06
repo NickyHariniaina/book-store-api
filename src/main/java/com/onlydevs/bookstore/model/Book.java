@@ -1,6 +1,7 @@
 package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,11 +23,14 @@ public class Book {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotBlank
   @Column(nullable = false)
   private String title;
 
+  @Column
   private String summary;
 
+  @Column
   private String language;
 
   @Column(name = "\"cover_url\"")

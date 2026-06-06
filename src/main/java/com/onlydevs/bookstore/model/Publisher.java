@@ -1,6 +1,8 @@
 package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +22,17 @@ public class Publisher {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotBlank
   @Column(nullable = false)
   private String name;
 
+  @NotBlank
   @Column(nullable = false)
   private String phone;
 
-  @Column private String email;
+  @Email
+  @Column
+  private String email;
 
   @Column private String country;
 

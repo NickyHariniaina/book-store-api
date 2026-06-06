@@ -1,6 +1,7 @@
 package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
@@ -20,6 +21,7 @@ public class BookPriceHistory {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @DecimalMin("0.00")
   @Column(nullable = false, precision = 10, scale = 2)
   private BigDecimal price;
 

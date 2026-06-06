@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.model;
 
 import com.onlydevs.bookstore.model.enums.BookFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class BookEdition {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotBlank
   @Column(unique = true, nullable = false)
   private String isbn;
 
