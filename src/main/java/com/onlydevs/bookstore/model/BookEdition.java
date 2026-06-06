@@ -51,7 +51,7 @@ public class BookEdition {
   private Publisher publisher;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "\"book_id\"")
+  @JoinColumn(name = "\"book_id\"", nullable = false)
   private Book book;
 
   @Builder.Default

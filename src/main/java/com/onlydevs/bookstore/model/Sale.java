@@ -43,8 +43,8 @@ public class Sale {
   private UUID id;
 
   @Enumerated(EnumType.STRING)
-  @Column
-  private SaleStatus status;
+  @Column(nullable = false)
+  private SaleStatus status = SaleStatus.PENDING;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "\"payment_method\"")
@@ -63,7 +63,7 @@ public class Sale {
   private BookStore bookStore;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "\"customer_id\"", nullable = false)
+  @JoinColumn(name = "\"customer_id\"")
   private Customer customer;
 
   @Builder.Default
