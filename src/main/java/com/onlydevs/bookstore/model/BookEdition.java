@@ -1,10 +1,9 @@
 package com.onlydevs.bookstore.model;
 
 import com.onlydevs.bookstore.model.enums.BookFormat;
-import java.util.List;
-
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
