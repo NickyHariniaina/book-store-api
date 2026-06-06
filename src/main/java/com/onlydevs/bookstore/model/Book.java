@@ -4,7 +4,9 @@ import com.onlydevs.bookstore.model.enums.BookLanguage;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import lombok.*;
@@ -30,8 +32,7 @@ public class Book {
   @Column(nullable = false)
   private String title;
 
-  @Column
-  private String summary;
+  @Column private String summary;
 
   @Enumerated(EnumType.STRING)
   @Column

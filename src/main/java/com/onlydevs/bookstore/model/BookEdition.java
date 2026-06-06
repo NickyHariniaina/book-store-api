@@ -36,6 +36,7 @@ public class BookEdition {
   @Column(nullable = false)
   private BookFormat format;
 
+  @Builder.Default
   private Boolean active = true;
 
   @CreationTimestamp

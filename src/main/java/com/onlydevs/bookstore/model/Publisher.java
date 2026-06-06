@@ -32,9 +32,7 @@ public class Publisher {
   @Column(nullable = false)
   private String phone;
 
-  @Email
-  @Column
-  private String email;
+  @Email @Column private String email;
 
   @Column private String country;
 

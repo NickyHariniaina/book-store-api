@@ -39,8 +39,7 @@ public class InventoryItem {
   @Column(name = "\"updated_at\"")
   private Instant updatedAt;
 
-  @Version
-  private Long version;
+  @Version private Long version;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_store_id\"", nullable = false)

@@ -49,7 +49,9 @@ public class BookStore {
   private Instant updatedAt;
 
   @Builder.Default
-  @OneToMany(mappedBy = "bookStore", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OneToMany(
+      mappedBy = "bookStore",
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   private List<Sale> sales = new ArrayList<>();
 
   @Builder.Default
