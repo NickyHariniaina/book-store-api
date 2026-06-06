@@ -1,5 +1,6 @@
 package com.onlydevs.bookstore.model;
 
+import com.onlydevs.bookstore.model.enums.BookLanguage;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
@@ -32,8 +33,9 @@ public class Book {
   @Column
   private String summary;
 
+  @Enumerated(EnumType.STRING)
   @Column
-  private String language;
+  private BookLanguage language;
 
   @Column(name = "\"cover_url\"")
   private String coverUrl;
