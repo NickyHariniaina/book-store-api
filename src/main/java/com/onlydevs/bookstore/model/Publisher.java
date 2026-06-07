@@ -44,8 +44,7 @@ public class Publisher {
   @Column
   private String country;
 
-  @Column
-  private String website;
+  @Column private String website;
 
   @Column(name = "\"created_at\"")
   @CreationTimestamp
