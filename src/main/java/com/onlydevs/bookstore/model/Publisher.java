@@ -44,7 +44,6 @@ public class Publisher {
   @Column
   private String country;
 
-  @Size(max = 2048, message = "website must not exceed 2048 characters")
   @Column
   private String website;
 

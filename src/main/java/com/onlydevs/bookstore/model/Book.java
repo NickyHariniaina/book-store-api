@@ -42,7 +42,6 @@ public class Book {
   @Column
   private BookLanguage language;
 
-  @Size(max = 2048, message = "cover url must not exceed 2048 characters")
   @Column(name = "\"cover_url\"")
   private String coverUrl;
 
