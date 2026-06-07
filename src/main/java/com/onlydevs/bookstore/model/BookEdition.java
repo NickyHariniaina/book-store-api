@@ -68,4 +68,8 @@ public class BookEdition {
   @Builder.Default
   @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
   private List<BookPriceHistory> priceHistory = new ArrayList<>();
+
+  @Builder.Default
+  @OneToMany(mappedBy = "bookEdition", cascade = CascadeType.ALL)
+  private List<SaleItem> saleItems = new ArrayList<>();
 }
