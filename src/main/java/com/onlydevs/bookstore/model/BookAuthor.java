@@ -1,5 +1,6 @@
 package com.onlydevs.bookstore.model;
 
+import com.onlydevs.bookstore.model.enums.AuthorRole;
 import jakarta.persistence.*;
 import java.util.UUID;
 import lombok.*;
@@ -28,4 +29,11 @@ public class BookAuthor {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"author_id\"", nullable = false)
   private Author author;
+
+  @Enumerated(EnumType.STRING)
+  @Column
+  private AuthorRole role;
+
+  @Column(name = "\"contribution_order\"")
+  private Integer contributionOrder;
 }
