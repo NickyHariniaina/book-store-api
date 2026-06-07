@@ -60,4 +60,8 @@ public class Book {
   @Builder.Default
   @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<BookAuthor> bookAuthors = new ArrayList<>();
+
+  @Builder.Default
+  @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<BookEdition> bookEditions = new ArrayList<>();
 }
