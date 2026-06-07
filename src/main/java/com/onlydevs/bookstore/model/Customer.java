@@ -3,6 +3,7 @@ package com.onlydevs.bookstore.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,17 +26,21 @@ public class Customer {
   private UUID id;
 
   @NotBlank
+  @Size(min = 1, max = 100, message = "first name must be between 1 and 100 characters")
   @Column(name = "\"first_name\"", nullable = false)
   private String firstName;
 
   @NotBlank
+  @Size(min = 1, max = 100, message = "last name must be between 1 and 100 characters")
   @Column(name = "\"last_name\"", nullable = false)
   private String lastName;
 
   @Email
+  @Size(max = 255, message = "email must not exceed 255 characters")
   @Column(unique = true)
   private String email;
 
+  @Size(max = 20, message = "phone must not exceed 20 characters")
   @Column(unique = true)
   private String phone;
 

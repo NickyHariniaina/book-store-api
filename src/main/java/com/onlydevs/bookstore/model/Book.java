@@ -3,6 +3,7 @@ package com.onlydevs.bookstore.model;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,15 +30,19 @@ public class Book {
   private UUID id;
 
   @NotBlank
+  @Size(min = 1, max = 255, message = "title must be between 1 and 255 characters")
   @Column(nullable = false)
   private String title;
 
-  @Column private String summary;
+  @Size(max = 2000, message = "summary must not exceed 2000 characters")
+  @Column
+  private String summary;
 
   @Enumerated(EnumType.STRING)
   @Column
   private BookLanguage language;
 
+  @Size(max = 2048, message = "cover url must not exceed 2048 characters")
   @Column(name = "\"cover_url\"")
   private String coverUrl;
 

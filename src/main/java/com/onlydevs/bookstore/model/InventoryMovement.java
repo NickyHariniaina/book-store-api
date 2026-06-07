@@ -4,6 +4,7 @@ import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
@@ -33,15 +34,18 @@ public class InventoryMovement {
   private Integer quantity;
 
   @NotBlank
+  @Size(min = 1, max = 500, message = "reason must be between 1 and 500 characters")
   @Column(nullable = false)
   private String reason;
 
+  @Size(max = 255, message = "reference must not exceed 255 characters")
   private String reference;
 
   @Column(name = "\"moved_at\"")
   @CreationTimestamp
   private Instant movedAt;
 
+  @Size(max = 100, message = "created by must not exceed 100 characters")
   @Column(name = "\"created_by\"")
   private String createdBy;
 
