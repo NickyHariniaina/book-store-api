@@ -3,6 +3,7 @@ package com.onlydevs.bookstore.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -26,11 +27,13 @@ public class Publisher {
   private UUID id;
 
   @NotBlank
+  @NotNull
   @Size(min = 1, max = 255, message = "name must be between 1 and 255 characters")
   @Column(nullable = false)
   private String name;
 
   @NotBlank
+  @NotNull
   @Size(max = 20, message = "phone must not exceed 20 characters")
   @Column(nullable = false)
   private String phone;

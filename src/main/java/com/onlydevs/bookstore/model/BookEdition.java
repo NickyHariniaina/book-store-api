@@ -3,6 +3,7 @@ package com.onlydevs.bookstore.model;
 import com.onlydevs.bookstore.model.enums.BookFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class BookEdition {
   private UUID id;
 
   @NotBlank
+  @NotNull
   @Size(min = 10, max = 13, message = "isbn must be between 10 and 13 characters")
   @Column(unique = true, nullable = false)
   private String isbn;
@@ -35,6 +37,7 @@ public class BookEdition {
   @Size(max = 50, message = "edition must not exceed 50 characters")
   private String edition;
 
+  @NotNull
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private BookFormat format;
@@ -53,6 +56,7 @@ public class BookEdition {
   @JoinColumn(name = "\"publisher_id\"")
   private Publisher publisher;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_id\"", nullable = false)
   private Book book;

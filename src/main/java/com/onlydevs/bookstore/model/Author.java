@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -25,11 +26,13 @@ public class Author {
   private UUID id;
 
   @NotBlank
+  @NotNull
   @Size(min = 1, max = 100, message = "first name must be between 1 and 100 characters")
   @Column(nullable = false, name = "\"first_name\"")
   private String firstName;
 
   @NotBlank
+  @NotNull
   @Size(min = 1, max = 100, message = "last name must be between 1 and 100 characters")
   @Column(nullable = false, name = "\"last_name\"")
   private String lastName;
