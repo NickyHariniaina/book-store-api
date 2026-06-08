@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ public class Sale {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotNull
   @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -55,6 +57,7 @@ public class Sale {
   @Column(name = "\"updated_at\"")
   private Instant updatedAt;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_store_id\"", nullable = false)
   private BookStore bookStore;

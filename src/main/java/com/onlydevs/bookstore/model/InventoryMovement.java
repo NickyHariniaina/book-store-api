@@ -3,6 +3,7 @@ package com.onlydevs.bookstore.model;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
@@ -25,15 +26,18 @@ public class InventoryMovement {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotNull
   @Enumerated(EnumType.STRING)
   @Column(name = "\"inventory_movement_type\"", nullable = false)
   private InventoryMovementType inventoryMovementType;
 
+  @NotNull
   @Positive
   @Column(nullable = false)
   private Integer quantity;
 
   @NotBlank
+  @NotNull
   @Size(min = 1, max = 500, message = "reason must be between 1 and 500 characters")
   @Column(nullable = false)
   private String reason;
@@ -49,10 +53,12 @@ public class InventoryMovement {
   @Column(name = "\"created_by\"")
   private String createdBy;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_store_id\"", nullable = false)
   private BookStore bookStore;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_edition_id\"", nullable = false)
   private BookEdition bookEdition;

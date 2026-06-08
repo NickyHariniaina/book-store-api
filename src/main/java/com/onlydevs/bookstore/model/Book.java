@@ -3,6 +3,7 @@ package com.onlydevs.bookstore.model;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class Book {
   private UUID id;
 
   @NotBlank
+  @NotNull
   @Size(min = 1, max = 255, message = "title must be between 1 and 255 characters")
   @Column(nullable = false)
   private String title;

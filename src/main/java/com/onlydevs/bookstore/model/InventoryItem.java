@@ -1,6 +1,7 @@
 package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.time.Instant;
 import java.util.UUID;
@@ -23,10 +24,12 @@ public class InventoryItem {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotNull
   @PositiveOrZero
   @Column(name = "\"quantity_on_hand\"", nullable = false)
   private Integer quantityOnHand;
 
+  @NotNull
   @PositiveOrZero
   @Column(name = "\"reorder_level\"", nullable = false)
   private Integer reorderLevel;
@@ -41,10 +44,12 @@ public class InventoryItem {
 
   @Version private Long version;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_store_id\"", nullable = false)
   private BookStore bookStore;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_edition_id\"", nullable = false)
   private BookEdition bookEdition;

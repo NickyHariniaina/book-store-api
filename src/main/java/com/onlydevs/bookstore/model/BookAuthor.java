@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.model;
 
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.*;
 
@@ -22,10 +23,12 @@ public class BookAuthor {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_id\"", nullable = false)
   private Book book;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"author_id\"", nullable = false)
   private Author author;

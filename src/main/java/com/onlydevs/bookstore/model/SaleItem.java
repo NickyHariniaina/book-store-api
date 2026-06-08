@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -24,10 +25,12 @@ public class SaleItem {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotNull
   @Positive
   @Column(nullable = false)
   private Integer quantity;
 
+  @NotNull
   @DecimalMin("0.00")
   @Column(name = "\"unit_price\"", nullable = false, precision = 10, scale = 2)
   private BigDecimal unitPrice;
@@ -40,10 +43,12 @@ public class SaleItem {
   @Column(name = "\"created_at\"")
   private Instant createdAt;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"sale_id\"", nullable = false)
   private Sale sale;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_edition_id\"", nullable = false)
   private BookEdition bookEdition;
