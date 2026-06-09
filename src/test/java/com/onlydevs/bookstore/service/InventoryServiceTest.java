@@ -14,8 +14,8 @@ import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
-import com.onlydevs.bookstore.model.exception.NotImplementedException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
+import com.onlydevs.bookstore.model.exception.NotImplementedException;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import java.util.List;
@@ -32,8 +32,7 @@ class InventoryServiceTest {
   private final InventoryItemRepository itemRepository = mock(InventoryItemRepository.class);
   private final InventoryMovementRepository movementRepository =
       mock(InventoryMovementRepository.class);
-  private final InventoryService subject =
-      new InventoryService(itemRepository, movementRepository);
+  private final InventoryService subject = new InventoryService(itemRepository, movementRepository);
 
   private BookStore store;
   private BookEdition edition;
@@ -78,8 +77,7 @@ class InventoryServiceTest {
     when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
         .thenReturn(Optional.empty());
 
-    assertThrows(
-        NotFoundException.class, () -> subject.getStockByEdition(STORE_ID, EDITION_ID));
+    assertThrows(NotFoundException.class, () -> subject.getStockByEdition(STORE_ID, EDITION_ID));
   }
 
   @Test
@@ -135,7 +133,8 @@ class InventoryServiceTest {
         .thenReturn(Optional.of(item));
 
     assertThrows(
-        BadRequestException.class, () -> subject.adjustStock(STORE_ID, EDITION_ID, -20, "Too much"));
+        BadRequestException.class,
+        () -> subject.adjustStock(STORE_ID, EDITION_ID, -20, "Too much"));
     verify(movementRepository, never()).save(any());
   }
 
@@ -145,8 +144,7 @@ class InventoryServiceTest {
         .thenReturn(Optional.empty());
 
     assertThrows(
-        NotFoundException.class,
-        () -> subject.adjustStock(STORE_ID, EDITION_ID, 5, "Not found"));
+        NotFoundException.class, () -> subject.adjustStock(STORE_ID, EDITION_ID, 5, "Not found"));
   }
 
   @Test
@@ -210,7 +208,7 @@ class InventoryServiceTest {
     var result = subject.getMovements(STORE_ID, InventoryMovementType.ARRIVAL);
 
     assertEquals(0, result.size());
-    verify(movementRepository).findByBookStoreIdAndInventoryMovementType(
-            STORE_ID, InventoryMovementType.ARRIVAL);
+    verify(movementRepository)
+        .findByBookStoreIdAndInventoryMovementType(STORE_ID, InventoryMovementType.ARRIVAL);
   }
 }

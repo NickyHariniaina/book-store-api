@@ -4,8 +4,8 @@ import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
-import com.onlydevs.bookstore.model.exception.NotImplementedException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
+import com.onlydevs.bookstore.model.exception.NotImplementedException;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import java.util.List;
@@ -66,17 +66,13 @@ public class InventoryService {
   }
 
   @Transactional
-  public InventoryItem adjustStock(
-      UUID storeId, UUID editionId, Integer quantity, String reason) {
+  public InventoryItem adjustStock(UUID storeId, UUID editionId, Integer quantity, String reason) {
     InventoryItem item = getStockByEdition(storeId, editionId);
 
     int newQuantity = item.getQuantityOnHand() + quantity;
     if (newQuantity < 0) {
       throw new BadRequestException(
-          "Insufficient stock: current="
-              + item.getQuantityOnHand()
-              + ", adjustment="
-              + quantity);
+          "Insufficient stock: current=" + item.getQuantityOnHand() + ", adjustment=" + quantity);
     }
     item.setQuantityOnHand(newQuantity);
     itemRepository.save(item);
@@ -112,8 +108,7 @@ public class InventoryService {
   }
 
   @Transactional
-  public InventoryItem recordLost(
-      UUID storeId, UUID editionId, Integer quantity, String reason) {
+  public InventoryItem recordLost(UUID storeId, UUID editionId, Integer quantity, String reason) {
     InventoryItem item = getStockByEdition(storeId, editionId);
     applyStockDecrement(item, quantity);
 

@@ -49,11 +49,10 @@ public class InventoryMapper {
         .reason(movement.getReason())
         .reference(movement.getReference())
         .movedAt(movement.getMovedAt())
-        .createdAt(movement.getCreatedAt());
+        .createdAt(movement.getMovedAt());
   }
 
-  public List<InventoryMovementResponse> toMovementRestList(
-      List<InventoryMovement> movements) {
+  public List<InventoryMovementResponse> toMovementRestList(List<InventoryMovement> movements) {
     return movements.stream().map(this::toMovementRest).toList();
   }
 

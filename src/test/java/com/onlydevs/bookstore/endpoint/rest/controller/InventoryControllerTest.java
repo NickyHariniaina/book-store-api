@@ -2,8 +2,6 @@ package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -84,8 +82,7 @@ class InventoryControllerTest {
             .editionId(EDITION_ID)
             .bookTitle("Test Book")
             .isbn("1234567890")
-            .type(
-                com.onlydevs.bookstore.endpoint.rest.model.InventoryMovementType.ARRIVAL)
+            .type(com.onlydevs.bookstore.endpoint.rest.model.InventoryMovementType.ARRIVAL)
             .quantity(5)
             .signedQuantity(5)
             .reason("Arrival")
@@ -119,8 +116,7 @@ class InventoryControllerTest {
     when(service.getStockByEdition(STORE_ID, EDITION_ID))
         .thenThrow(new NotFoundException("Not found"));
 
-    assertThrows(
-        NotFoundException.class, () -> controller.getStockByEdition(STORE_ID, EDITION_ID));
+    assertThrows(NotFoundException.class, () -> controller.getStockByEdition(STORE_ID, EDITION_ID));
   }
 
   @Test
@@ -191,7 +187,6 @@ class InventoryControllerTest {
 
   @Test
   void getMovements_withInvalidType_throws() {
-    assertThrows(
-        NotFoundException.class, () -> controller.getMovements(STORE_ID, "INVALID"));
+    assertThrows(NotFoundException.class, () -> controller.getMovements(STORE_ID, "INVALID"));
   }
 }

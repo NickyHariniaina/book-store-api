@@ -77,8 +77,7 @@ public class InventoryController {
 
   @GetMapping("/api/v1/stores/{storeId}/movements")
   public List<InventoryMovementResponse> getMovements(
-      @PathVariable UUID storeId,
-      @RequestParam(name = "type", required = false) String type) {
+      @PathVariable UUID storeId, @RequestParam(name = "type", required = false) String type) {
     InventoryMovementType jpaType = null;
     if (type != null) {
       try {
