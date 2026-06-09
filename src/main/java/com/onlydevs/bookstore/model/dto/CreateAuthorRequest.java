@@ -1,3 +1,5 @@
 package com.onlydevs.bookstore.model.dto;
 
-public record CreateAuthorRequest(String firstName, String lastName) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record CreateAuthorRequest(@NotBlank String firstName, @NotBlank String lastName) {}
