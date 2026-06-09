@@ -35,7 +35,7 @@ class PublisherMapperTest {
             .createdAt(now)
             .build();
 
-    var response = mapper.toResponse(publisher);
+    var response = mapper.toRest(publisher);
 
     assertEquals(id, response.id);
     assertEquals("Test Publisher", response.name);
@@ -55,7 +55,7 @@ class PublisherMapperTest {
             .createdAt(Instant.now())
             .build();
 
-    var response = mapper.toResponse(publisher);
+    var response = mapper.toRest(publisher);
 
     assertNull(response.website);
     assertNull(response.email);
@@ -74,7 +74,7 @@ class PublisherMapperTest {
             .country("US")
             .build();
 
-    var publisher = mapper.toEntity(request);
+    var publisher = mapper.toDomain(request);
 
     assertNull(publisher.getId());
     assertEquals("Test Publisher", publisher.getName());
@@ -89,7 +89,7 @@ class PublisherMapperTest {
   void toEntity_creates_publisher_with_minimal_fields() {
     var request = CreatePublisherRequest.builder().name("Minimal").build();
 
-    var publisher = mapper.toEntity(request);
+    var publisher = mapper.toDomain(request);
 
     assertEquals("Minimal", publisher.getName());
     assertNull(publisher.getWebsite());

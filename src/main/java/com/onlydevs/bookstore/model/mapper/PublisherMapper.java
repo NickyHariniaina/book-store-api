@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PublisherMapper {
 
-  public PublisherResponse toResponse(Publisher publisher) {
+  public PublisherResponse toRest(Publisher publisher) {
     return PublisherResponse.builder()
         .id(publisher.getId())
         .name(publisher.getName())
@@ -21,7 +21,7 @@ public class PublisherMapper {
         .build();
   }
 
-  public Publisher toEntity(CreatePublisherRequest request) {
+  public Publisher toDomain(CreatePublisherRequest request) {
     return Publisher.builder()
         .name(request.name)
         .website(request.website)

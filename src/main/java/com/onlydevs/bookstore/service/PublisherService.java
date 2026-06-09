@@ -21,21 +21,21 @@ public class PublisherService {
   private final PublisherMapper publisherMapper;
 
   public Page<PublisherResponse> getAllPublishers(Pageable pageable) {
-    return publisherRepository.findAll(pageable).map(publisherMapper::toResponse);
+    return publisherRepository.findAll(pageable).map(publisherMapper::toRest);
   }
 
   public PublisherResponse getPublisherById(UUID id) {
     var publisher =
         publisherRepository.findById(id).orElseThrow(() -> new NotFoundException("Publisher", id));
-    return publisherMapper.toResponse(publisher);
+    return publisherMapper.toRest(publisher);
   }
 
   public PublisherResponse createPublisher(CreatePublisherRequest request) {
     if (request.email != null && publisherRepository.existsByEmailIgnoreCase(request.email)) {
       throw new ConflictException("Publisher with email " + request.email + " already exists");
     }
-    var publisher = publisherMapper.toEntity(request);
-    return publisherMapper.toResponse(publisherRepository.save(publisher));
+    var publisher = publisherMapper.toDomain(request);
+    return publisherMapper.toRest(publisherRepository.save(publisher));
   }
 
   public PublisherResponse updatePublisher(UUID id, UpdatePublisherRequest request) {
@@ -47,7 +47,7 @@ public class PublisherService {
       throw new ConflictException("Publisher with email " + request.email + " already exists");
     }
     publisherMapper.updateEntity(publisher, request);
-    return publisherMapper.toResponse(publisherRepository.save(publisher));
+    return publisherMapper.toRest(publisherRepository.save(publisher));
   }
 
   public void deletePublisher(UUID id) {
