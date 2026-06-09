@@ -15,7 +15,8 @@ import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
-import com.onlydevs.bookstore.model.exception.NotImplementedException;
+import com.onlydevs.bookstore.repository.BookEditionRepository;
+import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import java.util.List;
@@ -28,11 +29,14 @@ class InventoryServiceTest {
 
   private static final UUID STORE_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
   private static final UUID EDITION_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
-
   private final InventoryItemRepository itemRepository = mock(InventoryItemRepository.class);
   private final InventoryMovementRepository movementRepository =
       mock(InventoryMovementRepository.class);
-  private final InventoryService subject = new InventoryService(itemRepository, movementRepository);
+  private final BookStoreRepository bookStoreRepository = mock(BookStoreRepository.class);
+  private final BookEditionRepository bookEditionRepository = mock(BookEditionRepository.class);
+  private final InventoryService subject =
+      new InventoryService(
+          itemRepository, movementRepository, bookStoreRepository, bookEditionRepository);
 
   private BookStore store;
   private BookEdition edition;
@@ -93,14 +97,18 @@ class InventoryServiceTest {
   }
 
   @Test
-  void recordArrival_newItem_throwsNotImplemented() {
+  void recordArrival_newItem_creates() {
     when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
         .thenReturn(Optional.empty());
+    when(bookStoreRepository.getReferenceById(STORE_ID)).thenReturn(new BookStore());
+    when(bookEditionRepository.getReferenceById(EDITION_ID)).thenReturn(new BookEdition());
+    when(itemRepository.save(any(InventoryItem.class))).thenAnswer(i -> i.getArgument(0));
 
-    assertThrows(
-        NotImplementedException.class,
-        () -> subject.recordArrival(STORE_ID, EDITION_ID, 5, "REF-001"));
-    verify(movementRepository, never()).save(any());
+    var result = subject.recordArrival(STORE_ID, EDITION_ID, 5, "REF-001");
+
+    assertEquals(5, result.getQuantityOnHand());
+    verify(itemRepository).save(any(InventoryItem.class));
+    verify(movementRepository).save(any(InventoryMovement.class));
   }
 
   @Test
