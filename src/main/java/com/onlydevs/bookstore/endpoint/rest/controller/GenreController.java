@@ -1,5 +1,6 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
+import com.onlydevs.bookstore.model.dto.BookSummaryResponse;
 import com.onlydevs.bookstore.model.dto.CreateGenreRequest;
 import com.onlydevs.bookstore.model.dto.GenreResponse;
 import com.onlydevs.bookstore.model.dto.RenameGenreRequest;
@@ -30,6 +31,11 @@ public class GenreController {
   @GetMapping
   public ResponseEntity<List<GenreResponse>> getAllGenres() {
     return ResponseEntity.ok(genreService.getAllGenres());
+  }
+
+  @GetMapping("/{id}/books")
+  public ResponseEntity<List<BookSummaryResponse>> getBooksByGenreId(@PathVariable UUID id) {
+    return ResponseEntity.ok(genreService.getBooksByGenreId(id));
   }
 
   @GetMapping("/{id}")

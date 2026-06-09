@@ -1,6 +1,7 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.model.Genre;
+import com.onlydevs.bookstore.model.dto.BookSummaryResponse;
 import com.onlydevs.bookstore.model.dto.CreateGenreRequest;
 import com.onlydevs.bookstore.model.dto.GenreResponse;
 import com.onlydevs.bookstore.model.dto.RenameGenreRequest;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -53,6 +55,15 @@ public class GenreService {
     Genre genre =
         genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
     genreRepository.delete(genre);
+  }
+
+  @Transactional(readOnly = true)
+  public List<BookSummaryResponse> getBooksByGenreId(UUID genreId) {
+    Genre genre =
+        genreRepository
+            .findById(genreId)
+            .orElseThrow(() -> new NotFoundException("Genre", genreId));
+    return genre.getBooks().stream().map(genreMapper::toBookSummaryResponse).toList();
   }
 
   public List<RevenuePerGenreResponse> getRevenuePerGenre() {
