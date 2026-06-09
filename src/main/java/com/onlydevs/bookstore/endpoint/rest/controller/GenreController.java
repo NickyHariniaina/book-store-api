@@ -1,6 +1,9 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import com.onlydevs.bookstore.model.Genre;
+import com.onlydevs.bookstore.model.exception.ConflictException;
+import com.onlydevs.bookstore.model.exception.NotFoundException;
+import com.onlydevs.bookstore.repository.GenreRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +26,7 @@ public class GenreController {
   @GetMapping("/{id}/books")
   public ResponseEntity<Genre> getGenreWithBooks(@PathVariable UUID id) {
     return ResponseEntity.ok(
-        genreRepository.findById(id).orElseThrow(() -> ResourceNotFoundException.of("Genre", id)));
+        genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id)));
   }
 
   @PostMapping
@@ -39,7 +42,7 @@ public class GenreController {
   @PatchMapping("/{id}/rename")
   public ResponseEntity<Genre> renameGenre(@PathVariable UUID id, @RequestParam String name) {
     Genre genre =
-        genreRepository.findById(id).orElseThrow(() -> ResourceNotFoundException.of("Genre", id));
+        genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
     if (genreRepository.existsByNameIgnoreCase(name)) {
       throw new ConflictException("Genre name already taken: " + name);
     }
@@ -50,7 +53,7 @@ public class GenreController {
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteGenre(@PathVariable UUID id) {
     Genre genre =
-        genreRepository.findById(id).orElseThrow(() -> ResourceNotFoundException.of("Genre", id));
+        genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
     genreRepository.delete(genre);
     return ResponseEntity.noContent().build();
   }
