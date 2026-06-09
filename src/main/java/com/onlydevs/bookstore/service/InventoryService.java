@@ -5,7 +5,8 @@ import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
-import com.onlydevs.bookstore.model.exception.NotImplementedException;
+import com.onlydevs.bookstore.repository.BookEditionRepository;
+import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import java.util.List;
@@ -20,9 +21,8 @@ public class InventoryService {
 
   private final InventoryItemRepository itemRepository;
   private final InventoryMovementRepository movementRepository;
-
-  // TODO: inject BookStoreRepository when available
-  // private final BookStoreRepository bookStoreRepository;
+  private final BookStoreRepository bookStoreRepository;
+  private final BookEditionRepository bookEditionRepository;
 
   public List<InventoryItem> getInventoryByStore(UUID storeId) {
     return itemRepository.findByBookStoreId(storeId);
@@ -40,7 +40,6 @@ public class InventoryService {
   @Transactional
   public InventoryItem recordArrival(
       UUID storeId, UUID editionId, Integer quantity, String reference) {
-    // Try to find existing stock item
     var optItem = itemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId);
 
     if (optItem.isPresent()) {
@@ -59,10 +58,23 @@ public class InventoryService {
       return item;
     }
 
-    // TODO: implement creation of new InventoryItem
-    // Requires BookStoreRepository and BookEditionRepository to resolve references
-    throw new NotImplementedException(
-        "Cannot create new stock entry for a new edition: waiting for BookStoreRepository");
+    var storeRef = bookStoreRepository.getReferenceById(storeId);
+    var editionRef = bookEditionRepository.getReferenceById(editionId);
+
+    InventoryItem newItem =
+        InventoryItem.builder()
+            .bookStore(storeRef)
+            .bookEdition(editionRef)
+            .quantityOnHand(quantity)
+            .reorderLevel(0)
+            .build();
+
+    itemRepository.save(newItem);
+
+    createMovement(
+        storeRef, editionRef, InventoryMovementType.ARRIVAL, quantity, "Arrival", reference);
+
+    return newItem;
   }
 
   @Transactional
