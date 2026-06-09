@@ -198,6 +198,16 @@ class InventoryServiceTest {
   }
 
   @Test
+  void getMovementsByEdition_returnsList() {
+    when(movementRepository.findByBookEditionId(EDITION_ID)).thenReturn(List.of());
+
+    var result = subject.getMovementsByEdition(EDITION_ID);
+
+    assertEquals(0, result.size());
+    verify(movementRepository).findByBookEditionId(EDITION_ID);
+  }
+
+  @Test
   void getMovements_withoutType_returnsAll() {
     when(movementRepository.findByBookStoreId(STORE_ID)).thenReturn(List.of());
 
