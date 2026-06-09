@@ -55,6 +55,7 @@ jacoco {
 
 
 repositories {
+    mavenLocal()
 
     mavenCentral()
 }
@@ -180,6 +181,8 @@ dependencies {
 
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'io.swagger:swagger-annotations:1.6.12'
+
+    implementation 'com.onlydevs:bookstore-23c96d64-gen:latest'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.2'
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.2'
