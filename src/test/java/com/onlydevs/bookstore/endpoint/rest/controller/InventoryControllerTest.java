@@ -165,6 +165,16 @@ class InventoryControllerTest {
   }
 
   @Test
+  void getMovementsByEdition_returnsList() {
+    when(service.getMovementsByEdition(EDITION_ID)).thenReturn(List.of(movement));
+    when(mapper.toMovementRestList(List.of(movement))).thenReturn(List.of(movementResponse));
+
+    var result = controller.getMovementsByEdition(EDITION_ID);
+
+    assertEquals(1, result.size());
+  }
+
+  @Test
   void getMovements_withoutType_returnsAll() {
     when(service.getMovements(STORE_ID, null)).thenReturn(List.of(movement));
     when(mapper.toMovementRestList(List.of(movement))).thenReturn(List.of(movementResponse));
