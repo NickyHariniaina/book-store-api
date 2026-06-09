@@ -1,8 +1,9 @@
 package com.onlydevs.bookstore.model.exception;
 
-public class NotFoundException extends RuntimeException {
+import java.util.UUID;
 
-  public NotFoundException(String message) {
-    super(message);
+public class NotFoundException extends RuntimeException {
+  public NotFoundException(String entityName, UUID id) {
+    super(entityName + " not found with id: " + id);
   }
 }
