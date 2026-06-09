@@ -136,6 +136,10 @@ public class InventoryService {
     return item;
   }
 
+  public List<InventoryMovement> getMovementsByEdition(UUID editionId) {
+    return movementRepository.findByBookEditionId(editionId);
+  }
+
   public List<InventoryMovement> getMovements(UUID storeId, InventoryMovementType type) {
     if (type == null) {
       return movementRepository.findByBookStoreId(storeId);
