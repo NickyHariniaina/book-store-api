@@ -1,0 +1,230 @@
+package com.onlydevs.bookstore.endpoint.rest.controller;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.PublisherResponse;
+import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.exception.ConflictException;
+import com.onlydevs.bookstore.model.exception.NotFoundException;
+import com.onlydevs.bookstore.service.PublisherService;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+@WebMvcTest(PublisherController.class)
+class PublisherControllerTest {
+
+  @Autowired private MockMvc mockMvc;
+
+  @Autowired private ObjectMapper objectMapper;
+
+  @MockBean private PublisherService publisherService;
+
+  @Test
+  void should_list_all_publishers_with_pagination() throws Exception {
+    PublisherResponse publisher = new PublisherResponse();
+    publisher.id = UUID.randomUUID();
+    publisher.name = "Test Publisher";
+    Page<PublisherResponse> page = new PageImpl<>(List.of(publisher));
+
+    when(publisherService.getAllPublishers(any())).thenReturn(page);
+
+    mockMvc
+        .perform(get("/publishers").param("page", "0").param("size", "10"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].name").value("Test Publisher"));
+  }
+
+  @Test
+  void should_get_publisher_by_id_when_exists() throws Exception {
+    UUID id = UUID.randomUUID();
+    PublisherResponse publisher = new PublisherResponse();
+    publisher.id = id;
+    publisher.name = "Test Publisher";
+
+    when(publisherService.getPublisherById(id)).thenReturn(publisher);
+
+    mockMvc
+        .perform(get("/publishers/{id}", id))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("Test Publisher"));
+  }
+
+  @Test
+  void should_return_404_when_publisher_not_found() throws Exception {
+    UUID id = UUID.randomUUID();
+
+    when(publisherService.getPublisherById(id)).thenThrow(new NotFoundException("Publisher", id));
+
+    mockMvc.perform(get("/publishers/{id}", id)).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void should_create_publisher_and_return_201_when_valid() throws Exception {
+    CreatePublisherRequest request =
+        CreatePublisherRequest.builder().name("New Publisher").email("new@example.com").build();
+    PublisherResponse response = new PublisherResponse();
+    response.id = UUID.randomUUID();
+    response.name = "New Publisher";
+
+    when(publisherService.createPublisher(any())).thenReturn(response);
+
+    mockMvc
+        .perform(
+            post("/publishers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.name").value("New Publisher"));
+  }
+
+  @Test
+  void should_return_400_when_create_publisher_with_empty_name() throws Exception {
+    CreatePublisherRequest request =
+        CreatePublisherRequest.builder().name("").email("test@example.com").build();
+
+    mockMvc
+        .perform(
+            post("/publishers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void should_return_400_when_create_publisher_with_invalid_email() throws Exception {
+    CreatePublisherRequest request =
+        CreatePublisherRequest.builder().name("Test Publisher").email("not-an-email").build();
+
+    mockMvc
+        .perform(
+            post("/publishers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void should_return_409_when_create_publisher_with_duplicate_email() throws Exception {
+    CreatePublisherRequest request =
+        CreatePublisherRequest.builder()
+            .name("Test Publisher")
+            .email("duplicate@example.com")
+            .build();
+
+    when(publisherService.createPublisher(any()))
+        .thenThrow(
+            new ConflictException("Publisher with email duplicate@example.com already exists"));
+
+    mockMvc
+        .perform(
+            post("/publishers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  void should_update_publisher_when_exists() throws Exception {
+    UUID id = UUID.randomUUID();
+    UpdatePublisherRequest request = UpdatePublisherRequest.builder().name("Updated Name").build();
+    PublisherResponse response = new PublisherResponse();
+    response.id = id;
+    response.name = "Updated Name";
+
+    when(publisherService.updatePublisher(any(), any())).thenReturn(response);
+
+    mockMvc
+        .perform(
+            put("/publishers/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("Updated Name"));
+  }
+
+  @Test
+  void should_return_404_when_update_nonexistent_publisher() throws Exception {
+    UUID id = UUID.randomUUID();
+    UpdatePublisherRequest request = UpdatePublisherRequest.builder().name("New Name").build();
+
+    when(publisherService.updatePublisher(any(), any()))
+        .thenThrow(new NotFoundException("Publisher", id));
+
+    mockMvc
+        .perform(
+            put("/publishers/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void should_update_publisher_contact_info_only() throws Exception {
+    UUID id = UUID.randomUUID();
+    UpdatePublisherRequest request =
+        UpdatePublisherRequest.builder().website("http://example.com").phone("1234567890").build();
+    PublisherResponse response = new PublisherResponse();
+    response.id = id;
+    response.name = "Existing Name";
+    response.website = "http://example.com";
+    response.phone = "1234567890";
+
+    when(publisherService.updatePublisher(any(), any())).thenReturn(response);
+
+    mockMvc
+        .perform(
+            put("/publishers/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.website").value("http://example.com"))
+        .andExpect(jsonPath("$.phone").value("1234567890"));
+  }
+
+  @Test
+  void should_delete_publisher_when_no_active_editions_linked() throws Exception {
+    UUID id = UUID.randomUUID();
+
+    mockMvc.perform(delete("/publishers/{id}", id)).andExpect(status().isNoContent());
+  }
+
+  @Test
+  void should_return_404_when_delete_nonexistent_publisher() throws Exception {
+    UUID id = UUID.randomUUID();
+
+    doThrow(new NotFoundException("Publisher", id)).when(publisherService).deletePublisher(id);
+
+    mockMvc.perform(delete("/publishers/{id}", id)).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void should_validate_email_uniqueness_on_update() throws Exception {
+    UUID id = UUID.randomUUID();
+    UpdatePublisherRequest request =
+        UpdatePublisherRequest.builder().email("taken@example.com").build();
+
+    when(publisherService.updatePublisher(any(), any()))
+        .thenThrow(new ConflictException("Publisher with email taken@example.com already exists"));
+
+    mockMvc
+        .perform(
+            put("/publishers/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isConflict());
+  }
+}
