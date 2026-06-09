@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,10 +34,10 @@ class PublisherControllerTest {
 
   @Test
   void should_list_all_publishers_with_pagination() throws Exception {
-    PublisherResponse publisher = new PublisherResponse();
+    var publisher = new PublisherResponse();
     publisher.id = UUID.randomUUID();
     publisher.name = "Test Publisher";
-    Page<PublisherResponse> page = new PageImpl<>(List.of(publisher));
+    var page = new PageImpl<>(List.of(publisher));
 
     when(publisherService.getAllPublishers(any())).thenReturn(page);
 
@@ -50,8 +49,8 @@ class PublisherControllerTest {
 
   @Test
   void should_get_publisher_by_id_when_exists() throws Exception {
-    UUID id = UUID.randomUUID();
-    PublisherResponse publisher = new PublisherResponse();
+    var id = UUID.randomUUID();
+    var publisher = new PublisherResponse();
     publisher.id = id;
     publisher.name = "Test Publisher";
 
@@ -65,7 +64,7 @@ class PublisherControllerTest {
 
   @Test
   void should_return_404_when_publisher_not_found() throws Exception {
-    UUID id = UUID.randomUUID();
+    var id = UUID.randomUUID();
 
     when(publisherService.getPublisherById(id)).thenThrow(new NotFoundException("Publisher", id));
 
@@ -74,9 +73,9 @@ class PublisherControllerTest {
 
   @Test
   void should_create_publisher_and_return_201_when_valid() throws Exception {
-    CreatePublisherRequest request =
+    var request =
         CreatePublisherRequest.builder().name("New Publisher").email("new@example.com").build();
-    PublisherResponse response = new PublisherResponse();
+    var response = new PublisherResponse();
     response.id = UUID.randomUUID();
     response.name = "New Publisher";
 
@@ -93,8 +92,7 @@ class PublisherControllerTest {
 
   @Test
   void should_return_400_when_create_publisher_with_empty_name() throws Exception {
-    CreatePublisherRequest request =
-        CreatePublisherRequest.builder().name("").email("test@example.com").build();
+    var request = CreatePublisherRequest.builder().name("").email("test@example.com").build();
 
     mockMvc
         .perform(
@@ -106,7 +104,7 @@ class PublisherControllerTest {
 
   @Test
   void should_return_400_when_create_publisher_with_invalid_email() throws Exception {
-    CreatePublisherRequest request =
+    var request =
         CreatePublisherRequest.builder().name("Test Publisher").email("not-an-email").build();
 
     mockMvc
@@ -119,7 +117,7 @@ class PublisherControllerTest {
 
   @Test
   void should_return_409_when_create_publisher_with_duplicate_email() throws Exception {
-    CreatePublisherRequest request =
+    var request =
         CreatePublisherRequest.builder()
             .name("Test Publisher")
             .email("duplicate@example.com")
@@ -139,9 +137,9 @@ class PublisherControllerTest {
 
   @Test
   void should_update_publisher_when_exists() throws Exception {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request = UpdatePublisherRequest.builder().name("Updated Name").build();
-    PublisherResponse response = new PublisherResponse();
+    var id = UUID.randomUUID();
+    var request = UpdatePublisherRequest.builder().name("Updated Name").build();
+    var response = new PublisherResponse();
     response.id = id;
     response.name = "Updated Name";
 
@@ -158,8 +156,8 @@ class PublisherControllerTest {
 
   @Test
   void should_return_404_when_update_nonexistent_publisher() throws Exception {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request = UpdatePublisherRequest.builder().name("New Name").build();
+    var id = UUID.randomUUID();
+    var request = UpdatePublisherRequest.builder().name("New Name").build();
 
     when(publisherService.updatePublisher(any(), any()))
         .thenThrow(new NotFoundException("Publisher", id));
@@ -174,10 +172,10 @@ class PublisherControllerTest {
 
   @Test
   void should_update_publisher_contact_info_only() throws Exception {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request =
+    var id = UUID.randomUUID();
+    var request =
         UpdatePublisherRequest.builder().website("http://example.com").phone("1234567890").build();
-    PublisherResponse response = new PublisherResponse();
+    var response = new PublisherResponse();
     response.id = id;
     response.name = "Existing Name";
     response.website = "http://example.com";
@@ -197,14 +195,14 @@ class PublisherControllerTest {
 
   @Test
   void should_delete_publisher_when_no_active_editions_linked() throws Exception {
-    UUID id = UUID.randomUUID();
+    var id = UUID.randomUUID();
 
     mockMvc.perform(delete("/publishers/{id}", id)).andExpect(status().isNoContent());
   }
 
   @Test
   void should_return_404_when_delete_nonexistent_publisher() throws Exception {
-    UUID id = UUID.randomUUID();
+    var id = UUID.randomUUID();
 
     doThrow(new NotFoundException("Publisher", id)).when(publisherService).deletePublisher(id);
 
@@ -213,9 +211,8 @@ class PublisherControllerTest {
 
   @Test
   void should_validate_email_uniqueness_on_update() throws Exception {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request =
-        UpdatePublisherRequest.builder().email("taken@example.com").build();
+    var id = UUID.randomUUID();
+    var request = UpdatePublisherRequest.builder().email("taken@example.com").build();
 
     when(publisherService.updatePublisher(any(), any()))
         .thenThrow(new ConflictException("Publisher with email taken@example.com already exists"));

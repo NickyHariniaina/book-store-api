@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
-import com.onlydevs.bookstore.model.dto.PublisherResponse;
 import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
@@ -21,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class PublisherServiceTest {
@@ -40,13 +38,13 @@ class PublisherServiceTest {
 
   @Test
   void should_create_publisher_successfully() {
-    CreatePublisherRequest request =
+    var request =
         CreatePublisherRequest.builder()
             .name("Test Publisher")
             .email("test@example.com")
             .phone("1234567890")
             .build();
-    Publisher savedEntity = new Publisher();
+    var savedEntity = new Publisher();
     savedEntity.setId(UUID.randomUUID());
     savedEntity.setName("Test Publisher");
     savedEntity.setEmail("test@example.com");
@@ -55,7 +53,7 @@ class PublisherServiceTest {
     when(publisherRepository.existsByEmailIgnoreCase("test@example.com")).thenReturn(false);
     when(publisherRepository.save(any())).thenReturn(savedEntity);
 
-    PublisherResponse response = publisherService.createPublisher(request);
+    var response = publisherService.createPublisher(request);
 
     assertEquals("Test Publisher", response.name);
     assertEquals("test@example.com", response.email);
@@ -66,7 +64,7 @@ class PublisherServiceTest {
 
   @Test
   void should_throw_exception_when_create_publisher_with_duplicate_email() {
-    CreatePublisherRequest request =
+    var request =
         CreatePublisherRequest.builder()
             .name("Test Publisher")
             .email("duplicate@example.com")
@@ -74,17 +72,16 @@ class PublisherServiceTest {
 
     when(publisherRepository.existsByEmailIgnoreCase("duplicate@example.com")).thenReturn(true);
 
-    ConflictException ex =
-        assertThrows(ConflictException.class, () -> publisherService.createPublisher(request));
+    var ex = assertThrows(ConflictException.class, () -> publisherService.createPublisher(request));
     assertTrue(ex.getMessage().contains("duplicate@example.com"));
     verify(publisherRepository, never()).save(any());
   }
 
   @Test
   void should_update_publisher_name_successfully() {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request = UpdatePublisherRequest.builder().name("New Name").build();
-    Publisher existing = new Publisher();
+    var id = UUID.randomUUID();
+    var request = UpdatePublisherRequest.builder().name("New Name").build();
+    var existing = new Publisher();
     existing.setId(id);
     existing.setName("Old Name");
 
@@ -100,10 +97,9 @@ class PublisherServiceTest {
 
   @Test
   void should_update_publisher_email_successfully() {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request =
-        UpdatePublisherRequest.builder().email("new@example.com").build();
-    Publisher existing = new Publisher();
+    var id = UUID.randomUUID();
+    var request = UpdatePublisherRequest.builder().email("new@example.com").build();
+    var existing = new Publisher();
     existing.setId(id);
     existing.setEmail("old@example.com");
 
@@ -119,9 +115,9 @@ class PublisherServiceTest {
 
   @Test
   void should_update_publisher_country_successfully() {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request = UpdatePublisherRequest.builder().country("DE").build();
-    Publisher existing = new Publisher();
+    var id = UUID.randomUUID();
+    var request = UpdatePublisherRequest.builder().country("DE").build();
+    var existing = new Publisher();
     existing.setId(id);
     existing.setCountry("US");
 
@@ -135,9 +131,9 @@ class PublisherServiceTest {
 
   @Test
   void should_update_publisher_phone_successfully() {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request = UpdatePublisherRequest.builder().phone("1111111111").build();
-    Publisher existing = new Publisher();
+    var id = UUID.randomUUID();
+    var request = UpdatePublisherRequest.builder().phone("1111111111").build();
+    var existing = new Publisher();
     existing.setId(id);
     existing.setPhone("0000000000");
 
@@ -151,17 +147,16 @@ class PublisherServiceTest {
 
   @Test
   void should_throw_exception_when_update_publisher_with_duplicate_email() {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request =
-        UpdatePublisherRequest.builder().email("taken@example.com").build();
-    Publisher existing = new Publisher();
+    var id = UUID.randomUUID();
+    var request = UpdatePublisherRequest.builder().email("taken@example.com").build();
+    var existing = new Publisher();
     existing.setId(id);
     existing.setEmail("old@example.com");
 
     when(publisherRepository.findById(id)).thenReturn(Optional.of(existing));
     when(publisherRepository.existsByEmailIgnoreCase("taken@example.com")).thenReturn(true);
 
-    ConflictException ex =
+    var ex =
         assertThrows(ConflictException.class, () -> publisherService.updatePublisher(id, request));
     assertTrue(ex.getMessage().contains("taken@example.com"));
     verify(publisherRepository, never()).save(any());
@@ -169,8 +164,8 @@ class PublisherServiceTest {
 
   @Test
   void should_throw_exception_when_update_nonexistent_publisher() {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request = UpdatePublisherRequest.builder().name("New Name").build();
+    var id = UUID.randomUUID();
+    var request = UpdatePublisherRequest.builder().name("New Name").build();
 
     when(publisherRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -180,8 +175,8 @@ class PublisherServiceTest {
 
   @Test
   void should_delete_publisher_when_no_editions_linked() {
-    UUID id = UUID.randomUUID();
-    Publisher publisher = new Publisher();
+    var id = UUID.randomUUID();
+    var publisher = new Publisher();
     publisher.setId(id);
 
     when(publisherRepository.findById(id)).thenReturn(Optional.of(publisher));
@@ -193,7 +188,7 @@ class PublisherServiceTest {
 
   @Test
   void should_throw_exception_when_delete_nonexistent_publisher() {
-    UUID id = UUID.randomUUID();
+    var id = UUID.randomUUID();
 
     when(publisherRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -203,17 +198,17 @@ class PublisherServiceTest {
 
   @Test
   void should_get_all_publishers_with_pagination() {
-    Pageable pageable = PageRequest.of(0, 10);
+    var pageable = PageRequest.of(0, 10);
 
-    Publisher publisher = new Publisher();
+    var publisher = new Publisher();
     publisher.setId(UUID.randomUUID());
     publisher.setName("Test");
 
-    Page<Publisher> publisherPage = new PageImpl<>(java.util.List.of(publisher));
+    var publisherPage = new PageImpl<>(java.util.List.of(publisher));
 
     when(publisherRepository.findAll(pageable)).thenReturn(publisherPage);
 
-    Page<PublisherResponse> result = publisherService.getAllPublishers(pageable);
+    var result = publisherService.getAllPublishers(pageable);
 
     assertEquals(1, result.getTotalElements());
     assertEquals("Test", result.getContent().get(0).name);
@@ -222,26 +217,26 @@ class PublisherServiceTest {
 
   @Test
   void should_return_empty_page_when_no_publishers_exist() {
-    Pageable pageable = PageRequest.of(0, 10);
+    var pageable = PageRequest.of(0, 10);
     Page<Publisher> emptyPage = Page.empty();
 
     when(publisherRepository.findAll(pageable)).thenReturn(emptyPage);
 
-    Page<PublisherResponse> result = publisherService.getAllPublishers(pageable);
+    var result = publisherService.getAllPublishers(pageable);
 
     assertTrue(result.isEmpty());
   }
 
   @Test
   void should_get_publisher_by_id_when_exists() {
-    UUID id = UUID.randomUUID();
-    Publisher publisher = new Publisher();
+    var id = UUID.randomUUID();
+    var publisher = new Publisher();
     publisher.setId(id);
     publisher.setName("Test Publisher");
 
     when(publisherRepository.findById(id)).thenReturn(Optional.of(publisher));
 
-    PublisherResponse response = publisherService.getPublisherById(id);
+    var response = publisherService.getPublisherById(id);
 
     assertEquals("Test Publisher", response.name);
     assertEquals(id, response.id);
@@ -249,7 +244,7 @@ class PublisherServiceTest {
 
   @Test
   void should_throw_exception_when_get_publisher_by_id_not_found() {
-    UUID id = UUID.randomUUID();
+    var id = UUID.randomUUID();
 
     when(publisherRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -258,15 +253,15 @@ class PublisherServiceTest {
 
   @Test
   void should_update_all_nullable_contact_fields_at_once() {
-    UUID id = UUID.randomUUID();
-    UpdatePublisherRequest request =
+    var id = UUID.randomUUID();
+    var request =
         UpdatePublisherRequest.builder()
             .website("http://new.com")
             .email("new@example.com")
             .phone("1111111111")
             .country("DE")
             .build();
-    Publisher existing = new Publisher();
+    var existing = new Publisher();
     existing.setId(id);
     existing.setWebsite(null);
     existing.setEmail(null);

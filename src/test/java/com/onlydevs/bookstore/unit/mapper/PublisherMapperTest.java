@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
-import com.onlydevs.bookstore.model.dto.PublisherResponse;
 import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
 import java.time.Instant;
@@ -23,9 +22,9 @@ class PublisherMapperTest {
 
   @Test
   void toResponse_maps_all_fields() {
-    UUID id = UUID.randomUUID();
-    Instant now = Instant.now();
-    Publisher publisher =
+    var id = UUID.randomUUID();
+    var now = Instant.now();
+    var publisher =
         Publisher.builder()
             .id(id)
             .name("Test Publisher")
@@ -36,7 +35,7 @@ class PublisherMapperTest {
             .createdAt(now)
             .build();
 
-    PublisherResponse response = mapper.toResponse(publisher);
+    var response = mapper.toResponse(publisher);
 
     assertEquals(id, response.id);
     assertEquals("Test Publisher", response.name);
@@ -49,14 +48,14 @@ class PublisherMapperTest {
 
   @Test
   void toResponse_maps_nullable_fields() {
-    Publisher publisher =
+    var publisher =
         Publisher.builder()
             .id(UUID.randomUUID())
             .name("Test Publisher")
             .createdAt(Instant.now())
             .build();
 
-    PublisherResponse response = mapper.toResponse(publisher);
+    var response = mapper.toResponse(publisher);
 
     assertNull(response.website);
     assertNull(response.email);
@@ -66,7 +65,7 @@ class PublisherMapperTest {
 
   @Test
   void toEntity_creates_publisher_from_request() {
-    CreatePublisherRequest request =
+    var request =
         CreatePublisherRequest.builder()
             .name("Test Publisher")
             .website("http://example.com")
@@ -75,7 +74,7 @@ class PublisherMapperTest {
             .country("US")
             .build();
 
-    Publisher publisher = mapper.toEntity(request);
+    var publisher = mapper.toEntity(request);
 
     assertNull(publisher.getId());
     assertEquals("Test Publisher", publisher.getName());
@@ -88,9 +87,9 @@ class PublisherMapperTest {
 
   @Test
   void toEntity_creates_publisher_with_minimal_fields() {
-    CreatePublisherRequest request = CreatePublisherRequest.builder().name("Minimal").build();
+    var request = CreatePublisherRequest.builder().name("Minimal").build();
 
-    Publisher publisher = mapper.toEntity(request);
+    var publisher = mapper.toEntity(request);
 
     assertEquals("Minimal", publisher.getName());
     assertNull(publisher.getWebsite());
@@ -101,7 +100,7 @@ class PublisherMapperTest {
 
   @Test
   void updateEntity_updates_all_fields() {
-    Publisher publisher =
+    var publisher =
         Publisher.builder()
             .id(UUID.randomUUID())
             .name("Old Name")
@@ -111,7 +110,7 @@ class PublisherMapperTest {
             .country("FR")
             .build();
 
-    UpdatePublisherRequest request =
+    var request =
         UpdatePublisherRequest.builder()
             .name("New Name")
             .website("http://new.com")
@@ -131,7 +130,7 @@ class PublisherMapperTest {
 
   @Test
   void updateEntity_does_not_overwrite_null_fields() {
-    Publisher publisher =
+    var publisher =
         Publisher.builder()
             .id(UUID.randomUUID())
             .name("Original Name")
@@ -141,7 +140,7 @@ class PublisherMapperTest {
             .country("US")
             .build();
 
-    UpdatePublisherRequest request = UpdatePublisherRequest.builder().name("Updated Name").build();
+    var request = UpdatePublisherRequest.builder().name("Updated Name").build();
 
     mapper.updateEntity(publisher, request);
 
@@ -154,7 +153,7 @@ class PublisherMapperTest {
 
   @Test
   void updateEntity_updates_all_nullable_fields_at_once() {
-    Publisher publisher =
+    var publisher =
         Publisher.builder()
             .id(UUID.randomUUID())
             .name("Name")
@@ -164,7 +163,7 @@ class PublisherMapperTest {
             .country(null)
             .build();
 
-    UpdatePublisherRequest request =
+    var request =
         UpdatePublisherRequest.builder()
             .website("http://new.com")
             .email("new@example.com")
