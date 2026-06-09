@@ -44,4 +44,8 @@ public class Author {
   @Builder.Default
   @OneToMany(mappedBy = "author")
   private List<BookAuthor> bookAuthors = new ArrayList<>();
+
+  public String getFirstName() {
+    return this.firstName + " " + this.lastName;
+  }
 }
