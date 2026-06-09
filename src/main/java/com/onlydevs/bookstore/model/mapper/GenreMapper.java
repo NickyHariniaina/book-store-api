@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class GenreMapper {
 
-  public GenreResponse toResponse(Genre genre) {
+  public GenreResponse toRest(Genre genre) {
     return GenreResponse.builder()
         .id(genre.getId())
         .name(genre.getName())
@@ -19,7 +19,7 @@ public class GenreMapper {
         .build();
   }
 
-  public Genre toEntity(CreateGenreRequest request) {
+  public Genre toDomain(CreateGenreRequest request) {
     return Genre.builder().name(request.name).description(request.description).build();
   }
 

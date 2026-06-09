@@ -25,15 +25,15 @@ public class GenreService {
   private final GenreMapper genreMapper;
 
   public List<GenreResponse> getAllGenres() {
-    return genreRepository.findAll().stream().map(genreMapper::toResponse).toList();
+    return genreRepository.findAll().stream().map(genreMapper::toRest).toList();
   }
 
   public GenreResponse createGenre(CreateGenreRequest request) {
     if (genreRepository.existsByNameIgnoreCase(request.name)) {
       throw new ConflictException("Genre already exists: " + request.name);
     }
-    var genre = genreMapper.toEntity(request);
-    return genreMapper.toResponse(genreRepository.save(genre));
+    var genre = genreMapper.toDomain(request);
+    return genreMapper.toRest(genreRepository.save(genre));
   }
 
   public GenreResponse renameGenre(UUID id, RenameGenreRequest request) {
@@ -42,7 +42,7 @@ public class GenreService {
       throw new ConflictException("Genre name already taken: " + request.name);
     }
     genre.rename(request.name);
-    return genreMapper.toResponse(genreRepository.save(genre));
+    return genreMapper.toRest(genreRepository.save(genre));
   }
 
   public void deleteGenre(UUID id) {

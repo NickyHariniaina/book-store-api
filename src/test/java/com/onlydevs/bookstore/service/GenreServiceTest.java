@@ -55,17 +55,17 @@ class GenreServiceTest {
     var expectedResponse = createGenreResponse(genreId, "Fiction", "Fiction books");
 
     when(genreRepository.existsByNameIgnoreCase("Fiction")).thenReturn(false);
-    when(genreMapper.toEntity(request)).thenReturn(genre);
+    when(genreMapper.toDomain(request)).thenReturn(genre);
     when(genreRepository.save(genre)).thenReturn(savedGenre);
-    when(genreMapper.toResponse(savedGenre)).thenReturn(expectedResponse);
+    when(genreMapper.toRest(savedGenre)).thenReturn(expectedResponse);
 
     var actual = genreService.createGenre(request);
 
     assertEquals(expectedResponse, actual);
     verify(genreRepository).existsByNameIgnoreCase("Fiction");
-    verify(genreMapper).toEntity(request);
+    verify(genreMapper).toDomain(request);
     verify(genreRepository).save(genre);
-    verify(genreMapper).toResponse(savedGenre);
+    verify(genreMapper).toRest(savedGenre);
   }
 
   @Test
@@ -89,7 +89,7 @@ class GenreServiceTest {
     when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
     when(genreRepository.existsByNameIgnoreCase("New Name")).thenReturn(false);
     when(genreRepository.save(genre)).thenReturn(genre);
-    when(genreMapper.toResponse(genre)).thenReturn(expectedResponse);
+    when(genreMapper.toRest(genre)).thenReturn(expectedResponse);
 
     var actual = genreService.renameGenre(genreId, request);
 
@@ -97,7 +97,7 @@ class GenreServiceTest {
     verify(genreRepository).findById(genreId);
     verify(genreRepository).existsByNameIgnoreCase("New Name");
     verify(genreRepository).save(genre);
-    verify(genreMapper).toResponse(genre);
+    verify(genreMapper).toRest(genre);
   }
 
   @Test
@@ -157,8 +157,8 @@ class GenreServiceTest {
     var r2 = createGenreResponse(id2, "Science", "Science books");
 
     when(genreRepository.findAll()).thenReturn(List.of(g1, g2));
-    when(genreMapper.toResponse(g1)).thenReturn(r1);
-    when(genreMapper.toResponse(g2)).thenReturn(r2);
+    when(genreMapper.toRest(g1)).thenReturn(r1);
+    when(genreMapper.toRest(g2)).thenReturn(r2);
 
     var result = genreService.getAllGenres();
 
@@ -166,8 +166,8 @@ class GenreServiceTest {
     assertTrue(result.contains(r1));
     assertTrue(result.contains(r2));
     verify(genreRepository).findAll();
-    verify(genreMapper).toResponse(g1);
-    verify(genreMapper).toResponse(g2);
+    verify(genreMapper).toRest(g1);
+    verify(genreMapper).toRest(g2);
   }
 
   @Test
