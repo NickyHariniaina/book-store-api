@@ -1,6 +1,5 @@
 package com.onlydevs.bookstore.service;
 
-import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
 import com.onlydevs.bookstore.model.dto.PublisherResponse;
 import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
@@ -26,7 +25,7 @@ public class PublisherService {
   }
 
   public PublisherResponse getPublisherById(UUID id) {
-    Publisher publisher =
+    var publisher =
         publisherRepository.findById(id).orElseThrow(() -> new NotFoundException("Publisher", id));
     return publisherMapper.toResponse(publisher);
   }
@@ -35,12 +34,12 @@ public class PublisherService {
     if (request.email != null && publisherRepository.existsByEmailIgnoreCase(request.email)) {
       throw new ConflictException("Publisher with email " + request.email + " already exists");
     }
-    Publisher publisher = publisherMapper.toEntity(request);
+    var publisher = publisherMapper.toEntity(request);
     return publisherMapper.toResponse(publisherRepository.save(publisher));
   }
 
   public PublisherResponse updatePublisher(UUID id, UpdatePublisherRequest request) {
-    Publisher publisher =
+    var publisher =
         publisherRepository.findById(id).orElseThrow(() -> new NotFoundException("Publisher", id));
     if (request.email != null
         && !request.email.equalsIgnoreCase(publisher.getEmail())
@@ -52,7 +51,7 @@ public class PublisherService {
   }
 
   public void deletePublisher(UUID id) {
-    Publisher publisher =
+    var publisher =
         publisherRepository.findById(id).orElseThrow(() -> new NotFoundException("Publisher", id));
     publisherRepository.delete(publisher);
   }
