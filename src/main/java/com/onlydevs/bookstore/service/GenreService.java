@@ -27,12 +27,6 @@ public class GenreService {
     return genreRepository.findAll().stream().map(genreMapper::toResponse).toList();
   }
 
-  public GenreResponse getGenreById(UUID id) {
-    Genre genre =
-        genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
-    return genreMapper.toResponse(genre);
-  }
-
   public GenreResponse createGenre(CreateGenreRequest request) {
     if (genreRepository.existsByNameIgnoreCase(request.name)) {
       throw new ConflictException("Genre already exists: " + request.name);

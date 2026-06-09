@@ -38,11 +38,6 @@ public class GenreController {
     return ResponseEntity.ok(genreService.getBooksByGenreId(id));
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<GenreResponse> getGenreById(@PathVariable UUID id) {
-    return ResponseEntity.ok(genreService.getGenreById(id));
-  }
-
   @PostMapping
   public ResponseEntity<GenreResponse> createGenre(@Valid @RequestBody CreateGenreRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(genreService.createGenre(request));
