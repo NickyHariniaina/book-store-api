@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,8 +36,9 @@ public class GenreController {
   }
 
   @GetMapping("/{id}/books")
-  public ResponseEntity<List<BookSummaryResponse>> getBooksByGenreId(@PathVariable UUID id) {
-    return ResponseEntity.ok(genreService.getBooksByGenreId(id));
+  public ResponseEntity<Page<BookSummaryResponse>> getBooksByGenreId(
+      @PathVariable UUID id, Pageable pageable) {
+    return ResponseEntity.ok(genreService.getBooksByGenreId(id, pageable));
   }
 
   @PostMapping

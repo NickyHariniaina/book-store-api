@@ -13,6 +13,8 @@ import com.onlydevs.bookstore.repository.GenreRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,12 +54,13 @@ public class GenreService {
   }
 
   @Transactional(readOnly = true)
-  public List<BookSummaryResponse> getBooksByGenreId(UUID genreId) {
-    Genre genre =
-        genreRepository
-            .findById(genreId)
-            .orElseThrow(() -> new NotFoundException("Genre", genreId));
-    return genre.getBooks().stream().map(genreMapper::toBookSummaryResponse).toList();
+  public Page<BookSummaryResponse> getBooksByGenreId(UUID genreId, Pageable pageable) {
+    if (!genreRepository.existsById(genreId)) {
+      throw new NotFoundException("Genre", genreId);
+    }
+    return genreRepository
+        .findBooksByGenreId(genreId, pageable)
+        .map(genreMapper::toBookSummaryResponse);
   }
 
   public List<RevenuePerGenreResponse> getRevenuePerGenre() {
