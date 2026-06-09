@@ -56,7 +56,7 @@ public class GenreService {
   }
 
   public List<RevenuePerGenreResponse> getRevenuePerGenre() {
-    return genreRepository.countBooksPerGenre().stream()
+    return genreRepository.revenueByGenre().stream()
         .map(genreMapper::toRevenuePerGenreResponse)
         .toList();
   }
