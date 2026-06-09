@@ -1,7 +1,6 @@
 package com.onlydevs.bookstore.endpoint.rest;
 
 import com.onlydevs.bookstore.model.exception.BadRequestException;
-import com.onlydevs.bookstore.model.exception.ForbiddenException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.exception.NotImplementedException;
 import com.onlydevs.bookstore.model.exception.TooManyRequestsException;
@@ -11,8 +10,7 @@ import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -44,6 +42,18 @@ public class GlobalExceptionHandler {
     return handleBadRequest(new BadRequestException(message));
   }
 
+  @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleValidation(
+      MethodArgumentNotValidException e) {
+    log.info("Validation failed", e);
+    String message =
+        e.getBindingResult().getFieldErrors().stream()
+            .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+            .reduce((a, b) -> a + "; " + b)
+            .orElse(e.getMessage());
+    return handleBadRequest(new BadRequestException(message));
+  }
+
   @ExceptionHandler(value = {TooManyRequestsException.class})
   ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleTooManyRequests(
       TooManyRequestsException e) {
@@ -64,21 +74,6 @@ public class GlobalExceptionHandler {
     return handleTooManyRequests(new TooManyRequestsException(e));
   }
 
-  @ExceptionHandler(
-      value = {
-        AccessDeniedException.class,
-        BadCredentialsException.class,
-        ForbiddenException.class
-      })
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleForbidden(
-      Exception e) {
-    log.info("Forbidden", e);
-    var restException = new com.onlydevs.bookstore.endpoint.rest.model.Exception();
-    restException.setType(HttpStatus.FORBIDDEN.toString());
-    restException.setMessage(e.getMessage());
-    return new ResponseEntity<>(restException, HttpStatus.FORBIDDEN);
-  }
-
   @ExceptionHandler(value = {NotFoundException.class})
   ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleNotFound(
       NotFoundException e) {
@@ -90,13 +85,11 @@ public class GlobalExceptionHandler {
   ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleNotImplemented(
       NotImplementedException e) {
     log.error("Not implemented", e);
-    return new ResponseEntity<>(
-        toRest(e, HttpStatus.NOT_IMPLEMENTED), HttpStatus.NOT_IMPLEMENTED);
+    return new ResponseEntity<>(toRest(e, HttpStatus.NOT_IMPLEMENTED), HttpStatus.NOT_IMPLEMENTED);
   }
 
   @ExceptionHandler(value = {Exception.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleDefault(
-      Exception e) {
+  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleDefault(Exception e) {
     log.error("Internal error", e);
     return new ResponseEntity<>(
         toRest(e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
