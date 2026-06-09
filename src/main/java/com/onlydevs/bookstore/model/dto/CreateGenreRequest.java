@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-class CreateGenreRequest {
+public class CreateGenreRequest {
   @NotBlank(message = "Name is required")
   @Size(max = 100)
   public String name;
