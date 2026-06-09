@@ -6,10 +6,7 @@ import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookAuthor;
 import com.onlydevs.bookstore.model.Genre;
-import com.onlydevs.bookstore.model.dto.BookSummaryResponse;
 import com.onlydevs.bookstore.model.dto.CreateGenreRequest;
-import com.onlydevs.bookstore.model.dto.GenreResponse;
-import com.onlydevs.bookstore.model.dto.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import com.onlydevs.bookstore.model.mapper.GenreMapper;
@@ -31,10 +28,10 @@ class GenreMapperTest {
 
   @Test
   void toResponse_maps_all_fields() {
-    UUID id = UUID.randomUUID();
-    Genre genre = Genre.builder().id(id).name("Fiction").description("Fiction books").build();
+    var id = UUID.randomUUID();
+    var genre = Genre.builder().id(id).name("Fiction").description("Fiction books").build();
 
-    GenreResponse response = mapper.toResponse(genre);
+    var response = mapper.toResponse(genre);
 
     assertEquals(id, response.id);
     assertEquals("Fiction", response.name);
@@ -43,19 +40,18 @@ class GenreMapperTest {
 
   @Test
   void toResponse_maps_null_description() {
-    Genre genre = Genre.builder().id(UUID.randomUUID()).name("Fiction").description(null).build();
+    var genre = Genre.builder().id(UUID.randomUUID()).name("Fiction").description(null).build();
 
-    GenreResponse response = mapper.toResponse(genre);
+    var response = mapper.toResponse(genre);
 
     assertNull(response.description);
   }
 
   @Test
   void toEntity_creates_genre_from_request() {
-    CreateGenreRequest request =
-        CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
+    var request = CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
 
-    Genre genre = mapper.toEntity(request);
+    var genre = mapper.toEntity(request);
 
     assertNull(genre.getId());
     assertEquals("Fiction", genre.getName());
@@ -64,9 +60,9 @@ class GenreMapperTest {
 
   @Test
   void toEntity_creates_genre_with_null_description() {
-    CreateGenreRequest request = CreateGenreRequest.builder().name("Fiction").build();
+    var request = CreateGenreRequest.builder().name("Fiction").build();
 
-    Genre genre = mapper.toEntity(request);
+    var genre = mapper.toEntity(request);
 
     assertEquals("Fiction", genre.getName());
     assertNull(genre.getDescription());
@@ -74,15 +70,15 @@ class GenreMapperTest {
 
   @Test
   void toBookSummaryResponse_maps_all_fields() {
-    UUID bookId = UUID.randomUUID();
-    UUID authorId = UUID.randomUUID();
-    UUID genreId = UUID.randomUUID();
-    Instant now = Instant.now();
+    var bookId = UUID.randomUUID();
+    var authorId = UUID.randomUUID();
+    var genreId = UUID.randomUUID();
+    var now = Instant.now();
 
-    Genre genre = Genre.builder().id(genreId).name("Fiction").build();
-    Author author = Author.builder().id(authorId).firstName("John").lastName("Doe").build();
+    var genre = Genre.builder().id(genreId).name("Fiction").build();
+    var author = Author.builder().id(authorId).firstName("John").lastName("Doe").build();
 
-    Book book =
+    var book =
         Book.builder()
             .id(bookId)
             .title("Test Book")
@@ -92,7 +88,7 @@ class GenreMapperTest {
             .genres(Set.of(genre))
             .build();
 
-    BookAuthor bookAuthor =
+    var bookAuthor =
         BookAuthor.builder()
             .id(UUID.randomUUID())
             .book(book)
@@ -101,7 +97,7 @@ class GenreMapperTest {
             .build();
     book.setBookAuthors(List.of(bookAuthor));
 
-    BookSummaryResponse response = mapper.toBookSummaryResponse(book);
+    var response = mapper.toBookSummaryResponse(book);
 
     assertEquals(bookId, response.id);
     assertEquals("Test Book", response.title);
@@ -114,7 +110,7 @@ class GenreMapperTest {
 
   @Test
   void toBookSummaryResponse_maps_null_language() {
-    Book book =
+    var book =
         Book.builder()
             .id(UUID.randomUUID())
             .title("Test")
@@ -122,16 +118,16 @@ class GenreMapperTest {
             .createdAt(Instant.now())
             .build();
 
-    BookSummaryResponse response = mapper.toBookSummaryResponse(book);
+    var response = mapper.toBookSummaryResponse(book);
 
     assertNull(response.language);
   }
 
   @Test
   void toBookSummaryResponse_handles_empty_authors_and_genres() {
-    Book book = Book.builder().id(UUID.randomUUID()).title("Test").createdAt(Instant.now()).build();
+    var book = Book.builder().id(UUID.randomUUID()).title("Test").createdAt(Instant.now()).build();
 
-    BookSummaryResponse response = mapper.toBookSummaryResponse(book);
+    var response = mapper.toBookSummaryResponse(book);
 
     assertTrue(response.authorNames.isEmpty());
     assertTrue(response.genreNames.isEmpty());
@@ -139,9 +135,9 @@ class GenreMapperTest {
 
   @Test
   void toRevenuePerGenreResponse_maps_row() {
-    Object[] row = new Object[] {"Fiction", 500.0};
+    var row = new Object[] {"Fiction", 500.0};
 
-    RevenuePerGenreResponse response = mapper.toRevenuePerGenreResponse(row);
+    var response = mapper.toRevenuePerGenreResponse(row);
 
     assertEquals("Fiction", response.genreName);
     assertEquals(500.0, response.revenue);
@@ -149,9 +145,9 @@ class GenreMapperTest {
 
   @Test
   void toRevenuePerGenreResponse_handles_null_revenue() {
-    Object[] row = new Object[] {"New Genre", null};
+    var row = new Object[] {"New Genre", null};
 
-    RevenuePerGenreResponse response = mapper.toRevenuePerGenreResponse(row);
+    var response = mapper.toRevenuePerGenreResponse(row);
 
     assertEquals("New Genre", response.genreName);
     assertEquals(0.0, response.revenue);

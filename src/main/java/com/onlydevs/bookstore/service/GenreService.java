@@ -1,6 +1,5 @@
 package com.onlydevs.bookstore.service;
 
-import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.dto.BookSummaryResponse;
 import com.onlydevs.bookstore.model.dto.CreateGenreRequest;
 import com.onlydevs.bookstore.model.dto.GenreResponse;
@@ -33,13 +32,12 @@ public class GenreService {
     if (genreRepository.existsByNameIgnoreCase(request.name)) {
       throw new ConflictException("Genre already exists: " + request.name);
     }
-    Genre genre = genreMapper.toEntity(request);
+    var genre = genreMapper.toEntity(request);
     return genreMapper.toResponse(genreRepository.save(genre));
   }
 
   public GenreResponse renameGenre(UUID id, RenameGenreRequest request) {
-    Genre genre =
-        genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
+    var genre = genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
     if (genreRepository.existsByNameIgnoreCase(request.name)) {
       throw new ConflictException("Genre name already taken: " + request.name);
     }
@@ -48,8 +46,7 @@ public class GenreService {
   }
 
   public void deleteGenre(UUID id) {
-    Genre genre =
-        genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
+    var genre = genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
     genreRepository.delete(genre);
   }
 

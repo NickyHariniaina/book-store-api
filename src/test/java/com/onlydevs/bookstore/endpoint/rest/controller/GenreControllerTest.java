@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
@@ -41,13 +40,13 @@ class GenreControllerTest {
 
   @Test
   void should_list_all_genres_without_pagination() throws Exception {
-    GenreResponse g1 =
+    var g1 =
         GenreResponse.builder()
             .id(UUID.randomUUID())
             .name("Fiction")
             .description("Fiction")
             .build();
-    GenreResponse g2 =
+    var g2 =
         GenreResponse.builder()
             .id(UUID.randomUUID())
             .name("Science")
@@ -66,14 +65,14 @@ class GenreControllerTest {
 
   @Test
   void should_get_genre_with_books_when_genre_exists() throws Exception {
-    PageRequest pageable = PageRequest.of(0, 10);
-    BookSummaryResponse book =
+    var pageable = PageRequest.of(0, 10);
+    var book =
         BookSummaryResponse.builder()
             .id(UUID.randomUUID())
             .title("Test Book")
             .createdAt(now)
             .build();
-    Page<BookSummaryResponse> page = new PageImpl<>(List.of(book), pageable, 1);
+    var page = new PageImpl<>(List.of(book), pageable, 1);
 
     when(genreService.getBooksByGenreId(eq(genreId), any())).thenReturn(page);
 
@@ -95,9 +94,8 @@ class GenreControllerTest {
 
   @Test
   void should_create_genre_and_return_201_when_valid() throws Exception {
-    CreateGenreRequest request =
-        CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
-    GenreResponse response =
+    var request = CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
+    var response =
         GenreResponse.builder().id(genreId).name("Fiction").description("Fiction books").build();
 
     when(genreService.createGenre(any())).thenReturn(response);
@@ -114,7 +112,7 @@ class GenreControllerTest {
 
   @Test
   void should_return_400_when_create_genre_with_empty_name() throws Exception {
-    String invalidJson = "{\"name\":\"\",\"description\":\"desc\"}";
+    var invalidJson = "{\"name\":\"\",\"description\":\"desc\"}";
 
     mockMvc
         .perform(post("/genres").contentType(MediaType.APPLICATION_JSON).content(invalidJson))
@@ -123,8 +121,7 @@ class GenreControllerTest {
 
   @Test
   void should_return_409_when_create_duplicate_genre() throws Exception {
-    CreateGenreRequest request =
-        CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
+    var request = CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
 
     when(genreService.createGenre(any()))
         .thenThrow(new ConflictException("Genre already exists: Fiction"));
@@ -139,9 +136,8 @@ class GenreControllerTest {
 
   @Test
   void should_rename_genre_when_genre_exists() throws Exception {
-    RenameGenreRequest request = RenameGenreRequest.builder().name("New Name").build();
-    GenreResponse response =
-        GenreResponse.builder().id(genreId).name("New Name").description("Desc").build();
+    var request = RenameGenreRequest.builder().name("New Name").build();
+    var response = GenreResponse.builder().id(genreId).name("New Name").description("Desc").build();
 
     when(genreService.renameGenre(eq(genreId), any())).thenReturn(response);
 
@@ -156,7 +152,7 @@ class GenreControllerTest {
 
   @Test
   void should_return_404_when_rename_nonexistent_genre() throws Exception {
-    RenameGenreRequest request = RenameGenreRequest.builder().name("New Name").build();
+    var request = RenameGenreRequest.builder().name("New Name").build();
 
     when(genreService.renameGenre(eq(genreId), any()))
         .thenThrow(new NotFoundException("Genre", genreId));
@@ -183,7 +179,7 @@ class GenreControllerTest {
 
   @Test
   void should_return_409_when_rename_genre_to_existing_name() throws Exception {
-    RenameGenreRequest request = RenameGenreRequest.builder().name("Taken Name").build();
+    var request = RenameGenreRequest.builder().name("Taken Name").build();
 
     when(genreService.renameGenre(eq(genreId), any()))
         .thenThrow(new ConflictException("Genre name already taken: Taken Name"));
@@ -222,10 +218,8 @@ class GenreControllerTest {
 
   @Test
   void should_get_revenue_per_genre_for_dashboard() throws Exception {
-    RevenuePerGenreResponse r1 =
-        RevenuePerGenreResponse.builder().genreName("Fiction").revenue(500.0).build();
-    RevenuePerGenreResponse r2 =
-        RevenuePerGenreResponse.builder().genreName("Science").revenue(300.0).build();
+    var r1 = RevenuePerGenreResponse.builder().genreName("Fiction").revenue(500.0).build();
+    var r2 = RevenuePerGenreResponse.builder().genreName("Science").revenue(300.0).build();
 
     when(genreService.getRevenuePerGenre()).thenReturn(List.of(r1, r2));
 
