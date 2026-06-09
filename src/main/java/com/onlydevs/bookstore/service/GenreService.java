@@ -37,7 +37,10 @@ public class GenreService {
   }
 
   public GenreResponse renameGenre(UUID id, RenameGenreRequest request) {
-    var genre = genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
+    var genre =
+        genreRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Genre not found with id: " + id));
     if (genreRepository.existsByNameIgnoreCase(request.name)) {
       throw new ConflictException("Genre name already taken: " + request.name);
     }
@@ -46,14 +49,17 @@ public class GenreService {
   }
 
   public void deleteGenre(UUID id) {
-    var genre = genreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre", id));
+    var genre =
+        genreRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Genre not found with id: " + id));
     genreRepository.delete(genre);
   }
 
   @Transactional(readOnly = true)
   public Page<BookSummaryResponse> getBooksByGenreId(UUID genreId, Pageable pageable) {
     if (!genreRepository.existsById(genreId)) {
-      throw new NotFoundException("Genre", genreId);
+      throw new NotFoundException("Genre not found with id: " + genreId);
     }
     return genreRepository
         .findBooksByGenreId(genreId, pageable)
