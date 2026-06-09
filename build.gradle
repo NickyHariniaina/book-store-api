@@ -34,7 +34,7 @@ task generateJavaClient(type: GenerateTask) {
 
     groupId = 'com.onlydevs'
     id = 'bookstore-23c96d64-gen'
-    skipValidateSpec = false
+    skipValidateSpec = true
     logToStderr = true
     generateAliasAsModel = false
     enablePostProcessFile = false
@@ -182,7 +182,7 @@ dependencies {
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'io.swagger:swagger-annotations:1.6.12'
 
-    implementation 'com.onlydevs:bookstore-23c96d64-gen:latest'
+    implementation 'com.onlydevs:bookstore-23c96d64-gen:1.0.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.2'
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.2'
