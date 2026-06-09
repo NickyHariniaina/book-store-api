@@ -66,7 +66,8 @@ class PublisherControllerTest {
   void should_return_404_when_publisher_not_found() throws Exception {
     var id = UUID.randomUUID();
 
-    when(publisherService.getPublisherById(id)).thenThrow(new NotFoundException("Publisher", id));
+    when(publisherService.getPublisherById(id))
+        .thenThrow(new NotFoundException("Publisher not found with id: " + id));
 
     mockMvc.perform(get("/publishers/{id}", id)).andExpect(status().isNotFound());
   }
@@ -160,7 +161,7 @@ class PublisherControllerTest {
     var request = UpdatePublisherRequest.builder().name("New Name").build();
 
     when(publisherService.updatePublisher(any(), any()))
-        .thenThrow(new NotFoundException("Publisher", id));
+        .thenThrow(new NotFoundException("Publisher not found with id: " + id));
 
     mockMvc
         .perform(
@@ -204,7 +205,9 @@ class PublisherControllerTest {
   void should_return_404_when_delete_nonexistent_publisher() throws Exception {
     var id = UUID.randomUUID();
 
-    doThrow(new NotFoundException("Publisher", id)).when(publisherService).deletePublisher(id);
+    doThrow(new NotFoundException("Publisher not found with id: " + id))
+        .when(publisherService)
+        .deletePublisher(id);
 
     mockMvc.perform(delete("/publishers/{id}", id)).andExpect(status().isNotFound());
   }

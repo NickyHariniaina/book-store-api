@@ -26,7 +26,9 @@ public class PublisherService {
 
   public PublisherResponse getPublisherById(UUID id) {
     var publisher =
-        publisherRepository.findById(id).orElseThrow(() -> new NotFoundException("Publisher", id));
+        publisherRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Publisher not found with id: " + id));
     return publisherMapper.toRest(publisher);
   }
 
@@ -40,7 +42,9 @@ public class PublisherService {
 
   public PublisherResponse updatePublisher(UUID id, UpdatePublisherRequest request) {
     var publisher =
-        publisherRepository.findById(id).orElseThrow(() -> new NotFoundException("Publisher", id));
+        publisherRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Publisher not found with id: " + id));
     if (request.email != null
         && !request.email.equalsIgnoreCase(publisher.getEmail())
         && publisherRepository.existsByEmailIgnoreCase(request.email)) {
@@ -52,7 +56,9 @@ public class PublisherService {
 
   public void deletePublisher(UUID id) {
     var publisher =
-        publisherRepository.findById(id).orElseThrow(() -> new NotFoundException("Publisher", id));
+        publisherRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Publisher not found with id: " + id));
     publisherRepository.delete(publisher);
   }
 }

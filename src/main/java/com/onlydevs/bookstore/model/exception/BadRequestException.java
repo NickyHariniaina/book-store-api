@@ -1,7 +1,7 @@
 package com.onlydevs.bookstore.model.exception;
 
-public class ConflictException extends ApiException {
-  public ConflictException(String message) {
+public class BadRequestException extends ApiException {
+  public BadRequestException(String message) {
     super(ExceptionType.CLIENT_EXCEPTION, message);
   }
 }
