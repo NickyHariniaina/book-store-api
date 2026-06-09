@@ -40,7 +40,7 @@ public class Publisher {
 
   @Email
   @Size(max = 255, message = "email must not exceed 255 characters")
-  @Column
+  @Column(unique = true)
   private String email;
 
   @Size(max = 100, message = "country must not exceed 100 characters")
