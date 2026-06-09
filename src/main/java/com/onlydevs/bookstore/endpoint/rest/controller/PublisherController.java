@@ -5,9 +5,10 @@ import com.onlydevs.bookstore.model.dto.PublisherResponse;
 import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
 import com.onlydevs.bookstore.service.PublisherService;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,8 +28,8 @@ public class PublisherController {
   private final PublisherService publisherService;
 
   @GetMapping
-  public ResponseEntity<List<PublisherResponse>> getAllPublishers() {
-    return ResponseEntity.ok(publisherService.getAllPublishers());
+  public ResponseEntity<Page<PublisherResponse>> getAllPublishers(Pageable pageable) {
+    return ResponseEntity.ok(publisherService.getAllPublishers(pageable));
   }
 
   @GetMapping("/{id}")

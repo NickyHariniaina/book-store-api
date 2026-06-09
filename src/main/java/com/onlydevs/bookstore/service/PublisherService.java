@@ -7,9 +7,10 @@ import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
 import com.onlydevs.bookstore.repository.PublisherRepository;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,8 +20,8 @@ public class PublisherService {
   private final PublisherRepository publisherRepository;
   private final PublisherMapper publisherMapper;
 
-  public List<PublisherResponse> getAllPublishers() {
-    return publisherRepository.findAll().stream().map(publisherMapper::toResponse).toList();
+  public Page<PublisherResponse> getAllPublishers(Pageable pageable) {
+    return publisherRepository.findAll(pageable).map(publisherMapper::toResponse);
   }
 
   public PublisherResponse getPublisherById(UUID id) {
