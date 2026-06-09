@@ -75,6 +75,11 @@ public class InventoryController {
     return ResponseEntity.status(HttpStatus.OK).body(mapper.toRest(item));
   }
 
+  @GetMapping("/api/v1/editions/{editionId}/movements")
+  public List<InventoryMovementResponse> getMovementsByEdition(@PathVariable UUID editionId) {
+    return mapper.toMovementRestList(service.getMovementsByEdition(editionId));
+  }
+
   @GetMapping("/api/v1/stores/{storeId}/movements")
   public List<InventoryMovementResponse> getMovements(
       @PathVariable UUID storeId, @RequestParam(name = "type", required = false) String type) {
