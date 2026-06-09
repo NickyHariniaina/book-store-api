@@ -18,9 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/books")
 @AllArgsConstructor
-@NoArgsConstructor
 public class BookController {
-    private BookService bookService;
+    private final BookService bookService;
     @GetMapping
     public ResponseEntity<Page<BookSummaryResponse>> getAllBooks(
             @RequestParam(defaultValue = "0") int page,

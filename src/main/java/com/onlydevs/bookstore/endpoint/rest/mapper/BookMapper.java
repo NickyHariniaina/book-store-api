@@ -3,6 +3,7 @@ package com.onlydevs.bookstore.endpoint.rest.mapper;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
@@ -11,13 +12,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
+@AllArgsConstructor
 public class BookMapper {
-
     public BookSummaryResponse toBookSummaryResponse(Book book) {
         if (book == null) {
             return null;
         }
-
         return BookSummaryResponse.builder()
                 .id(book.getId())
                 .title(book.getTitle())

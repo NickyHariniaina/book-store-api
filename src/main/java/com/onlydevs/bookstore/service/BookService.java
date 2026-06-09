@@ -11,10 +11,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-@NoArgsConstructor
 public class BookService {
-    private BookRepository bookRepository;
-    private BookMapper bookMapper;
+    private final BookRepository bookRepository;
+    private final BookMapper bookMapper;
 
     public Page<BookSummaryResponse> getAllBooks(Pageable pageable){
         return bookRepository.findAll(pageable).map(bookMapper::toBookSummaryResponse);
