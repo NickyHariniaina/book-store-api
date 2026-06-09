@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookStoreMapper;
 import com.onlydevs.bookstore.endpoint.rest.model.BookStoreResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateBookStoreRequest;
 import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.service.BookStoreService;

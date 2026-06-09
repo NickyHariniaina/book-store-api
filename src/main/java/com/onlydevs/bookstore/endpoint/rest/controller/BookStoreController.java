@@ -40,8 +40,8 @@ public class BookStoreController {
   public BookStoreResponse updateStore(
       @PathVariable UUID id, @RequestBody UpdateBookStoreRequest request) {
     var bookStore =
-        service.update(id, request.getName(), request.getAddress(), request.getPhone(),
-            request.getEmail());
+        service.update(
+            id, request.getName(), request.getAddress(), request.getPhone(), request.getEmail());
     return mapper.toRest(bookStore);
   }
 }
