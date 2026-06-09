@@ -816,26 +816,12 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         '200':
+          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/PriceResponse' }
-  /editions/{id}/prices/current:
-    get:
-      tags: [BookEditions]
-      summary: Current active price
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/PriceResponse' }
-  /editions/{id}/prices:
     post:
       tags: [BookEditions]
       summary: Set new price (auto-closes previous)
@@ -851,6 +837,22 @@ paths:
             schema: { $ref: '#/components/schemas/SetPriceRequest' }
       responses:
         '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PriceResponse' }
+  /editions/{id}/prices/current:
+    get:
+      tags: [BookEditions]
+      summary: Current active price
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
           content:
             application/json:
               schema: { $ref: '#/components/schemas/PriceResponse' }
