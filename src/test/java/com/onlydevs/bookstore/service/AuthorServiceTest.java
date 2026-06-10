@@ -89,7 +89,7 @@ class AuthorServiceTest {
     assertThrows(
         NotFoundException.class,
         () -> {
-          AuthorResponse actualResponse = authorService.findById(id.toString());
+          authorService.findById(id.toString());
         });
     verify(authorRepository).findById(id);
   }
