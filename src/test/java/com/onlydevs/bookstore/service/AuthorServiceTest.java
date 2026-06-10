@@ -66,9 +66,19 @@ class AuthorServiceTest {
             .firstName("Albert")
             .lastName("Camus")
             .build();
-
-    var authorResponse =
+    var authorResponse = AuthorResponse
+            .builder()
+            .id(id.toString())
+            .firstName("Albert")
+            .lastName("Camus")
+            .fullName("Alber Camus").build();
     when(authorRepository.findById(id)).thenReturn(Optional.of(author));
     when(authorMapper.toRest(author)).thenReturn(authorResponse);
+
+    AuthorResponse actualResponse = authorService.findById(id.toString());
+
+    assertEquals(authorResponse, actualResponse);
+    verify(authorMapper).toRest(author);
+    verify(authorRepository).findById(id);
   }
 }
