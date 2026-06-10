@@ -14,7 +14,7 @@ class AuthorMapperTest {
   private final AuthorMapper authorMapper = new AuthorMapper();
 
   @Test
-  void toDomain_shouldMapRequestToAuthor() {
+  void toDomain_should_map_request_to_author() {
     CreateAuthorRequest request = new CreateAuthorRequest("John", "Doe");
 
     Author result = authorMapper.toDomain(request);
@@ -27,7 +27,7 @@ class AuthorMapperTest {
   }
 
   @Test
-  void toRest_shouldMapAuthorToResponse() {
+  void toRest_should_map_author_to_response() {
     UUID id = UUID.randomUUID();
     Instant now = Instant.now();
     Author author =
