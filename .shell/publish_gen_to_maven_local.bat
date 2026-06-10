@@ -1,1 +1,2 @@
-cd build/gen && mvn clean install
+cd build/gen
+mvn clean install
