@@ -57,8 +57,4 @@ class AuthorServiceTest {
     verify(authorMapper).toRest(savedAuthor);
   }
 
-  @Test
-  void save_should_raise_conflict_when_creating_user() {
-
-  }
 }
