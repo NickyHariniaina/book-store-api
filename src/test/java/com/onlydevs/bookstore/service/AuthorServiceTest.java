@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
 import com.onlydevs.bookstore.model.Author;
-import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.AuthorResponse;
+import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import com.onlydevs.bookstore.repository.AuthorRepository;
 import java.time.Instant;
 import java.util.Optional;
@@ -61,17 +61,14 @@ class AuthorServiceTest {
   @Test
   void should_find_author_by_id() {
     var id = UUID.randomUUID();
-    var author = Author.builder()
-            .id(id)
-            .firstName("Albert")
-            .lastName("Camus")
-            .build();
-    var authorResponse = AuthorResponse
-            .builder()
+    var author = Author.builder().id(id).firstName("Albert").lastName("Camus").build();
+    var authorResponse =
+        AuthorResponse.builder()
             .id(id.toString())
             .firstName("Albert")
             .lastName("Camus")
-            .fullName("Alber Camus").build();
+            .fullName("Alber Camus")
+            .build();
     when(authorRepository.findById(id)).thenReturn(Optional.of(author));
     when(authorMapper.toRest(author)).thenReturn(authorResponse);
 

@@ -1,8 +1,8 @@
 package com.onlydevs.bookstore.endpoint.rest.mapper;
 
 import com.onlydevs.bookstore.model.Author;
-import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.AuthorResponse;
+import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 

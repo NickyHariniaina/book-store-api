@@ -1,14 +1,13 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
-import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.AuthorResponse;
+import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.AuthorRepository;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -23,7 +22,10 @@ public class AuthorService {
   }
 
   public AuthorResponse findById(String id) {
-     var author = authorRepository.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException("Author with id " + id + " doesn't exist."));
-     return authorMapper.toRest(author);
+    var author =
+        authorRepository
+            .findById(UUID.fromString(id))
+            .orElseThrow(() -> new NotFoundException("Author with id " + id + " doesn't exist."));
+    return authorMapper.toRest(author);
   }
 }

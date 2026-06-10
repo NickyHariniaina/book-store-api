@@ -3,8 +3,8 @@ package com.onlydevs.bookstore.endpoint.rest.mapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.onlydevs.bookstore.model.Author;
-import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.AuthorResponse;
+import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

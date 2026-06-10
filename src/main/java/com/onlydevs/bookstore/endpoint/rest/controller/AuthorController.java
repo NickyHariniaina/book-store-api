@@ -1,7 +1,7 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
-import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.AuthorResponse;
+import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import com.onlydevs.bookstore.service.AuthorService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
