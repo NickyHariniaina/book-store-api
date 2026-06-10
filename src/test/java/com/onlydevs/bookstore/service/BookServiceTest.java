@@ -1,11 +1,31 @@
 package com.onlydevs.bookstore.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookMapper;
-import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
 import com.onlydevs.bookstore.model.*;
+import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
+import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
+import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
+import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
+import com.onlydevs.bookstore.model.exception.BadRequestException;
+import com.onlydevs.bookstore.model.exception.NotFoundException;
+import com.onlydevs.bookstore.repository.AuthorRepository;
+import com.onlydevs.bookstore.repository.BookAuthorRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
+import com.onlydevs.bookstore.repository.GenreRepository;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,330 +37,551 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
 
-    @Mock
-    private BookRepository bookRepository;
+  @Mock private BookRepository bookRepository;
 
-    @Mock
-    private BookMapper bookMapper;
+  @Mock private BookMapper bookMapper;
 
-    @InjectMocks
-    private BookService bookService;
+  @Mock private AuthorRepository authorRepository;
 
-    private Pageable pageable;
-    private Book bookWithAuthor;
-    private Book bookWithoutAuthor;
-    private Book bookWithMultipleAuthors;
-    private BookSummaryResponse responseWithAuthor;
-    private BookSummaryResponse responseWithoutAuthor;
-    private BookSummaryResponse responseWithMultipleAuthors;
-    private Author author1;
-    private Author author2;
-    private Genre genre;
+  @Mock private GenreRepository genreRepository;
 
-    @BeforeEach
-    void setUp() {
-        pageable = PageRequest.of(0, 20);
+  @Mock private BookAuthorRepository bookAuthorRepository;
 
-        author1 = Author.builder()
-                .id(UUID.randomUUID())
-                .firstName("Scott")
-                .lastName("Fitzgerald")
-                .build();
+  @InjectMocks private BookService bookService;
 
-        author2 = Author.builder()
-                .id(UUID.randomUUID())
-                .firstName("Ernest")
-                .lastName("Hemingway")
-                .build();
+  private Pageable pageable;
+  private Book bookWithAuthor;
+  private Book bookWithoutAuthor;
+  private Book bookWithMultipleAuthors;
+  private BookSummaryResponse responseWithAuthor;
+  private BookSummaryResponse responseWithoutAuthor;
+  private BookSummaryResponse responseWithMultipleAuthors;
+  private BookDetailResponse bookDetailResponse;
+  private Author author1;
+  private Author author2;
+  private Genre genre;
+  private UUID bookId;
+  private UUID authorId;
+  private UUID genreId;
+  private Book book;
 
-        genre = Genre.builder()
-                .id(UUID.randomUUID())
-                .name("Fiction")
-                .build();
+  @BeforeEach
+  void setUp() {
+    pageable = PageRequest.of(0, 20);
+    bookId = UUID.randomUUID();
+    authorId = UUID.randomUUID();
+    genreId = UUID.randomUUID();
 
-        BookAuthor bookAuthor = BookAuthor.builder()
-                .id(UUID.randomUUID())
-                .author(author1)
-                .role(AuthorRole.AUTHOR)
-                .contributionOrder(1)
-                .build();
+    author1 =
+        Author.builder().id(UUID.randomUUID()).firstName("Scott").lastName("Fitzgerald").build();
 
-        bookWithAuthor = Book.builder()
-                .id(UUID.randomUUID())
-                .title("The Great Gatsby")
-                .summary("A story about the American dream")
-                .language(BookLanguage.ENGLISH)
-                .coverUrl("https://example.com/gatsby.jpg")
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .bookAuthors(List.of(bookAuthor))
-                .genres(Set.of(genre))
-                .build();
+    author2 =
+        Author.builder().id(UUID.randomUUID()).firstName("Ernest").lastName("Hemingway").build();
 
-        responseWithAuthor = BookSummaryResponse.builder()
-                .id(bookWithAuthor.getId())
-                .title("The Great Gatsby")
-                .language("ENGLISH")
-                .coverUrl("https://example.com/gatsby.jpg")
-                .authorNames(List.of("Scott Fitzgerald"))
-                .genreNames(List.of("Fiction"))
-                .createdAt(bookWithAuthor.getCreatedAt())
-                .build();
+    genre = Genre.builder().id(genreId).name("Fiction").build();
 
-        bookWithoutAuthor = Book.builder()
-                .id(UUID.randomUUID())
-                .title("1984")
-                .summary("A dystopian social science fiction")
-                .language(BookLanguage.ENGLISH)
-                .coverUrl("https://example.com/1984.jpg")
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .bookAuthors(List.of())
-                .genres(Set.of())
-                .build();
+    BookAuthor bookAuthor =
+        BookAuthor.builder()
+            .id(UUID.randomUUID())
+            .author(author1)
+            .role(AuthorRole.AUTHOR)
+            .contributionOrder(1)
+            .build();
 
-        responseWithoutAuthor = BookSummaryResponse.builder()
-                .id(bookWithoutAuthor.getId())
-                .title("1984")
-                .language("ENGLISH")
-                .coverUrl("https://example.com/1984.jpg")
-                .authorNames(List.of())
-                .genreNames(List.of())
-                .createdAt(bookWithoutAuthor.getCreatedAt())
-                .build();
+    bookWithAuthor =
+        Book.builder()
+            .id(UUID.randomUUID())
+            .title("The Great Gatsby")
+            .summary("A story about the American dream")
+            .language(BookLanguage.ENGLISH)
+            .coverUrl("https://example.com/gatsby.jpg")
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .bookAuthors(List.of(bookAuthor))
+            .genres(Set.of(genre))
+            .build();
 
-        BookAuthor bookAuthor1 = BookAuthor.builder()
-                .id(UUID.randomUUID())
-                .author(author2)
-                .role(AuthorRole.AUTHOR)
-                .contributionOrder(2)
-                .build();
+    responseWithAuthor =
+        BookSummaryResponse.builder()
+            .id(bookWithAuthor.getId())
+            .title("The Great Gatsby")
+            .language("ENGLISH")
+            .coverUrl("https://example.com/gatsby.jpg")
+            .authorNames(List.of("Scott Fitzgerald"))
+            .genreNames(List.of("Fiction"))
+            .createdAt(bookWithAuthor.getCreatedAt())
+            .build();
 
-        BookAuthor bookAuthor2 = BookAuthor.builder()
-                .id(UUID.randomUUID())
-                .author(author1)
-                .role(AuthorRole.AUTHOR)
-                .contributionOrder(1)
-                .build();
+    bookWithoutAuthor =
+        Book.builder()
+            .id(UUID.randomUUID())
+            .title("1984")
+            .summary("A dystopian social science fiction")
+            .language(BookLanguage.ENGLISH)
+            .coverUrl("https://example.com/1984.jpg")
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .bookAuthors(List.of())
+            .genres(Set.of())
+            .build();
 
-        bookWithMultipleAuthors = Book.builder()
-                .id(UUID.randomUUID())
-                .title("The Sun Also Rises")
-                .summary("A novel about expatriates")
-                .language(BookLanguage.ENGLISH)
-                .coverUrl("https://example.com/sun.jpg")
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .bookAuthors(List.of(bookAuthor1, bookAuthor2))
-                .genres(Set.of())
-                .build();
+    responseWithoutAuthor =
+        BookSummaryResponse.builder()
+            .id(bookWithoutAuthor.getId())
+            .title("1984")
+            .language("ENGLISH")
+            .coverUrl("https://example.com/1984.jpg")
+            .authorNames(List.of())
+            .genreNames(List.of())
+            .createdAt(bookWithoutAuthor.getCreatedAt())
+            .build();
 
-        responseWithMultipleAuthors = BookSummaryResponse.builder()
-                .id(bookWithMultipleAuthors.getId())
-                .title("The Sun Also Rises")
-                .language("ENGLISH")
-                .coverUrl("https://example.com/sun.jpg")
-                .authorNames(List.of("Scott Fitzgerald", "Ernest Hemingway"))
-                .genreNames(List.of())
-                .createdAt(bookWithMultipleAuthors.getCreatedAt())
-                .build();
-    }
+    BookAuthor bookAuthor1 =
+        BookAuthor.builder()
+            .id(UUID.randomUUID())
+            .author(author2)
+            .role(AuthorRole.AUTHOR)
+            .contributionOrder(2)
+            .build();
 
-    @Test
-    void getAllBooks_ShouldReturnPageOfBookSummaryResponses() {
-        Page<Book> bookPage = new PageImpl<>(List.of(bookWithAuthor, bookWithoutAuthor), pageable, 2);
-        when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-        when(bookMapper.toBookSummaryResponse(bookWithAuthor)).thenReturn(responseWithAuthor);
-        when(bookMapper.toBookSummaryResponse(bookWithoutAuthor)).thenReturn(responseWithoutAuthor);
+    BookAuthor bookAuthor2 =
+        BookAuthor.builder()
+            .id(UUID.randomUUID())
+            .author(author1)
+            .role(AuthorRole.AUTHOR)
+            .contributionOrder(1)
+            .build();
 
-        Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
+    bookWithMultipleAuthors =
+        Book.builder()
+            .id(UUID.randomUUID())
+            .title("The Sun Also Rises")
+            .summary("A novel about expatriates")
+            .language(BookLanguage.ENGLISH)
+            .coverUrl("https://example.com/sun.jpg")
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .bookAuthors(List.of(bookAuthor1, bookAuthor2))
+            .genres(Set.of())
+            .build();
 
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(2);
-        assertThat(result.getTotalElements()).isEqualTo(2);
-        assertThat(result.getNumber()).isEqualTo(0);
-        assertThat(result.getSize()).isEqualTo(20);
-        assertThat(result.getTotalPages()).isEqualTo(1);
-        assertThat(result.isLast()).isTrue();
+    responseWithMultipleAuthors =
+        BookSummaryResponse.builder()
+            .id(bookWithMultipleAuthors.getId())
+            .title("The Sun Also Rises")
+            .language("ENGLISH")
+            .coverUrl("https://example.com/sun.jpg")
+            .authorNames(List.of("Scott Fitzgerald", "Ernest Hemingway"))
+            .genreNames(List.of())
+            .createdAt(bookWithMultipleAuthors.getCreatedAt())
+            .build();
 
-        BookSummaryResponse firstBook = result.getContent().get(0);
-        assertThat(firstBook.getId()).isEqualTo(bookWithAuthor.getId());
-        assertThat(firstBook.getTitle()).isEqualTo("The Great Gatsby");
-        assertThat(firstBook.getLanguage()).isEqualTo("ENGLISH");
-        assertThat(firstBook.getCoverUrl()).isEqualTo("https://example.com/gatsby.jpg");
-        assertThat(firstBook.getAuthorNames()).hasSize(1);
-        assertThat(firstBook.getAuthorNames()).contains("Scott Fitzgerald");
-        assertThat(firstBook.getGenreNames()).hasSize(1);
-        assertThat(firstBook.getGenreNames()).contains("Fiction");
-        assertThat(firstBook.getCreatedAt()).isNotNull();
+    book =
+        Book.builder()
+            .id(bookId)
+            .title("Test Book")
+            .summary("Test summary")
+            .language(BookLanguage.ENGLISH)
+            .coverUrl("https://example.com/cover.jpg")
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .bookAuthors(List.of())
+            .genres(new HashSet<>())
+            .build();
 
-        BookSummaryResponse secondBook = result.getContent().get(1);
-        assertThat(secondBook.getId()).isEqualTo(bookWithoutAuthor.getId());
-        assertThat(secondBook.getTitle()).isEqualTo("1984");
-        assertThat(secondBook.getAuthorNames()).isEmpty();
-        assertThat(secondBook.getGenreNames()).isEmpty();
+    bookDetailResponse =
+        BookDetailResponse.builder()
+            .id(bookId)
+            .title("Test Book")
+            .summary("Test summary")
+            .language("ENGLISH")
+            .coverUrl("https://example.com/cover.jpg")
+            .authors(List.of())
+            .genres(List.of())
+            .createdAt(book.getCreatedAt())
+            .updatedAt(book.getUpdatedAt())
+            .build();
+  }
 
-        verify(bookRepository, times(1)).findAll(pageable);
-        verify(bookMapper, times(1)).toBookSummaryResponse(bookWithAuthor);
-        verify(bookMapper, times(1)).toBookSummaryResponse(bookWithoutAuthor);
-    }
+  @Test
+  void getAllBooks_ShouldReturnPageOfBookSummaryResponses() {
+    Page<Book> bookPage = new PageImpl<>(List.of(bookWithAuthor, bookWithoutAuthor), pageable, 2);
+    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
+    when(bookMapper.toBookSummaryResponse(bookWithAuthor)).thenReturn(responseWithAuthor);
+    when(bookMapper.toBookSummaryResponse(bookWithoutAuthor)).thenReturn(responseWithoutAuthor);
 
-    @Test
-    void getAllBooks_WhenNoBooks_ShouldReturnEmptyPage() {
-        Page<Book> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(bookRepository.findAll(pageable)).thenReturn(emptyPage);
+    Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
-        Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).hasSize(2);
+    assertThat(result.getTotalElements()).isEqualTo(2);
+    assertThat(result.getNumber()).isEqualTo(0);
+    assertThat(result.getSize()).isEqualTo(20);
+    assertThat(result.getTotalPages()).isEqualTo(1);
+    assertThat(result.isLast()).isTrue();
 
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
-        assertThat(result.getTotalPages()).isEqualTo(0);
-        assertThat(result.getNumber()).isEqualTo(0);
-        assertThat(result.getSize()).isEqualTo(20);
-        assertThat(result.isLast()).isTrue();
+    BookSummaryResponse firstBook = result.getContent().get(0);
+    assertThat(firstBook.getId()).isEqualTo(bookWithAuthor.getId());
+    assertThat(firstBook.getTitle()).isEqualTo("The Great Gatsby");
+    assertThat(firstBook.getLanguage()).isEqualTo("ENGLISH");
+    assertThat(firstBook.getCoverUrl()).isEqualTo("https://example.com/gatsby.jpg");
+    assertThat(firstBook.getAuthorNames()).hasSize(1);
+    assertThat(firstBook.getAuthorNames()).contains("Scott Fitzgerald");
+    assertThat(firstBook.getGenreNames()).hasSize(1);
+    assertThat(firstBook.getGenreNames()).contains("Fiction");
+    assertThat(firstBook.getCreatedAt()).isNotNull();
 
-        verify(bookRepository, times(1)).findAll(pageable);
-        verify(bookMapper, never()).toBookSummaryResponse(any());
-    }
+    BookSummaryResponse secondBook = result.getContent().get(1);
+    assertThat(secondBook.getId()).isEqualTo(bookWithoutAuthor.getId());
+    assertThat(secondBook.getTitle()).isEqualTo("1984");
+    assertThat(secondBook.getAuthorNames()).isEmpty();
+    assertThat(secondBook.getGenreNames()).isEmpty();
 
-    @Test
-    void getAllBooks_WhenBookHasNoAuthors_ShouldReturnEmptyAuthorList() {
-        Page<Book> bookPage = new PageImpl<>(List.of(bookWithoutAuthor), pageable, 1);
-        when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-        when(bookMapper.toBookSummaryResponse(bookWithoutAuthor)).thenReturn(responseWithoutAuthor);
+    verify(bookRepository, times(1)).findAll(pageable);
+    verify(bookMapper, times(1)).toBookSummaryResponse(bookWithAuthor);
+    verify(bookMapper, times(1)).toBookSummaryResponse(bookWithoutAuthor);
+  }
 
-        Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
+  @Test
+  void getAllBooks_WhenNoBooks_ShouldReturnEmptyPage() {
+    Page<Book> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+    when(bookRepository.findAll(pageable)).thenReturn(emptyPage);
 
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().getFirst().getAuthorNames()).isEmpty();
-        assertThat(result.getContent().getFirst().getGenreNames()).isEmpty();
+    Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
-        verify(bookRepository, times(1)).findAll(pageable);
-    }
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).isEmpty();
+    assertThat(result.getTotalElements()).isEqualTo(0);
+    assertThat(result.getTotalPages()).isEqualTo(0);
+    assertThat(result.getNumber()).isEqualTo(0);
+    assertThat(result.getSize()).isEqualTo(20);
+    assertThat(result.isLast()).isTrue();
 
-    @Test
-    void getAllBooks_WhenBookHasMultipleAuthors_ShouldReturnAuthorsSortedByContributionOrder() {
-        Page<Book> bookPage = new PageImpl<>(List.of(bookWithMultipleAuthors), pageable, 1);
-        when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-        when(bookMapper.toBookSummaryResponse(bookWithMultipleAuthors)).thenReturn(responseWithMultipleAuthors);
+    verify(bookRepository, times(1)).findAll(pageable);
+    verify(bookMapper, never()).toBookSummaryResponse(any());
+  }
 
-        Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
+  @Test
+  void getAllBooks_WhenBookHasNoAuthors_ShouldReturnEmptyAuthorList() {
+    Page<Book> bookPage = new PageImpl<>(List.of(bookWithoutAuthor), pageable, 1);
+    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
+    when(bookMapper.toBookSummaryResponse(bookWithoutAuthor)).thenReturn(responseWithoutAuthor);
 
-        assertThat(result.getContent()).hasSize(1);
-        List<String> authorNames = result.getContent().getFirst().getAuthorNames();
-        assertThat(authorNames).hasSize(2);
-        assertThat(authorNames.get(0)).isEqualTo("Scott Fitzgerald");
-        assertThat(authorNames.get(1)).isEqualTo("Ernest Hemingway");
+    Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
-        verify(bookRepository, times(1)).findAll(pageable);
-    }
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().getFirst().getAuthorNames()).isEmpty();
+    assertThat(result.getContent().getFirst().getGenreNames()).isEmpty();
 
-    @Test
-    void getAllBooks_WhenBookHasNullLanguage_ShouldReturnNullLanguage() {
-        Book bookWithNullLanguage = Book.builder()
-                .id(UUID.randomUUID())
-                .title("Book Without Language")
-                .summary("Test summary")
-                .language(null)
-                .coverUrl(null)
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .bookAuthors(List.of())
-                .genres(Set.of())
-                .build();
+    verify(bookRepository, times(1)).findAll(pageable);
+  }
 
-        BookSummaryResponse responseWithNullLanguage = BookSummaryResponse.builder()
-                .id(bookWithNullLanguage.getId())
-                .title("Book Without Language")
-                .language(null)
-                .coverUrl(null)
-                .authorNames(List.of())
-                .genreNames(List.of())
-                .createdAt(bookWithNullLanguage.getCreatedAt())
-                .build();
+  @Test
+  void getAllBooks_WhenBookHasMultipleAuthors_ShouldReturnAuthorsSortedByContributionOrder() {
+    Page<Book> bookPage = new PageImpl<>(List.of(bookWithMultipleAuthors), pageable, 1);
+    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
+    when(bookMapper.toBookSummaryResponse(bookWithMultipleAuthors))
+        .thenReturn(responseWithMultipleAuthors);
 
-        Page<Book> bookPage = new PageImpl<>(List.of(bookWithNullLanguage), pageable, 1);
-        when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-        when(bookMapper.toBookSummaryResponse(bookWithNullLanguage)).thenReturn(responseWithNullLanguage);
+    Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
-        Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
+    assertThat(result.getContent()).hasSize(1);
+    List<String> authorNames = result.getContent().getFirst().getAuthorNames();
+    assertThat(authorNames).hasSize(2);
+    assertThat(authorNames.get(0)).isEqualTo("Scott Fitzgerald");
+    assertThat(authorNames.get(1)).isEqualTo("Ernest Hemingway");
 
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().getFirst().getLanguage()).isNull();
+    verify(bookRepository, times(1)).findAll(pageable);
+  }
 
-        verify(bookRepository, times(1)).findAll(pageable);
-    }
+  @Test
+  void getAllBooks_WhenBookHasNullLanguage_ShouldReturnNullLanguage() {
+    Book bookWithNullLanguage =
+        Book.builder()
+            .id(UUID.randomUUID())
+            .title("Book Without Language")
+            .summary("Test summary")
+            .language(null)
+            .coverUrl(null)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .bookAuthors(List.of())
+            .genres(Set.of())
+            .build();
 
-    @Test
-    void getAllBooks_WhenBookHasNullCoverUrl_ShouldReturnNullCoverUrl() {
-        Book bookWithNullCover = Book.builder()
-                .id(UUID.randomUUID())
-                .title("Book Without Cover")
-                .summary("Test summary")
-                .language(BookLanguage.ENGLISH)
-                .coverUrl(null)
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .bookAuthors(List.of())
-                .genres(Set.of())
-                .build();
+    BookSummaryResponse responseWithNullLanguage =
+        BookSummaryResponse.builder()
+            .id(bookWithNullLanguage.getId())
+            .title("Book Without Language")
+            .language(null)
+            .coverUrl(null)
+            .authorNames(List.of())
+            .genreNames(List.of())
+            .createdAt(bookWithNullLanguage.getCreatedAt())
+            .build();
 
-        BookSummaryResponse responseWithNullCover = BookSummaryResponse.builder()
-                .id(bookWithNullCover.getId())
-                .title("Book Without Cover")
-                .language("ENGLISH")
-                .coverUrl(null)
-                .authorNames(List.of())
-                .genreNames(List.of())
-                .createdAt(bookWithNullCover.getCreatedAt())
-                .build();
+    Page<Book> bookPage = new PageImpl<>(List.of(bookWithNullLanguage), pageable, 1);
+    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
+    when(bookMapper.toBookSummaryResponse(bookWithNullLanguage))
+        .thenReturn(responseWithNullLanguage);
 
-        Page<Book> bookPage = new PageImpl<>(List.of(bookWithNullCover), pageable, 1);
-        when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-        when(bookMapper.toBookSummaryResponse(bookWithNullCover)).thenReturn(responseWithNullCover);
+    Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
-        Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().getFirst().getLanguage()).isNull();
 
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().getFirst().getCoverUrl()).isNull();
+    verify(bookRepository, times(1)).findAll(pageable);
+  }
 
-        verify(bookRepository, times(1)).findAll(pageable);
-    }
+  @Test
+  void getAllBooks_WhenBookHasNullCoverUrl_ShouldReturnNullCoverUrl() {
+    Book bookWithNullCover =
+        Book.builder()
+            .id(UUID.randomUUID())
+            .title("Book Without Cover")
+            .summary("Test summary")
+            .language(BookLanguage.ENGLISH)
+            .coverUrl(null)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .bookAuthors(List.of())
+            .genres(Set.of())
+            .build();
 
-    @Test
-    void getAllBooks_ShouldUseCorrectPageableParameters() {
-        Pageable customPageable = PageRequest.of(2, 15);
-        Page<Book> emptyPage = new PageImpl<>(List.of(), customPageable, 0);
-        when(bookRepository.findAll(customPageable)).thenReturn(emptyPage);
+    BookSummaryResponse responseWithNullCover =
+        BookSummaryResponse.builder()
+            .id(bookWithNullCover.getId())
+            .title("Book Without Cover")
+            .language("ENGLISH")
+            .coverUrl(null)
+            .authorNames(List.of())
+            .genreNames(List.of())
+            .createdAt(bookWithNullCover.getCreatedAt())
+            .build();
 
-        bookService.getAllBooks(customPageable);
+    Page<Book> bookPage = new PageImpl<>(List.of(bookWithNullCover), pageable, 1);
+    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
+    when(bookMapper.toBookSummaryResponse(bookWithNullCover)).thenReturn(responseWithNullCover);
 
-        verify(bookRepository, times(1)).findAll(customPageable);
-    }
+    Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
-    @Test
-    void getAllBooks_WhenRepositoryThrowsException_ShouldPropagateException() {
-        RuntimeException exception = new RuntimeException("Database connection failed");
-        when(bookRepository.findAll(pageable)).thenThrow(exception);
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().getFirst().getCoverUrl()).isNull();
 
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
-            bookService.getAllBooks(pageable);
+    verify(bookRepository, times(1)).findAll(pageable);
+  }
+
+  @Test
+  void getAllBooks_ShouldUseCorrectPageableParameters() {
+    Pageable customPageable = PageRequest.of(2, 15);
+    Page<Book> emptyPage = new PageImpl<>(List.of(), customPageable, 0);
+    when(bookRepository.findAll(customPageable)).thenReturn(emptyPage);
+
+    bookService.getAllBooks(customPageable);
+
+    verify(bookRepository, times(1)).findAll(customPageable);
+  }
+
+  @Test
+  void getAllBooks_WhenRepositoryThrowsException_ShouldPropagateException() {
+    RuntimeException exception = new RuntimeException("Database connection failed");
+    when(bookRepository.findAll(pageable)).thenThrow(exception);
+
+    org.junit.jupiter.api.Assertions.assertThrows(
+        RuntimeException.class,
+        () -> {
+          bookService.getAllBooks(pageable);
         });
 
-        verify(bookRepository, times(1)).findAll(pageable);
-        verify(bookMapper, never()).toBookSummaryResponse(any());
-    }
+    verify(bookRepository, times(1)).findAll(pageable);
+    verify(bookMapper, never()).toBookSummaryResponse(any());
+  }
+
+  @Test
+  void getBookById_WhenBookExists_ShouldReturnDetail() {
+    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+    when(bookMapper.toBookDetailResponse(book)).thenReturn(bookDetailResponse);
+
+    BookDetailResponse result = bookService.getBookById(bookId);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getId()).isEqualTo(bookId);
+    assertThat(result.getTitle()).isEqualTo("Test Book");
+    verify(bookRepository, times(1)).findById(bookId);
+  }
+
+  @Test
+  void getBookById_WhenBookNotFound_ShouldThrow() {
+    when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> bookService.getBookById(bookId))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining("Book not found");
+
+    verify(bookRepository, times(1)).findById(bookId);
+  }
+
+  @Test
+  void createBook_ShouldReturnCreatedDetail() {
+    CreateBookRequest request =
+        CreateBookRequest.builder()
+            .title("New Book")
+            .summary("New summary")
+            .language("ENGLISH")
+            .build();
+    when(bookRepository.save(any(Book.class))).thenReturn(book);
+    when(bookMapper.toBookDetailResponse(book)).thenReturn(bookDetailResponse);
+
+    BookDetailResponse result = bookService.createBook(request);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getTitle()).isEqualTo("Test Book");
+    verify(bookRepository, times(1)).save(any(Book.class));
+  }
+
+  @Test
+  void createBook_WithInvalidLanguage_ShouldThrow() {
+    CreateBookRequest request =
+        CreateBookRequest.builder().title("New Book").language("INVALID_LANG").build();
+
+    assertThatThrownBy(() -> bookService.createBook(request))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("Invalid language");
+
+    verify(bookRepository, never()).save(any());
+  }
+
+  @Test
+  void updateBook_WhenBookExists_ShouldUpdateFields() {
+    UpdateBookRequest request =
+        UpdateBookRequest.builder().title("Updated Title").summary("Updated summary").build();
+    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+    when(bookRepository.save(any(Book.class))).thenReturn(book);
+    when(bookMapper.toBookDetailResponse(any())).thenReturn(bookDetailResponse);
+
+    BookDetailResponse result = bookService.updateBook(bookId, request);
+
+    assertThat(result).isNotNull();
+    verify(bookRepository, times(1)).findById(bookId);
+    verify(bookRepository, times(1)).save(any(Book.class));
+  }
+
+  @Test
+  void updateBook_WhenBookNotFound_ShouldThrow() {
+    UpdateBookRequest request = UpdateBookRequest.builder().title("Updated").build();
+    when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> bookService.updateBook(bookId, request))
+        .isInstanceOf(NotFoundException.class);
+
+    verify(bookRepository, times(1)).findById(bookId);
+    verify(bookRepository, never()).save(any());
+  }
+
+  @Test
+  void deleteBook_WhenBookExists_ShouldDelete() {
+    when(bookRepository.existsById(bookId)).thenReturn(true);
+
+    bookService.deleteBook(bookId);
+
+    verify(bookRepository, times(1)).existsById(bookId);
+    verify(bookRepository, times(1)).deleteById(bookId);
+  }
+
+  @Test
+  void deleteBook_WhenBookNotFound_ShouldThrow() {
+    when(bookRepository.existsById(bookId)).thenReturn(false);
+
+    assertThatThrownBy(() -> bookService.deleteBook(bookId)).isInstanceOf(NotFoundException.class);
+
+    verify(bookRepository, times(1)).existsById(bookId);
+    verify(bookRepository, never()).deleteById(any());
+  }
+
+  @Test
+  void addAuthorToBook_WhenNotLinked_ShouldAdd() {
+    BookAuthor bookAuthor =
+        BookAuthor.builder().id(UUID.randomUUID()).book(book).author(author1).build();
+    BookAuthorResponse authorResponse =
+        BookAuthorResponse.builder()
+            .id(bookAuthor.getId())
+            .bookId(bookId)
+            .authorId(author1.getId())
+            .authorFullName("Scott Fitzgerald")
+            .build();
+
+    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+    when(authorRepository.findById(author1.getId())).thenReturn(Optional.of(author1));
+    when(bookAuthorRepository.existsByBookIdAndAuthorId(bookId, author1.getId())).thenReturn(false);
+    when(bookAuthorRepository.save(any(BookAuthor.class))).thenReturn(bookAuthor);
+    when(bookMapper.toBookAuthorResponse(any(BookAuthor.class))).thenReturn(authorResponse);
+
+    BookAuthorResponse result = bookService.addAuthorToBook(bookId, author1.getId());
+
+    assertThat(result).isNotNull();
+    assertThat(result.getAuthorFullName()).isEqualTo("Scott Fitzgerald");
+    verify(bookAuthorRepository, times(1)).save(any(BookAuthor.class));
+  }
+
+  @Test
+  void addAuthorToBook_WhenAlreadyLinked_ShouldThrow() {
+    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+    when(authorRepository.findById(author1.getId())).thenReturn(Optional.of(author1));
+    when(bookAuthorRepository.existsByBookIdAndAuthorId(bookId, author1.getId())).thenReturn(true);
+
+    assertThatThrownBy(() -> bookService.addAuthorToBook(bookId, author1.getId()))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("already linked");
+
+    verify(bookAuthorRepository, never()).save(any());
+  }
+
+  @Test
+  void removeAuthorFromBook_WhenLinked_ShouldRemove() {
+    BookAuthor bookAuthor =
+        BookAuthor.builder().id(UUID.randomUUID()).book(book).author(author1).build();
+    when(bookAuthorRepository.findByBookIdAndAuthorId(bookId, author1.getId()))
+        .thenReturn(Optional.of(bookAuthor));
+
+    bookService.removeAuthorFromBook(bookId, author1.getId());
+
+    verify(bookAuthorRepository, times(1)).delete(bookAuthor);
+  }
+
+  @Test
+  void removeAuthorFromBook_WhenNotLinked_ShouldThrow() {
+    when(bookAuthorRepository.findByBookIdAndAuthorId(bookId, author1.getId()))
+        .thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> bookService.removeAuthorFromBook(bookId, author1.getId()))
+        .isInstanceOf(NotFoundException.class);
+
+    verify(bookAuthorRepository, never()).delete(any());
+  }
+
+  @Test
+  void addGenreToBook_ShouldAddGenre() {
+    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+    when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
+
+    bookService.addGenreToBook(bookId, genreId);
+
+    assertThat(book.getGenres()).contains(genre);
+    verify(bookRepository, times(1)).save(book);
+  }
+
+  @Test
+  void removeGenreFromBook_ShouldRemoveGenre() {
+    book.getGenres().add(genre);
+    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+    when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
+
+    bookService.removeGenreFromBook(bookId, genreId);
+
+    assertThat(book.getGenres()).doesNotContain(genre);
+    verify(bookRepository, times(1)).save(book);
+  }
 }
