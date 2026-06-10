@@ -25,14 +25,14 @@ class AuthorServiceTest {
   @InjectMocks private AuthorService authorService;
 
   @Test
-  void save_should_create_user_ok() {
+  void save_should_create_user() {
     var request = new CreateAuthorRequest("Albert", "Camus");
     var authorToCreate =
         Author.builder().firstName(request.firstName()).lastName(request.lastName()).build();
     var savedAuthor =
         Author.builder()
             .id(UUID.randomUUID())
-            .firstName("Alber")
+            .firstName("Albert")
             .lastName("Camus")
             .createdAt(Instant.now())
             .build();
@@ -55,5 +55,10 @@ class AuthorServiceTest {
     verify(authorMapper).toDomain(request);
     verify(authorRepository).save(authorToCreate);
     verify(authorMapper).toRest(savedAuthor);
+  }
+
+  @Test
+  void save_should_raise_conflict_when_creating_user() {
+
   }
 }
