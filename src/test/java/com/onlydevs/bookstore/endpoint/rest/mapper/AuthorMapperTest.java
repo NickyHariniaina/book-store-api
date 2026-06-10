@@ -30,12 +30,8 @@ class AuthorMapperTest {
   void toRest_shouldMapAuthorToResponse() {
     UUID id = UUID.randomUUID();
     Instant now = Instant.now();
-    Author author = Author.builder()
-        .id(id)
-        .firstName("Jane")
-        .lastName("Austen")
-        .createdAt(now)
-        .build();
+    Author author =
+        Author.builder().id(id).firstName("Jane").lastName("Austen").createdAt(now).build();
 
     CreateAuthorResponse result = authorMapper.toRest(author);
 
