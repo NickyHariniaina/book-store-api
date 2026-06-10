@@ -2,8 +2,10 @@ package com.onlydevs.bookstore.model.dto;
 
 import java.time.Instant;
 import lombok.Builder;
+import lombok.Getter;
 
 @Builder
+@Getter
 public class CreateAuthorResponse {
   private String id;
   private String firstName;
