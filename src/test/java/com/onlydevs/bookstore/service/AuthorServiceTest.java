@@ -56,5 +56,4 @@ class AuthorServiceTest {
     verify(authorRepository).save(authorToCreate);
     verify(authorMapper).toRest(savedAuthor);
   }
-
 }
