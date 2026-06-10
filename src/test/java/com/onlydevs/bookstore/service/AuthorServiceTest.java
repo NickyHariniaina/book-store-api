@@ -8,6 +8,7 @@ import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
 import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.dto.AuthorResponse;
 import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
+import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.AuthorRepository;
 import java.time.Instant;
 import java.util.Optional;
@@ -76,6 +77,20 @@ class AuthorServiceTest {
 
     assertEquals(authorResponse, actualResponse);
     verify(authorMapper).toRest(author);
+    verify(authorRepository).findById(id);
+  }
+
+  @Test
+  void should_raise_NotFoundException() {
+    var id = UUID.randomUUID();
+
+    when(authorRepository.findById(id)).thenReturn(Optional.empty());
+
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          AuthorResponse actualResponse = authorService.findById(id.toString());
+        });
     verify(authorRepository).findById(id);
   }
 }
