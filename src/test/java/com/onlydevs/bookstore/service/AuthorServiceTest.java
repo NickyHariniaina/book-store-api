@@ -7,9 +7,10 @@ import static org.mockito.Mockito.when;
 import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
 import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
-import com.onlydevs.bookstore.model.dto.CreateAuthorResponse;
+import com.onlydevs.bookstore.model.dto.AuthorResponse;
 import com.onlydevs.bookstore.repository.AuthorRepository;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +38,7 @@ class AuthorServiceTest {
             .createdAt(Instant.now())
             .build();
     var expectedResponse =
-        CreateAuthorResponse.builder()
+        AuthorResponse.builder()
             .id(savedAuthor.getId().toString())
             .firstName("Albert")
             .lastName("Camus")
@@ -49,11 +50,25 @@ class AuthorServiceTest {
     when(authorRepository.save(authorToCreate)).thenReturn(savedAuthor);
     when(authorMapper.toRest(savedAuthor)).thenReturn(expectedResponse);
 
-    CreateAuthorResponse actualResponse = authorService.save(request);
+    AuthorResponse actualResponse = authorService.save(request);
 
     assertEquals(expectedResponse, actualResponse);
     verify(authorMapper).toDomain(request);
     verify(authorRepository).save(authorToCreate);
     verify(authorMapper).toRest(savedAuthor);
+  }
+
+  @Test
+  void should_find_author_by_id() {
+    var id = UUID.randomUUID();
+    var author = Author.builder()
+            .id(id)
+            .firstName("Albert")
+            .lastName("Camus")
+            .build();
+
+    var authorResponse =
+    when(authorRepository.findById(id)).thenReturn(Optional.of(author));
+    when(authorMapper.toRest(author)).thenReturn(authorResponse);
   }
 }

@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
-import com.onlydevs.bookstore.model.dto.CreateAuthorResponse;
+import com.onlydevs.bookstore.model.dto.AuthorResponse;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class AuthorMapperTest {
     Author author =
         Author.builder().id(id).firstName("Jane").lastName("Austen").createdAt(now).build();
 
-    CreateAuthorResponse result = authorMapper.toRest(author);
+    AuthorResponse result = authorMapper.toRest(author);
 
     assertEquals(id.toString(), result.getId());
     assertEquals("Jane", result.getFirstName());

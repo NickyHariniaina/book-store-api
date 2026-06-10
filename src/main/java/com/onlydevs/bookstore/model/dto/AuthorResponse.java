@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class CreateAuthorResponse {
+public class AuthorResponse {
   private String id;
   private String firstName;
   private String lastName;

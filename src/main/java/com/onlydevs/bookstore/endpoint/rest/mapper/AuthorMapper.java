@@ -2,7 +2,7 @@ package com.onlydevs.bookstore.endpoint.rest.mapper;
 
 import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
-import com.onlydevs.bookstore.model.dto.CreateAuthorResponse;
+import com.onlydevs.bookstore.model.dto.AuthorResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +13,8 @@ public class AuthorMapper {
     return Author.builder().firstName(request.firstName()).lastName(request.lastName()).build();
   }
 
-  public CreateAuthorResponse toRest(Author author) {
-    return CreateAuthorResponse.builder()
+  public AuthorResponse toRest(Author author) {
+    return AuthorResponse.builder()
         .id(author.getId().toString())
         .firstName(author.getFirstName())
         .lastName(author.getLastName())

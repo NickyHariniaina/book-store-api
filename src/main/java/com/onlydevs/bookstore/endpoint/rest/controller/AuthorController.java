@@ -1,7 +1,7 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
-import com.onlydevs.bookstore.model.dto.CreateAuthorResponse;
+import com.onlydevs.bookstore.model.dto.AuthorResponse;
 import com.onlydevs.bookstore.service.AuthorService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ public class AuthorController {
   private final AuthorService authorService;
 
   @PostMapping
-  public CreateAuthorResponse createAuthor(@RequestBody @Valid CreateAuthorRequest request) {
+  public AuthorResponse createAuthor(@RequestBody @Valid CreateAuthorRequest request) {
     return authorService.save(request);
   }
 }
