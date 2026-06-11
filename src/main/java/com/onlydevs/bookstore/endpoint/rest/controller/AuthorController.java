@@ -24,7 +24,7 @@ public class AuthorController {
   }
 
   @GetMapping("/{id}")
-  public AuthorResponse findById(@PathVariable String id) {
-    return authorService.findById(id);
+  public AuthorResponse getById(@PathVariable String id) {
+    return authorService.getById(id);
   }
 }

@@ -73,7 +73,7 @@ class AuthorServiceTest {
     when(authorRepository.findById(id)).thenReturn(Optional.of(author));
     when(authorMapper.toRest(author)).thenReturn(authorResponse);
 
-    AuthorResponse actualResponse = authorService.findById(id.toString());
+    AuthorResponse actualResponse = authorService.getById(id.toString());
 
     assertEquals(authorResponse, actualResponse);
     verify(authorMapper).toRest(author);
@@ -89,7 +89,7 @@ class AuthorServiceTest {
     assertThrows(
         NotFoundException.class,
         () -> {
-          authorService.findById(id.toString());
+          authorService.getById(id.toString());
         });
     verify(authorRepository).findById(id);
   }

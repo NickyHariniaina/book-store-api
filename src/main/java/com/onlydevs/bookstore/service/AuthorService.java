@@ -21,7 +21,7 @@ public class AuthorService {
     return authorMapper.toRest(authorCreated);
   }
 
-  public AuthorResponse findById(String id) {
+  public AuthorResponse getById(String id) {
     var author =
         authorRepository
             .findById(UUID.fromString(id))
