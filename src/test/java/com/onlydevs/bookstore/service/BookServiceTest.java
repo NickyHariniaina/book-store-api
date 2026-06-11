@@ -3,7 +3,10 @@ package com.onlydevs.bookstore.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookMapper;
 import com.onlydevs.bookstore.model.*;
@@ -209,9 +212,9 @@ class BookServiceTest {
   @Test
   void getAllBooks_ShouldReturnPageOfBookSummaryResponses() {
     Page<Book> bookPage = new PageImpl<>(List.of(bookWithAuthor, bookWithoutAuthor), pageable, 2);
-    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-    when(bookMapper.toBookSummaryResponse(bookWithAuthor)).thenReturn(responseWithAuthor);
-    when(bookMapper.toBookSummaryResponse(bookWithoutAuthor)).thenReturn(responseWithoutAuthor);
+    given(bookRepository.findAll(pageable)).willReturn(bookPage);
+    given(bookMapper.toBookSummaryResponse(bookWithAuthor)).willReturn(responseWithAuthor);
+    given(bookMapper.toBookSummaryResponse(bookWithoutAuthor)).willReturn(responseWithoutAuthor);
 
     Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
@@ -240,15 +243,15 @@ class BookServiceTest {
     assertThat(secondBook.getAuthorNames()).isEmpty();
     assertThat(secondBook.getGenreNames()).isEmpty();
 
-    verify(bookRepository, times(1)).findAll(pageable);
-    verify(bookMapper, times(1)).toBookSummaryResponse(bookWithAuthor);
-    verify(bookMapper, times(1)).toBookSummaryResponse(bookWithoutAuthor);
+    then(bookRepository).should(times(1)).findAll(pageable);
+    then(bookMapper).should(times(1)).toBookSummaryResponse(bookWithAuthor);
+    then(bookMapper).should(times(1)).toBookSummaryResponse(bookWithoutAuthor);
   }
 
   @Test
   void getAllBooks_WhenNoBooks_ShouldReturnEmptyPage() {
     Page<Book> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-    when(bookRepository.findAll(pageable)).thenReturn(emptyPage);
+    given(bookRepository.findAll(pageable)).willReturn(emptyPage);
 
     Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
@@ -260,15 +263,15 @@ class BookServiceTest {
     assertThat(result.getSize()).isEqualTo(20);
     assertThat(result.isLast()).isTrue();
 
-    verify(bookRepository, times(1)).findAll(pageable);
-    verify(bookMapper, never()).toBookSummaryResponse(any());
+    then(bookRepository).should(times(1)).findAll(pageable);
+    then(bookMapper).should(never()).toBookSummaryResponse(any());
   }
 
   @Test
   void getAllBooks_WhenBookHasNoAuthors_ShouldReturnEmptyAuthorList() {
     Page<Book> bookPage = new PageImpl<>(List.of(bookWithoutAuthor), pageable, 1);
-    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-    when(bookMapper.toBookSummaryResponse(bookWithoutAuthor)).thenReturn(responseWithoutAuthor);
+    given(bookRepository.findAll(pageable)).willReturn(bookPage);
+    given(bookMapper.toBookSummaryResponse(bookWithoutAuthor)).willReturn(responseWithoutAuthor);
 
     Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
@@ -276,15 +279,15 @@ class BookServiceTest {
     assertThat(result.getContent().getFirst().getAuthorNames()).isEmpty();
     assertThat(result.getContent().getFirst().getGenreNames()).isEmpty();
 
-    verify(bookRepository, times(1)).findAll(pageable);
+    then(bookRepository).should(times(1)).findAll(pageable);
   }
 
   @Test
   void getAllBooks_WhenBookHasMultipleAuthors_ShouldReturnAuthorsSortedByContributionOrder() {
     Page<Book> bookPage = new PageImpl<>(List.of(bookWithMultipleAuthors), pageable, 1);
-    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-    when(bookMapper.toBookSummaryResponse(bookWithMultipleAuthors))
-        .thenReturn(responseWithMultipleAuthors);
+    given(bookRepository.findAll(pageable)).willReturn(bookPage);
+    given(bookMapper.toBookSummaryResponse(bookWithMultipleAuthors))
+        .willReturn(responseWithMultipleAuthors);
 
     Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
@@ -294,7 +297,7 @@ class BookServiceTest {
     assertThat(authorNames.get(0)).isEqualTo("Scott Fitzgerald");
     assertThat(authorNames.get(1)).isEqualTo("Ernest Hemingway");
 
-    verify(bookRepository, times(1)).findAll(pageable);
+    then(bookRepository).should(times(1)).findAll(pageable);
   }
 
   @Test
@@ -324,16 +327,16 @@ class BookServiceTest {
             .build();
 
     Page<Book> bookPage = new PageImpl<>(List.of(bookWithNullLanguage), pageable, 1);
-    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-    when(bookMapper.toBookSummaryResponse(bookWithNullLanguage))
-        .thenReturn(responseWithNullLanguage);
+    given(bookRepository.findAll(pageable)).willReturn(bookPage);
+    given(bookMapper.toBookSummaryResponse(bookWithNullLanguage))
+        .willReturn(responseWithNullLanguage);
 
     Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
     assertThat(result.getContent()).hasSize(1);
     assertThat(result.getContent().getFirst().getLanguage()).isNull();
 
-    verify(bookRepository, times(1)).findAll(pageable);
+    then(bookRepository).should(times(1)).findAll(pageable);
   }
 
   @Test
@@ -363,65 +366,62 @@ class BookServiceTest {
             .build();
 
     Page<Book> bookPage = new PageImpl<>(List.of(bookWithNullCover), pageable, 1);
-    when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-    when(bookMapper.toBookSummaryResponse(bookWithNullCover)).thenReturn(responseWithNullCover);
+    given(bookRepository.findAll(pageable)).willReturn(bookPage);
+    given(bookMapper.toBookSummaryResponse(bookWithNullCover)).willReturn(responseWithNullCover);
 
     Page<BookSummaryResponse> result = bookService.getAllBooks(pageable);
 
     assertThat(result.getContent()).hasSize(1);
     assertThat(result.getContent().getFirst().getCoverUrl()).isNull();
 
-    verify(bookRepository, times(1)).findAll(pageable);
+    then(bookRepository).should(times(1)).findAll(pageable);
   }
 
   @Test
   void getAllBooks_ShouldUseCorrectPageableParameters() {
     Pageable customPageable = PageRequest.of(2, 15);
     Page<Book> emptyPage = new PageImpl<>(List.of(), customPageable, 0);
-    when(bookRepository.findAll(customPageable)).thenReturn(emptyPage);
+    given(bookRepository.findAll(customPageable)).willReturn(emptyPage);
 
     bookService.getAllBooks(customPageable);
 
-    verify(bookRepository, times(1)).findAll(customPageable);
+    then(bookRepository).should(times(1)).findAll(customPageable);
   }
 
   @Test
   void getAllBooks_WhenRepositoryThrowsException_ShouldPropagateException() {
     RuntimeException exception = new RuntimeException("Database connection failed");
-    when(bookRepository.findAll(pageable)).thenThrow(exception);
+    given(bookRepository.findAll(pageable)).willThrow(exception);
 
-    org.junit.jupiter.api.Assertions.assertThrows(
-        RuntimeException.class,
-        () -> {
-          bookService.getAllBooks(pageable);
-        });
+    assertThatThrownBy(() -> bookService.getAllBooks(pageable))
+        .isInstanceOf(RuntimeException.class);
 
-    verify(bookRepository, times(1)).findAll(pageable);
-    verify(bookMapper, never()).toBookSummaryResponse(any());
+    then(bookRepository).should(times(1)).findAll(pageable);
+    then(bookMapper).should(never()).toBookSummaryResponse(any());
   }
 
   @Test
   void getBookById_WhenBookExists_ShouldReturnDetail() {
-    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-    when(bookMapper.toBookDetailResponse(book)).thenReturn(bookDetailResponse);
+    given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
+    given(bookMapper.toBookDetailResponse(book)).willReturn(bookDetailResponse);
 
     BookDetailResponse result = bookService.getBookById(bookId);
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(bookId);
     assertThat(result.getTitle()).isEqualTo("Test Book");
-    verify(bookRepository, times(1)).findById(bookId);
+    then(bookRepository).should(times(1)).findById(bookId);
   }
 
   @Test
   void getBookById_WhenBookNotFound_ShouldThrow() {
-    when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+    given(bookRepository.findById(bookId)).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> bookService.getBookById(bookId))
         .isInstanceOf(NotFoundException.class)
         .hasMessageContaining("Book not found");
 
-    verify(bookRepository, times(1)).findById(bookId);
+    then(bookRepository).should(times(1)).findById(bookId);
   }
 
   @Test
@@ -432,14 +432,14 @@ class BookServiceTest {
             .summary("New summary")
             .language("ENGLISH")
             .build();
-    when(bookRepository.save(any(Book.class))).thenReturn(book);
-    when(bookMapper.toBookDetailResponse(book)).thenReturn(bookDetailResponse);
+    given(bookRepository.save(any(Book.class))).willReturn(book);
+    given(bookMapper.toBookDetailResponse(book)).willReturn(bookDetailResponse);
 
     BookDetailResponse result = bookService.createBook(request);
 
     assertThat(result).isNotNull();
     assertThat(result.getTitle()).isEqualTo("Test Book");
-    verify(bookRepository, times(1)).save(any(Book.class));
+    then(bookRepository).should(times(1)).save(any(Book.class));
   }
 
   @Test
@@ -451,54 +451,54 @@ class BookServiceTest {
         .isInstanceOf(BadRequestException.class)
         .hasMessageContaining("Invalid language");
 
-    verify(bookRepository, never()).save(any());
+    then(bookRepository).should(never()).save(any());
   }
 
   @Test
   void updateBook_WhenBookExists_ShouldUpdateFields() {
     UpdateBookRequest request =
         UpdateBookRequest.builder().title("Updated Title").summary("Updated summary").build();
-    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-    when(bookRepository.save(any(Book.class))).thenReturn(book);
-    when(bookMapper.toBookDetailResponse(any())).thenReturn(bookDetailResponse);
+    given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
+    given(bookRepository.save(any(Book.class))).willReturn(book);
+    given(bookMapper.toBookDetailResponse(any())).willReturn(bookDetailResponse);
 
     BookDetailResponse result = bookService.updateBook(bookId, request);
 
     assertThat(result).isNotNull();
-    verify(bookRepository, times(1)).findById(bookId);
-    verify(bookRepository, times(1)).save(any(Book.class));
+    then(bookRepository).should(times(1)).findById(bookId);
+    then(bookRepository).should(times(1)).save(any(Book.class));
   }
 
   @Test
   void updateBook_WhenBookNotFound_ShouldThrow() {
     UpdateBookRequest request = UpdateBookRequest.builder().title("Updated").build();
-    when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+    given(bookRepository.findById(bookId)).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> bookService.updateBook(bookId, request))
         .isInstanceOf(NotFoundException.class);
 
-    verify(bookRepository, times(1)).findById(bookId);
-    verify(bookRepository, never()).save(any());
+    then(bookRepository).should(times(1)).findById(bookId);
+    then(bookRepository).should(never()).save(any());
   }
 
   @Test
   void deleteBook_WhenBookExists_ShouldDelete() {
-    when(bookRepository.existsById(bookId)).thenReturn(true);
+    given(bookRepository.existsById(bookId)).willReturn(true);
 
     bookService.deleteBook(bookId);
 
-    verify(bookRepository, times(1)).existsById(bookId);
-    verify(bookRepository, times(1)).deleteById(bookId);
+    then(bookRepository).should(times(1)).existsById(bookId);
+    then(bookRepository).should(times(1)).deleteById(bookId);
   }
 
   @Test
   void deleteBook_WhenBookNotFound_ShouldThrow() {
-    when(bookRepository.existsById(bookId)).thenReturn(false);
+    given(bookRepository.existsById(bookId)).willReturn(false);
 
     assertThatThrownBy(() -> bookService.deleteBook(bookId)).isInstanceOf(NotFoundException.class);
 
-    verify(bookRepository, times(1)).existsById(bookId);
-    verify(bookRepository, never()).deleteById(any());
+    then(bookRepository).should(times(1)).existsById(bookId);
+    then(bookRepository).should(never()).deleteById(any());
   }
 
   @Test
@@ -513,75 +513,76 @@ class BookServiceTest {
             .authorFullName("Scott Fitzgerald")
             .build();
 
-    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-    when(authorRepository.findById(author1.getId())).thenReturn(Optional.of(author1));
-    when(bookAuthorRepository.existsByBookIdAndAuthorId(bookId, author1.getId())).thenReturn(false);
-    when(bookAuthorRepository.save(any(BookAuthor.class))).thenReturn(bookAuthor);
-    when(bookMapper.toBookAuthorResponse(any(BookAuthor.class))).thenReturn(authorResponse);
+    given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
+    given(authorRepository.findById(author1.getId())).willReturn(Optional.of(author1));
+    given(bookAuthorRepository.existsByBookIdAndAuthorId(bookId, author1.getId()))
+        .willReturn(false);
+    given(bookAuthorRepository.save(any(BookAuthor.class))).willReturn(bookAuthor);
+    given(bookMapper.toBookAuthorResponse(any(BookAuthor.class))).willReturn(authorResponse);
 
     BookAuthorResponse result = bookService.addAuthorToBook(bookId, author1.getId());
 
     assertThat(result).isNotNull();
     assertThat(result.getAuthorFullName()).isEqualTo("Scott Fitzgerald");
-    verify(bookAuthorRepository, times(1)).save(any(BookAuthor.class));
+    then(bookAuthorRepository).should(times(1)).save(any(BookAuthor.class));
   }
 
   @Test
   void addAuthorToBook_WhenAlreadyLinked_ShouldThrow() {
-    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-    when(authorRepository.findById(author1.getId())).thenReturn(Optional.of(author1));
-    when(bookAuthorRepository.existsByBookIdAndAuthorId(bookId, author1.getId())).thenReturn(true);
+    given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
+    given(authorRepository.findById(author1.getId())).willReturn(Optional.of(author1));
+    given(bookAuthorRepository.existsByBookIdAndAuthorId(bookId, author1.getId())).willReturn(true);
 
     assertThatThrownBy(() -> bookService.addAuthorToBook(bookId, author1.getId()))
         .isInstanceOf(BadRequestException.class)
         .hasMessageContaining("already linked");
 
-    verify(bookAuthorRepository, never()).save(any());
+    then(bookAuthorRepository).should(never()).save(any());
   }
 
   @Test
   void removeAuthorFromBook_WhenLinked_ShouldRemove() {
     BookAuthor bookAuthor =
         BookAuthor.builder().id(UUID.randomUUID()).book(book).author(author1).build();
-    when(bookAuthorRepository.findByBookIdAndAuthorId(bookId, author1.getId()))
-        .thenReturn(Optional.of(bookAuthor));
+    given(bookAuthorRepository.findByBookIdAndAuthorId(bookId, author1.getId()))
+        .willReturn(Optional.of(bookAuthor));
 
     bookService.removeAuthorFromBook(bookId, author1.getId());
 
-    verify(bookAuthorRepository, times(1)).delete(bookAuthor);
+    then(bookAuthorRepository).should(times(1)).delete(bookAuthor);
   }
 
   @Test
   void removeAuthorFromBook_WhenNotLinked_ShouldThrow() {
-    when(bookAuthorRepository.findByBookIdAndAuthorId(bookId, author1.getId()))
-        .thenReturn(Optional.empty());
+    given(bookAuthorRepository.findByBookIdAndAuthorId(bookId, author1.getId()))
+        .willReturn(Optional.empty());
 
     assertThatThrownBy(() -> bookService.removeAuthorFromBook(bookId, author1.getId()))
         .isInstanceOf(NotFoundException.class);
 
-    verify(bookAuthorRepository, never()).delete(any());
+    then(bookAuthorRepository).should(never()).delete(any());
   }
 
   @Test
   void addGenreToBook_ShouldAddGenre() {
-    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-    when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
+    given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
+    given(genreRepository.findById(genreId)).willReturn(Optional.of(genre));
 
     bookService.addGenreToBook(bookId, genreId);
 
     assertThat(book.getGenres()).contains(genre);
-    verify(bookRepository, times(1)).save(book);
+    then(bookRepository).should(times(1)).save(book);
   }
 
   @Test
   void removeGenreFromBook_ShouldRemoveGenre() {
     book.getGenres().add(genre);
-    when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-    when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
+    given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
+    given(genreRepository.findById(genreId)).willReturn(Optional.of(genre));
 
     bookService.removeGenreFromBook(bookId, genreId);
 
     assertThat(book.getGenres()).doesNotContain(genre);
-    verify(bookRepository, times(1)).save(book);
+    then(bookRepository).should(times(1)).save(book);
   }
 }

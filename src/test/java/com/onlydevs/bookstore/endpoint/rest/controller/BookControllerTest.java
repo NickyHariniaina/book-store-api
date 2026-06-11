@@ -1,8 +1,8 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -55,7 +55,7 @@ class BookControllerTest {
 
     Page<BookSummaryResponse> page = new PageImpl<>(List.of(response), PageRequest.of(0, 20), 1);
 
-    when(bookService.getAllBooks(any())).thenReturn(page);
+    given(bookService.getAllBooks(any())).willReturn(page);
 
     mockMvc
         .perform(get("/api/v1/books").contentType(MediaType.APPLICATION_JSON))
@@ -72,7 +72,7 @@ class BookControllerTest {
     BookDetailResponse response =
         BookDetailResponse.builder().id(bookId).title("Test Book").build();
 
-    when(bookService.getBookById(bookId)).thenReturn(response);
+    given(bookService.getBookById(bookId)).willReturn(response);
 
     mockMvc
         .perform(get("/api/v1/books/{id}", bookId))
@@ -89,7 +89,7 @@ class BookControllerTest {
     BookDetailResponse response =
         BookDetailResponse.builder().id(bookId).title("New Book").language("ENGLISH").build();
 
-    when(bookService.createBook(any())).thenReturn(response);
+    given(bookService.createBook(any())).willReturn(response);
 
     mockMvc
         .perform(
@@ -119,7 +119,7 @@ class BookControllerTest {
     BookDetailResponse response =
         BookDetailResponse.builder().id(bookId).title("Updated Title").build();
 
-    when(bookService.updateBook(any(), any())).thenReturn(response);
+    given(bookService.updateBook(any(), any())).willReturn(response);
 
     mockMvc
         .perform(
@@ -132,7 +132,7 @@ class BookControllerTest {
 
   @Test
   void deleteBook_ShouldReturnNoContent() throws Exception {
-    doNothing().when(bookService).deleteBook(bookId);
+    willDoNothing().given(bookService).deleteBook(bookId);
 
     mockMvc.perform(delete("/api/v1/books/{id}", bookId)).andExpect(status().isNoContent());
   }
@@ -147,7 +147,7 @@ class BookControllerTest {
             .authorId(authorId)
             .build();
 
-    when(bookService.addAuthorToBook(bookId, authorId)).thenReturn(response);
+    given(bookService.addAuthorToBook(bookId, authorId)).willReturn(response);
 
     mockMvc
         .perform(post("/api/v1/books/{id}/authors/{authorId}", bookId, authorId))
@@ -159,7 +159,7 @@ class BookControllerTest {
   @Test
   void removeAuthorFromBook_ShouldReturnNoContent() throws Exception {
     UUID authorId = UUID.randomUUID();
-    doNothing().when(bookService).removeAuthorFromBook(bookId, authorId);
+    willDoNothing().given(bookService).removeAuthorFromBook(bookId, authorId);
 
     mockMvc
         .perform(delete("/api/v1/books/{id}/authors/{authorId}", bookId, authorId))
@@ -169,7 +169,7 @@ class BookControllerTest {
   @Test
   void addGenreToBook_ShouldReturnNoContent() throws Exception {
     UUID genreId = UUID.randomUUID();
-    doNothing().when(bookService).addGenreToBook(bookId, genreId);
+    willDoNothing().given(bookService).addGenreToBook(bookId, genreId);
 
     mockMvc
         .perform(post("/api/v1/books/{id}/genres/{genreId}", bookId, genreId))
@@ -179,7 +179,7 @@ class BookControllerTest {
   @Test
   void removeGenreFromBook_ShouldReturnNoContent() throws Exception {
     UUID genreId = UUID.randomUUID();
-    doNothing().when(bookService).removeGenreFromBook(bookId, genreId);
+    willDoNothing().given(bookService).removeGenreFromBook(bookId, genreId);
 
     mockMvc
         .perform(delete("/api/v1/books/{id}/genres/{genreId}", bookId, genreId))
