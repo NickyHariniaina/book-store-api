@@ -21,7 +21,7 @@ class AuthorIT extends FacadeIT {
     var request = new CreateAuthorRequest("Jane", "Austen");
 
     AuthorResponse result =
-        rest.postForObject("http://localhost:" + port + "/authors", request, AuthorResponse.class);
+        rest.postForObject("http://localhost:" + port + "/api/v1/authors", request, AuthorResponse.class);
 
     assertNotNull(result.getId());
     assertEquals("Jane", result.getFirstName());
@@ -35,11 +35,11 @@ class AuthorIT extends FacadeIT {
     var createRequest = new CreateAuthorRequest("Jane", "Austen");
     AuthorResponse created =
         rest.postForObject(
-            "http://localhost:" + port + "/authors", createRequest, AuthorResponse.class);
+            "http://localhost:" + port + "/api/v1/authors", createRequest, AuthorResponse.class);
 
     AuthorResponse result =
         rest.getForObject(
-            "http://localhost:" + port + "/authors/" + created.getId(), AuthorResponse.class);
+            "http://localhost:" + port + "/api/v1/authors/" + created.getId(), AuthorResponse.class);
 
     assertEquals(created.getId(), result.getId());
     assertEquals("Jane", result.getFirstName());
