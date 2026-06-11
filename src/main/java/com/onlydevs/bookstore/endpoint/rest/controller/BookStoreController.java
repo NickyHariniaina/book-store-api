@@ -6,6 +6,7 @@ import com.onlydevs.bookstore.endpoint.rest.model.CreateBookStoreRequest;
 import com.onlydevs.bookstore.endpoint.rest.model.UpdateBookStoreRequest;
 import com.onlydevs.bookstore.service.BookStoreService;
 import java.util.UUID;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class BookStoreController {
   private final BookStoreMapper mapper;
 
   @GetMapping
-  public java.util.List<BookStoreResponse> getStores() {
+  public List<BookStoreResponse> getStores() {
     return mapper.toRestList(service.findAll());
   }
 
