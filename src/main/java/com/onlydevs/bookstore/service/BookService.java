@@ -23,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @AllArgsConstructor
 public class BookService {
@@ -36,7 +38,7 @@ public class BookService {
     return bookRepository.findAll(pageable).map(bookMapper::toBookSummaryResponse);
   }
 
-  public BookDetailResponse getBookById(java.util.UUID id) {
+  public BookDetailResponse getBookById(UUID id) {
     Book book =
         bookRepository
             .findById(id)
@@ -58,7 +60,7 @@ public class BookService {
   }
 
   @Transactional
-  public BookDetailResponse updateBook(java.util.UUID id, UpdateBookRequest request) {
+  public BookDetailResponse updateBook(UUID id, UpdateBookRequest request) {
     Book book =
         bookRepository
             .findById(id)
@@ -80,7 +82,7 @@ public class BookService {
   }
 
   @Transactional
-  public void deleteBook(java.util.UUID id) {
+  public void deleteBook(UUID id) {
     if (!bookRepository.existsById(id)) {
       throw new NotFoundException("Book not found with id: " + id);
     }
@@ -88,7 +90,7 @@ public class BookService {
   }
 
   @Transactional
-  public BookAuthorResponse addAuthorToBook(java.util.UUID bookId, java.util.UUID authorId) {
+  public BookAuthorResponse addAuthorToBook(UUID bookId, UUID authorId) {
     Book book =
         bookRepository
             .findById(bookId)
@@ -108,7 +110,7 @@ public class BookService {
   }
 
   @Transactional
-  public void removeAuthorFromBook(java.util.UUID bookId, java.util.UUID authorId) {
+  public void removeAuthorFromBook(UUID bookId, UUID authorId) {
     BookAuthor bookAuthor =
         bookAuthorRepository
             .findByBookIdAndAuthorId(bookId, authorId)
@@ -117,7 +119,7 @@ public class BookService {
   }
 
   @Transactional
-  public void addGenreToBook(java.util.UUID bookId, java.util.UUID genreId) {
+  public void addGenreToBook(UUID bookId, UUID genreId) {
     Book book =
         bookRepository
             .findById(bookId)
@@ -131,7 +133,7 @@ public class BookService {
   }
 
   @Transactional
-  public void removeGenreFromBook(java.util.UUID bookId, java.util.UUID genreId) {
+  public void removeGenreFromBook(UUID bookId, UUID genreId) {
     Book book =
         bookRepository
             .findById(bookId)
