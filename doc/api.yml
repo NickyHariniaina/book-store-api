@@ -213,7 +213,6 @@ components:
         lastName: { type: string }
         fullName: { type: string }
         createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
     BookAuthorResponse:
       type: object
       properties:
