@@ -1,5 +1,10 @@
 package com.onlydevs.bookstore.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-public record CreateAuthorRequest(@NotBlank String firstName, @NotBlank String lastName) {}
+public record CreateAuthorRequest(
+    @NotBlank @Size(min = 1, max = 100, message = "first name must be between 1 and 100 characters")
+        String firstName,
+    @NotBlank @Size(min = 1, max = 100, message = "last name must be between 1 and 100 characters")
+        String lastName) {}
