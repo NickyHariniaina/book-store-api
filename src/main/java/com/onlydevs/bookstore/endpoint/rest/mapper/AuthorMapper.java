@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@AllArgsConstructor
 public class AuthorMapper {
   public Author toDomain(CreateAuthorRequest request) {
     return Author.builder().firstName(request.firstName()).lastName(request.lastName()).build();
