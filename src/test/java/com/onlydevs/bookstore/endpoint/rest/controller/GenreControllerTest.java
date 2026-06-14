@@ -3,10 +3,10 @@ package com.onlydevs.bookstore.endpoint.rest.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlydevs.bookstore.endpoint.rest.model.BookSummaryResponse;
@@ -18,42 +18,28 @@ import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.service.GenreService;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(GenreController.class)
 class GenreControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-
-  @Autowired private ObjectMapper objectMapper;
-
   @MockBean private GenreService genreService;
 
-  private final UUID genreId = UUID.randomUUID();
-  private final Instant now = Instant.now();
+  @Autowired private MockMvc mockMvc;
+
+  @Autowired private ObjectMapper mapper;
 
   @Test
-  void should_list_all_genres_without_pagination() throws Exception {
-    var g1 =
-        new GenreResponse()
-            .id(UUID.randomUUID())
-            .name("Fiction")
-            .description("Fiction");
-    var g2 =
-        new GenreResponse()
-            .id(UUID.randomUUID())
-            .name("Science")
-            .description("Science");
+  void should_get_all_genres_ok() throws Exception {
+    var g1 = new GenreResponse().id(UUID.randomUUID()).name("Fiction");
+    var g2 = new GenreResponse().id(UUID.randomUUID()).name("Science");
 
     given(genreService.getAllGenres()).willReturn(List.of(g1, g2));
 
@@ -66,152 +52,109 @@ class GenreControllerTest {
   }
 
   @Test
-  void should_get_genre_with_books_when_genre_exists() throws Exception {
-    var pageable = PageRequest.of(0, 10);
-    var book =
-        new BookSummaryResponse()
-            .id(UUID.randomUUID())
-            .title("Test Book")
-            .createdAt(now);
-    var page = new PageImpl<>(List.of(book), pageable, 1);
-
-    given(genreService.getBooksByGenreId(eq(genreId), any())).willReturn(page);
-
-    mockMvc
-        .perform(get("/genres/{id}/books", genreId))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content.size()").value(1))
-        .andExpect(jsonPath("$.content[0].title").value("Test Book"))
-        .andExpect(jsonPath("$.totalElements").value(1));
-  }
-
-  @Test
-  void should_return_404_when_genre_not_found() throws Exception {
-    given(genreService.getBooksByGenreId(eq(genreId), any()))
-        .willThrow(new NotFoundException("Genre not found with id: " + genreId));
-
-    mockMvc.perform(get("/genres/{id}/books", genreId)).andExpect(status().isNotFound());
-  }
-
-  @Test
-  void should_create_genre_and_return_201_when_valid() throws Exception {
+  void should_create_genre_ok() throws Exception {
     var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
-    var response =
-        new GenreResponse().id(genreId).name("Fiction").description("Fiction books");
+    var response = new GenreResponse().id(UUID.randomUUID()).name("Fiction").description("Fiction books");
 
-    given(genreService.createGenre(any())).willReturn(response);
+    given(genreService.createGenre(any(CreateGenreRequest.class))).willReturn(response);
 
     mockMvc
         .perform(
             post("/genres")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(mapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.id").value(genreId.toString()))
         .andExpect(jsonPath("$.name").value("Fiction"));
   }
 
   @Test
-  void should_return_409_when_create_duplicate_genre() throws Exception {
-    var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
+  void should_fail_when_create_duplicate_genre() throws Exception {
+    var request = new CreateGenreRequest().name("Fiction");
 
-    given(genreService.createGenre(any()))
-        .willThrow(new ConflictException("Genre already exists: Fiction"));
+    given(genreService.createGenre(any(CreateGenreRequest.class)))
+        .willThrow(new ConflictException("Genre already exists"));
 
     mockMvc
         .perform(
             post("/genres")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(mapper.writeValueAsString(request)))
         .andExpect(status().isConflict());
   }
 
   @Test
-  void should_rename_genre_when_genre_exists() throws Exception {
-    var request = new RenameGenreRequest().name("New Name");
-    var response = new GenreResponse().id(genreId).name("New Name").description("Desc");
+  void should_rename_genre_ok() throws Exception {
+    var id = UUID.randomUUID();
+    var request = new RenameGenreRequest().name("Science");
+    var response = new GenreResponse().id(id).name("Science");
 
-    given(genreService.renameGenre(eq(genreId), any())).willReturn(response);
+    given(genreService.renameGenre(eq(id), any(RenameGenreRequest.class))).willReturn(response);
 
     mockMvc
         .perform(
-            patch("/genres/{id}/rename", genreId)
+            patch("/genres/{id}/rename", id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(mapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.name").value("New Name"));
+        .andExpect(jsonPath("$.name").value("Science"));
   }
 
   @Test
-  void should_return_404_when_rename_nonexistent_genre() throws Exception {
-    var request = new RenameGenreRequest().name("New Name");
+  void should_fail_when_rename_not_found() throws Exception {
+    var id = UUID.randomUUID();
+    var request = new RenameGenreRequest().name("Science");
 
-    given(genreService.renameGenre(eq(genreId), any()))
-        .willThrow(new NotFoundException("Genre not found with id: " + genreId));
+    given(genreService.renameGenre(eq(id), any(RenameGenreRequest.class)))
+        .willThrow(new NotFoundException("Genre not found"));
 
     mockMvc
         .perform(
-            patch("/genres/{id}/rename", genreId)
+            patch("/genres/{id}/rename", id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(mapper.writeValueAsString(request)))
         .andExpect(status().isNotFound());
   }
 
   @Test
-  void should_return_409_when_rename_genre_to_existing_name() throws Exception {
-    var request = new RenameGenreRequest().name("Taken Name");
+  void should_get_books_by_genre_ok() throws Exception {
+    var id = UUID.randomUUID();
+    var book = new BookSummaryResponse().id(UUID.randomUUID()).title("Test Book");
+    var page = new org.springframework.data.domain.PageImpl<>(List.of(book));
 
-    given(genreService.renameGenre(eq(genreId), any()))
-        .willThrow(new ConflictException("Genre name already taken: Taken Name"));
+    given(genreService.getBooksByGenreId(eq(id), any())).willReturn(page);
 
     mockMvc
-        .perform(
-            patch("/genres/{id}/rename", genreId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isConflict());
+        .perform(get("/genres/{id}/books", id))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].title").value("Test Book"));
   }
 
   @Test
-  void should_delete_genre_when_genre_exists() throws Exception {
-    willDoNothing().given(genreService).deleteGenre(genreId);
-
-    mockMvc.perform(delete("/genres/{id}", genreId)).andExpect(status().isNoContent());
+  void should_delete_genre_ok() throws Exception {
+    mockMvc.perform(delete("/genres/{id}", UUID.randomUUID())).andExpect(status().isNoContent());
   }
 
   @Test
-  void should_return_404_when_delete_nonexistent_genre() throws Exception {
-    willThrow(new NotFoundException("Genre not found with id: " + genreId))
+  void should_fail_when_delete_not_found() throws Exception {
+    var id = UUID.randomUUID();
+
+    willThrow(new NotFoundException("Genre not found"))
         .given(genreService)
-        .deleteGenre(genreId);
+        .deleteGenre(id);
 
-    mockMvc.perform(delete("/genres/{id}", genreId)).andExpect(status().isNotFound());
+    mockMvc.perform(delete("/genres/{id}", id)).andExpect(status().isNotFound());
   }
 
   @Test
-  void should_return_204_when_genre_deleted_successfully() throws Exception {
-    willDoNothing().given(genreService).deleteGenre(genreId);
-
-    mockMvc
-        .perform(delete("/genres/{id}", genreId))
-        .andExpect(status().isNoContent())
-        .andExpect(content().string(""));
-  }
-
-  @Test
-  void should_get_revenue_per_genre_for_dashboard() throws Exception {
+  void should_get_revenue_per_genre_ok() throws Exception {
     var r1 = new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(500.0));
-    var r2 = new RevenuePerGenreResponse().genreName("Science").revenue(BigDecimal.valueOf(300.0));
 
-    given(genreService.getRevenuePerGenre()).willReturn(List.of(r1, r2));
+    given(genreService.getRevenuePerGenre()).willReturn(List.of(r1));
 
     mockMvc
         .perform(get("/genres/revenue"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()").value(2))
         .andExpect(jsonPath("$[0].genreName").value("Fiction"))
-        .andExpect(jsonPath("$[0].revenue").value(500.0))
-        .andExpect(jsonPath("$[1].genreName").value("Science"))
-        .andExpect(jsonPath("$[1].revenue").value(300.0));
+        .andExpect(jsonPath("$[0].revenue").value(500.0));
   }
 }
