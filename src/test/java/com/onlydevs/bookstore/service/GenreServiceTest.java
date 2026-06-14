@@ -2,15 +2,18 @@ package com.onlydevs.bookstore.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
-import com.onlydevs.bookstore.model.Book;
-import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.endpoint.rest.model.BookSummaryResponse;
 import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
 import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
 import com.onlydevs.bookstore.endpoint.rest.model.RenameGenreRequest;
 import com.onlydevs.bookstore.endpoint.rest.model.RevenuePerGenreResponse;
+import com.onlydevs.bookstore.model.Book;
+import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.GenreMapper;
@@ -55,30 +58,30 @@ class GenreServiceTest {
     var savedGenre = createGenre(genreId, "Fiction", "Fiction books");
     var expectedResponse = createGenreResponse(genreId, "Fiction", "Fiction books");
 
-    when(genreRepository.existsByNameIgnoreCase("Fiction")).thenReturn(false);
-    when(genreMapper.toDomain(request)).thenReturn(genre);
-    when(genreRepository.save(genre)).thenReturn(savedGenre);
-    when(genreMapper.toRest(savedGenre)).thenReturn(expectedResponse);
+    given(genreRepository.existsByNameIgnoreCase("Fiction")).willReturn(false);
+    given(genreMapper.toDomain(request)).willReturn(genre);
+    given(genreRepository.save(genre)).willReturn(savedGenre);
+    given(genreMapper.toRest(savedGenre)).willReturn(expectedResponse);
 
     var actual = genreService.createGenre(request);
 
     assertEquals(expectedResponse, actual);
-    verify(genreRepository).existsByNameIgnoreCase("Fiction");
-    verify(genreMapper).toDomain(request);
-    verify(genreRepository).save(genre);
-    verify(genreMapper).toRest(savedGenre);
+    then(genreRepository).should().existsByNameIgnoreCase("Fiction");
+    then(genreMapper).should().toDomain(request);
+    then(genreRepository).should().save(genre);
+    then(genreMapper).should().toRest(savedGenre);
   }
 
   @Test
   void should_throw_exception_when_create_duplicate_genre() {
     var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
 
-    when(genreRepository.existsByNameIgnoreCase("Fiction")).thenReturn(true);
+    given(genreRepository.existsByNameIgnoreCase("Fiction")).willReturn(true);
 
     assertThrows(ConflictException.class, () -> genreService.createGenre(request));
-    verify(genreRepository).existsByNameIgnoreCase("Fiction");
-    verifyNoMoreInteractions(genreMapper);
-    verify(genreRepository, never()).save(any());
+    then(genreRepository).should().existsByNameIgnoreCase("Fiction");
+    then(genreMapper).shouldHaveNoMoreInteractions();
+    then(genreRepository).should(never()).save(any());
   }
 
   @Test
@@ -87,18 +90,18 @@ class GenreServiceTest {
     var request = new RenameGenreRequest().name("New Name");
     var expectedResponse = createGenreResponse(genreId, "New Name", "Description");
 
-    when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
-    when(genreRepository.existsByNameIgnoreCase("New Name")).thenReturn(false);
-    when(genreRepository.save(genre)).thenReturn(genre);
-    when(genreMapper.toRest(genre)).thenReturn(expectedResponse);
+    given(genreRepository.findById(genreId)).willReturn(Optional.of(genre));
+    given(genreRepository.existsByNameIgnoreCase("New Name")).willReturn(false);
+    given(genreRepository.save(genre)).willReturn(genre);
+    given(genreMapper.toRest(genre)).willReturn(expectedResponse);
 
     var actual = genreService.renameGenre(genreId, request);
 
     assertEquals(expectedResponse, actual);
-    verify(genreRepository).findById(genreId);
-    verify(genreRepository).existsByNameIgnoreCase("New Name");
-    verify(genreRepository).save(genre);
-    verify(genreMapper).toRest(genre);
+    then(genreRepository).should().findById(genreId);
+    then(genreRepository).should().existsByNameIgnoreCase("New Name");
+    then(genreRepository).should().save(genre);
+    then(genreMapper).should().toRest(genre);
   }
 
   @Test
@@ -106,46 +109,46 @@ class GenreServiceTest {
     var genre = createGenre(genreId, "Old Name", "Description");
     var request = new RenameGenreRequest().name("Taken Name");
 
-    when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
-    when(genreRepository.existsByNameIgnoreCase("Taken Name")).thenReturn(true);
+    given(genreRepository.findById(genreId)).willReturn(Optional.of(genre));
+    given(genreRepository.existsByNameIgnoreCase("Taken Name")).willReturn(true);
 
     assertThrows(ConflictException.class, () -> genreService.renameGenre(genreId, request));
-    verify(genreRepository).findById(genreId);
-    verify(genreRepository).existsByNameIgnoreCase("Taken Name");
-    verify(genreRepository, never()).save(any());
+    then(genreRepository).should().findById(genreId);
+    then(genreRepository).should().existsByNameIgnoreCase("Taken Name");
+    then(genreRepository).should(never()).save(any());
   }
 
   @Test
   void should_throw_exception_when_rename_nonexistent_genre() {
     var request = new RenameGenreRequest().name("New Name");
 
-    when(genreRepository.findById(genreId)).thenReturn(Optional.empty());
+    given(genreRepository.findById(genreId)).willReturn(Optional.empty());
 
     assertThrows(NotFoundException.class, () -> genreService.renameGenre(genreId, request));
-    verify(genreRepository).findById(genreId);
-    verify(genreRepository, never()).existsByNameIgnoreCase(any());
-    verify(genreRepository, never()).save(any());
+    then(genreRepository).should().findById(genreId);
+    then(genreRepository).should(never()).existsByNameIgnoreCase(any());
+    then(genreRepository).should(never()).save(any());
   }
 
   @Test
   void should_delete_genre_and_unlink_from_all_books() {
     var genre = createGenre(genreId, "Fiction", "Desc");
 
-    when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
+    given(genreRepository.findById(genreId)).willReturn(Optional.of(genre));
 
     genreService.deleteGenre(genreId);
 
-    verify(genreRepository).findById(genreId);
-    verify(genreRepository).delete(genre);
+    then(genreRepository).should().findById(genreId);
+    then(genreRepository).should().delete(genre);
   }
 
   @Test
   void should_throw_exception_when_delete_nonexistent_genre() {
-    when(genreRepository.findById(genreId)).thenReturn(Optional.empty());
+    given(genreRepository.findById(genreId)).willReturn(Optional.empty());
 
     assertThrows(NotFoundException.class, () -> genreService.deleteGenre(genreId));
-    verify(genreRepository).findById(genreId);
-    verify(genreRepository, never()).delete(any());
+    then(genreRepository).should().findById(genreId);
+    then(genreRepository).should(never()).delete(any());
   }
 
   @Test
@@ -157,28 +160,28 @@ class GenreServiceTest {
     var r1 = createGenreResponse(id1, "Fiction", "Fiction books");
     var r2 = createGenreResponse(id2, "Science", "Science books");
 
-    when(genreRepository.findAll()).thenReturn(List.of(g1, g2));
-    when(genreMapper.toRest(g1)).thenReturn(r1);
-    when(genreMapper.toRest(g2)).thenReturn(r2);
+    given(genreRepository.findAll()).thenReturn(List.of(g1, g2));
+    given(genreMapper.toRest(g1)).thenReturn(r1);
+    given(genreMapper.toRest(g2)).thenReturn(r2);
 
     var result = genreService.getAllGenres();
 
     assertEquals(2, result.size());
     assertTrue(result.contains(r1));
     assertTrue(result.contains(r2));
-    verify(genreRepository).findAll();
-    verify(genreMapper).toRest(g1);
-    verify(genreMapper).toRest(g2);
+    then(genreRepository).should().findAll();
+    then(genreMapper).should().toRest(g1);
+    then(genreMapper).should().toRest(g2);
   }
 
   @Test
   void should_return_empty_list_when_no_genres_exist() {
-    when(genreRepository.findAll()).thenReturn(List.of());
+    given(genreRepository.findAll()).willReturn(List.of());
 
     var result = genreService.getAllGenres();
 
     assertTrue(result.isEmpty());
-    verify(genreRepository).findAll();
+    then(genreRepository).should().findAll();
   }
 
   @Test
@@ -188,28 +191,28 @@ class GenreServiceTest {
     var bookPage = new PageImpl<>(List.of(book), pageable, 1);
     var summary = new BookSummaryResponse().id(UUID.randomUUID()).title("Test Book");
 
-    when(genreRepository.existsById(genreId)).thenReturn(true);
-    when(genreRepository.findBooksByGenreId(genreId, pageable)).thenReturn(bookPage);
-    when(genreMapper.toBookSummaryResponse(book)).thenReturn(summary);
+    given(genreRepository.existsById(genreId)).willReturn(true);
+    given(genreRepository.findBooksByGenreId(genreId, pageable)).willReturn(bookPage);
+    given(genreMapper.toBookSummaryResponse(book)).willReturn(summary);
 
     var result = genreService.getBooksByGenreId(genreId, pageable);
 
     assertEquals(1, result.getTotalElements());
     assertEquals(summary, result.getContent().getFirst());
-    verify(genreRepository).existsById(genreId);
-    verify(genreRepository).findBooksByGenreId(genreId, pageable);
-    verify(genreMapper).toBookSummaryResponse(book);
+    then(genreRepository).should().existsById(genreId);
+    then(genreRepository).should().findBooksByGenreId(genreId, pageable);
+    then(genreMapper).should().toBookSummaryResponse(book);
   }
 
   @Test
   void should_throw_exception_when_get_genre_with_books_not_found() {
     var pageable = PageRequest.of(0, 10);
 
-    when(genreRepository.existsById(genreId)).thenReturn(false);
+    given(genreRepository.existsById(genreId)).willReturn(false);
 
     assertThrows(NotFoundException.class, () -> genreService.getBooksByGenreId(genreId, pageable));
-    verify(genreRepository).existsById(genreId);
-    verify(genreRepository, never()).findBooksByGenreId(any(), any());
+    then(genreRepository).should().existsById(genreId);
+    then(genreRepository).should(never()).findBooksByGenreId(any(), any());
   }
 
   @Test
@@ -219,9 +222,9 @@ class GenreServiceTest {
     var rev1 = new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(500.0));
     var rev2 = new RevenuePerGenreResponse().genreName("Science").revenue(BigDecimal.valueOf(300.0));
 
-    when(genreRepository.revenueByGenre()).thenReturn(List.of(row1, row2));
-    when(genreMapper.toRevenuePerGenreResponse(row1)).thenReturn(rev1);
-    when(genreMapper.toRevenuePerGenreResponse(row2)).thenReturn(rev2);
+    given(genreRepository.revenueByGenre()).willReturn(List.of(row1, row2));
+    given(genreMapper.toRevenuePerGenreResponse(row1)).willReturn(rev1);
+    given(genreMapper.toRevenuePerGenreResponse(row2)).willReturn(rev2);
 
     var result = genreService.getRevenuePerGenre();
 
@@ -230,9 +233,9 @@ class GenreServiceTest {
     assertEquals(BigDecimal.valueOf(500.0), result.get(0).getRevenue());
     assertEquals("Science", result.get(1).getGenreName());
     assertEquals(BigDecimal.valueOf(300.0), result.get(1).getRevenue());
-    verify(genreRepository).revenueByGenre();
-    verify(genreMapper).toRevenuePerGenreResponse(row1);
-    verify(genreMapper).toRevenuePerGenreResponse(row2);
+    then(genreRepository).should().revenueByGenre();
+    then(genreMapper).should().toRevenuePerGenreResponse(row1);
+    then(genreMapper).should().toRevenuePerGenreResponse(row2);
   }
 
   @Test
@@ -241,14 +244,14 @@ class GenreServiceTest {
     var row2 = new Object[] {"History", 890.25};
     var row3 = new Object[] {"Biography", 450.00};
 
-    when(genreRepository.revenueByGenre()).thenReturn(List.of(row1, row2, row3));
-    when(genreMapper.toRevenuePerGenreResponse(row1))
-        .thenReturn(
+    given(genreRepository.revenueByGenre()).willReturn(List.of(row1, row2, row3));
+    given(genreMapper.toRevenuePerGenreResponse(row1))
+        .willReturn(
             new RevenuePerGenreResponse().genreName("Fantasy").revenue(BigDecimal.valueOf(1250.75)));
-    when(genreMapper.toRevenuePerGenreResponse(row2))
-        .thenReturn(new RevenuePerGenreResponse().genreName("History").revenue(BigDecimal.valueOf(890.25)));
-    when(genreMapper.toRevenuePerGenreResponse(row3))
-        .thenReturn(
+    given(genreMapper.toRevenuePerGenreResponse(row2))
+        .willReturn(new RevenuePerGenreResponse().genreName("History").revenue(BigDecimal.valueOf(890.25)));
+    given(genreMapper.toRevenuePerGenreResponse(row3))
+        .willReturn(
             new RevenuePerGenreResponse().genreName("Biography").revenue(BigDecimal.valueOf(450.00)));
 
     var result = genreService.getRevenuePerGenre();
@@ -264,9 +267,9 @@ class GenreServiceTest {
   void should_return_zero_revenue_for_genre_with_no_sales() {
     var row = new Object[] {"New Genre", null};
 
-    when(genreRepository.revenueByGenre()).thenReturn(List.<Object[]>of(row));
-    when(genreMapper.toRevenuePerGenreResponse(row))
-        .thenReturn(new RevenuePerGenreResponse().genreName("New Genre").revenue(BigDecimal.ZERO));
+    given(genreRepository.revenueByGenre()).willReturn(List.<Object[]>of(row));
+    given(genreMapper.toRevenuePerGenreResponse(row))
+        .willReturn(new RevenuePerGenreResponse().genreName("New Genre").revenue(BigDecimal.ZERO));
 
     var result = genreService.getRevenuePerGenre();
 
@@ -279,9 +282,9 @@ class GenreServiceTest {
   void should_aggregate_revenue_across_multiple_stores() {
     var row = new Object[] {"Fiction", 1500.00};
 
-    when(genreRepository.revenueByGenre()).thenReturn(List.<Object[]>of(row));
-    when(genreMapper.toRevenuePerGenreResponse(row))
-        .thenReturn(
+    given(genreRepository.revenueByGenre()).willReturn(List.<Object[]>of(row));
+    given(genreMapper.toRevenuePerGenreResponse(row))
+        .willReturn(
             new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(1500.00)));
 
     var result = genreService.getRevenuePerGenre();
@@ -295,9 +298,9 @@ class GenreServiceTest {
   void should_handle_date_range_parameters_correctly() {
     var row = new Object[] {"Drama", 750.00};
 
-    when(genreRepository.revenueByGenre()).thenReturn(List.<Object[]>of(row));
-    when(genreMapper.toRevenuePerGenreResponse(row))
-        .thenReturn(new RevenuePerGenreResponse().genreName("Drama").revenue(BigDecimal.valueOf(750.00)));
+    given(genreRepository.revenueByGenre()).willReturn(List.<Object[]>of(row));
+    given(genreMapper.toRevenuePerGenreResponse(row))
+        .willReturn(new RevenuePerGenreResponse().genreName("Drama").revenue(BigDecimal.valueOf(750.00)));
 
     var result = genreService.getRevenuePerGenre();
 

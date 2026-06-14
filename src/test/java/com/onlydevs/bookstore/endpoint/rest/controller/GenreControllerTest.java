@@ -1,7 +1,10 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -52,7 +55,7 @@ class GenreControllerTest {
             .name("Science")
             .description("Science");
 
-    when(genreService.getAllGenres()).thenReturn(List.of(g1, g2));
+    given(genreService.getAllGenres()).willReturn(List.of(g1, g2));
 
     mockMvc
         .perform(get("/genres"))
@@ -72,7 +75,7 @@ class GenreControllerTest {
             .createdAt(now);
     var page = new PageImpl<>(List.of(book), pageable, 1);
 
-    when(genreService.getBooksByGenreId(eq(genreId), any())).thenReturn(page);
+    given(genreService.getBooksByGenreId(eq(genreId), any())).willReturn(page);
 
     mockMvc
         .perform(get("/genres/{id}/books", genreId))
@@ -84,8 +87,8 @@ class GenreControllerTest {
 
   @Test
   void should_return_404_when_genre_not_found() throws Exception {
-    when(genreService.getBooksByGenreId(eq(genreId), any()))
-        .thenThrow(new NotFoundException("Genre not found with id: " + genreId));
+    given(genreService.getBooksByGenreId(eq(genreId), any()))
+        .willThrow(new NotFoundException("Genre not found with id: " + genreId));
 
     mockMvc.perform(get("/genres/{id}/books", genreId)).andExpect(status().isNotFound());
   }
@@ -96,7 +99,7 @@ class GenreControllerTest {
     var response =
         new GenreResponse().id(genreId).name("Fiction").description("Fiction books");
 
-    when(genreService.createGenre(any())).thenReturn(response);
+    given(genreService.createGenre(any())).willReturn(response);
 
     mockMvc
         .perform(
@@ -112,8 +115,8 @@ class GenreControllerTest {
   void should_return_409_when_create_duplicate_genre() throws Exception {
     var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
 
-    when(genreService.createGenre(any()))
-        .thenThrow(new ConflictException("Genre already exists: Fiction"));
+    given(genreService.createGenre(any()))
+        .willThrow(new ConflictException("Genre already exists: Fiction"));
 
     mockMvc
         .perform(
@@ -128,7 +131,7 @@ class GenreControllerTest {
     var request = new RenameGenreRequest().name("New Name");
     var response = new GenreResponse().id(genreId).name("New Name").description("Desc");
 
-    when(genreService.renameGenre(eq(genreId), any())).thenReturn(response);
+    given(genreService.renameGenre(eq(genreId), any())).willReturn(response);
 
     mockMvc
         .perform(
@@ -143,8 +146,8 @@ class GenreControllerTest {
   void should_return_404_when_rename_nonexistent_genre() throws Exception {
     var request = new RenameGenreRequest().name("New Name");
 
-    when(genreService.renameGenre(eq(genreId), any()))
-        .thenThrow(new NotFoundException("Genre not found with id: " + genreId));
+    given(genreService.renameGenre(eq(genreId), any()))
+        .willThrow(new NotFoundException("Genre not found with id: " + genreId));
 
     mockMvc
         .perform(
@@ -158,8 +161,8 @@ class GenreControllerTest {
   void should_return_409_when_rename_genre_to_existing_name() throws Exception {
     var request = new RenameGenreRequest().name("Taken Name");
 
-    when(genreService.renameGenre(eq(genreId), any()))
-        .thenThrow(new ConflictException("Genre name already taken: Taken Name"));
+    given(genreService.renameGenre(eq(genreId), any()))
+        .willThrow(new ConflictException("Genre name already taken: Taken Name"));
 
     mockMvc
         .perform(
@@ -171,15 +174,15 @@ class GenreControllerTest {
 
   @Test
   void should_delete_genre_when_genre_exists() throws Exception {
-    doNothing().when(genreService).deleteGenre(genreId);
+    willDoNothing().given(genreService).deleteGenre(genreId);
 
     mockMvc.perform(delete("/genres/{id}", genreId)).andExpect(status().isNoContent());
   }
 
   @Test
   void should_return_404_when_delete_nonexistent_genre() throws Exception {
-    doThrow(new NotFoundException("Genre not found with id: " + genreId))
-        .when(genreService)
+    willThrow(new NotFoundException("Genre not found with id: " + genreId))
+        .given(genreService)
         .deleteGenre(genreId);
 
     mockMvc.perform(delete("/genres/{id}", genreId)).andExpect(status().isNotFound());
@@ -187,7 +190,7 @@ class GenreControllerTest {
 
   @Test
   void should_return_204_when_genre_deleted_successfully() throws Exception {
-    doNothing().when(genreService).deleteGenre(genreId);
+    willDoNothing().given(genreService).deleteGenre(genreId);
 
     mockMvc
         .perform(delete("/genres/{id}", genreId))
@@ -200,7 +203,7 @@ class GenreControllerTest {
     var r1 = new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(500.0));
     var r2 = new RevenuePerGenreResponse().genreName("Science").revenue(BigDecimal.valueOf(300.0));
 
-    when(genreService.getRevenuePerGenre()).thenReturn(List.of(r1, r2));
+    given(genreService.getRevenuePerGenre()).willReturn(List.of(r1, r2));
 
     mockMvc
         .perform(get("/genres/revenue"))
