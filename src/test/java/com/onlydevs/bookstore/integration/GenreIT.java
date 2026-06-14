@@ -8,6 +8,7 @@ import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
 import com.onlydevs.bookstore.endpoint.rest.model.RenameGenreRequest;
 import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.repository.GenreRepository;
+import java.net.http.HttpClient;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 class GenreIT extends FacadeIT {
 
@@ -26,12 +29,29 @@ class GenreIT extends FacadeIT {
 
   @Autowired private GenreRepository genreRepository;
 
+  private RestTemplate patchTemplate;
   private String baseUri;
 
   @BeforeEach
   void setup() {
     baseUri = "http://localhost:" + port + "/genres";
     genreRepository.deleteAll();
+    patchTemplate =
+        new RestTemplate(new JdkClientHttpRequestFactory(HttpClient.newHttpClient()));
+    patchTemplate.setErrorHandler(
+        new org.springframework.web.client.ResponseErrorHandler() {
+          @Override
+          public boolean hasError(
+              @SuppressWarnings("NullableProblems") org.springframework.http.client.ClientHttpResponse
+                  response) {
+            return false;
+          }
+
+          @Override
+          public void handleError(
+              @SuppressWarnings("NullableProblems") org.springframework.http.client.ClientHttpResponse
+                  response) {}
+        });
   }
 
   @Test
@@ -78,7 +98,7 @@ class GenreIT extends FacadeIT {
     var request = new RenameGenreRequest().name("Science");
 
     var response =
-        restTemplate.exchange(
+        patchTemplate.exchange(
             baseUri + "/" + saved.getId() + "/rename",
             HttpMethod.PATCH,
             new org.springframework.http.HttpEntity<>(request),
@@ -94,7 +114,7 @@ class GenreIT extends FacadeIT {
     var request = new RenameGenreRequest().name("Science");
 
     var response =
-        restTemplate.exchange(
+        patchTemplate.exchange(
             baseUri + "/" + UUID.randomUUID() + "/rename",
             HttpMethod.PATCH,
             new org.springframework.http.HttpEntity<>(request),
@@ -111,7 +131,7 @@ class GenreIT extends FacadeIT {
     var request = new RenameGenreRequest().name("Science");
 
     var response =
-        restTemplate.exchange(
+        patchTemplate.exchange(
             baseUri + "/" + saved.getId() + "/rename",
             HttpMethod.PATCH,
             new org.springframework.http.HttpEntity<>(request),
@@ -124,11 +144,12 @@ class GenreIT extends FacadeIT {
   void should_delete_genre_ok() {
     var saved = genreRepository.save(Genre.builder().name("Fiction").build());
 
-    restTemplate.delete(baseUri + "/" + saved.getId());
+    var response =
+        restTemplate.exchange(
+            baseUri + "/" + saved.getId(), HttpMethod.DELETE, null, String.class);
 
-    var response = restTemplate.getForEntity(baseUri + "/" + saved.getId(), String.class);
-
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    assertFalse(genreRepository.existsById(saved.getId()));
   }
 
   @Test
