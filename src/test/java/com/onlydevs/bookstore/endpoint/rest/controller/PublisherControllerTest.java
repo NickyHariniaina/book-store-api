@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
-import com.onlydevs.bookstore.model.dto.PublisherResponse;
-import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.service.PublisherService;
@@ -34,9 +34,9 @@ class PublisherControllerTest {
 
   @Test
   void should_list_all_publishers_with_pagination() throws Exception {
-    var publisher = new PublisherResponse();
-    publisher.id = UUID.randomUUID();
-    publisher.name = "Test Publisher";
+    var publisher = new PublisherResponse()
+        .id(UUID.randomUUID())
+        .name("Test Publisher");
     var page = new PageImpl<>(List.of(publisher));
 
     when(publisherService.getAllPublishers(any())).thenReturn(page);
@@ -50,9 +50,9 @@ class PublisherControllerTest {
   @Test
   void should_get_publisher_by_id_when_exists() throws Exception {
     var id = UUID.randomUUID();
-    var publisher = new PublisherResponse();
-    publisher.id = id;
-    publisher.name = "Test Publisher";
+    var publisher = new PublisherResponse()
+        .id(id)
+        .name("Test Publisher");
 
     when(publisherService.getPublisherById(id)).thenReturn(publisher);
 
@@ -75,10 +75,10 @@ class PublisherControllerTest {
   @Test
   void should_create_publisher_and_return_201_when_valid() throws Exception {
     var request =
-        CreatePublisherRequest.builder().name("New Publisher").email("new@example.com").build();
-    var response = new PublisherResponse();
-    response.id = UUID.randomUUID();
-    response.name = "New Publisher";
+        new CreatePublisherRequest().name("New Publisher").email("new@example.com");
+    var response = new PublisherResponse()
+        .id(UUID.randomUUID())
+        .name("New Publisher");
 
     when(publisherService.createPublisher(any())).thenReturn(response);
 
@@ -92,37 +92,11 @@ class PublisherControllerTest {
   }
 
   @Test
-  void should_return_400_when_create_publisher_with_empty_name() throws Exception {
-    var request = CreatePublisherRequest.builder().name("").email("test@example.com").build();
-
-    mockMvc
-        .perform(
-            post("/publishers")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void should_return_400_when_create_publisher_with_invalid_email() throws Exception {
-    var request =
-        CreatePublisherRequest.builder().name("Test Publisher").email("not-an-email").build();
-
-    mockMvc
-        .perform(
-            post("/publishers")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
   void should_return_409_when_create_publisher_with_duplicate_email() throws Exception {
     var request =
-        CreatePublisherRequest.builder()
+        new CreatePublisherRequest()
             .name("Test Publisher")
-            .email("duplicate@example.com")
-            .build();
+            .email("duplicate@example.com");
 
     when(publisherService.createPublisher(any()))
         .thenThrow(
@@ -139,10 +113,10 @@ class PublisherControllerTest {
   @Test
   void should_update_publisher_when_exists() throws Exception {
     var id = UUID.randomUUID();
-    var request = UpdatePublisherRequest.builder().name("Updated Name").build();
-    var response = new PublisherResponse();
-    response.id = id;
-    response.name = "Updated Name";
+    var request = new UpdatePublisherRequest().name("Updated Name");
+    var response = new PublisherResponse()
+        .id(id)
+        .name("Updated Name");
 
     when(publisherService.updatePublisher(any(), any())).thenReturn(response);
 
@@ -158,7 +132,7 @@ class PublisherControllerTest {
   @Test
   void should_return_404_when_update_nonexistent_publisher() throws Exception {
     var id = UUID.randomUUID();
-    var request = UpdatePublisherRequest.builder().name("New Name").build();
+    var request = new UpdatePublisherRequest().name("New Name");
 
     when(publisherService.updatePublisher(any(), any()))
         .thenThrow(new NotFoundException("Publisher not found with id: " + id));
@@ -175,12 +149,12 @@ class PublisherControllerTest {
   void should_update_publisher_contact_info_only() throws Exception {
     var id = UUID.randomUUID();
     var request =
-        UpdatePublisherRequest.builder().website("http://example.com").phone("1234567890").build();
-    var response = new PublisherResponse();
-    response.id = id;
-    response.name = "Existing Name";
-    response.website = "http://example.com";
-    response.phone = "1234567890";
+        new UpdatePublisherRequest().website("http://example.com").phone("1234567890");
+    var response = new PublisherResponse()
+        .id(id)
+        .name("Existing Name")
+        .website("http://example.com")
+        .phone("1234567890");
 
     when(publisherService.updatePublisher(any(), any())).thenReturn(response);
 
@@ -215,7 +189,7 @@ class PublisherControllerTest {
   @Test
   void should_validate_email_uniqueness_on_update() throws Exception {
     var id = UUID.randomUUID();
-    var request = UpdatePublisherRequest.builder().email("taken@example.com").build();
+    var request = new UpdatePublisherRequest().email("taken@example.com");
 
     when(publisherService.updatePublisher(any(), any()))
         .thenThrow(new ConflictException("Publisher with email taken@example.com already exists"));

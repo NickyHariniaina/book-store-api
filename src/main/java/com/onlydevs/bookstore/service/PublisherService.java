@@ -1,8 +1,8 @@
 package com.onlydevs.bookstore.service;
 
-import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
-import com.onlydevs.bookstore.model.dto.PublisherResponse;
-import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
@@ -33,8 +33,8 @@ public class PublisherService {
   }
 
   public PublisherResponse createPublisher(CreatePublisherRequest request) {
-    if (request.email != null && publisherRepository.existsByEmailIgnoreCase(request.email)) {
-      throw new ConflictException("Publisher with email " + request.email + " already exists");
+    if (request.getEmail() != null && publisherRepository.existsByEmailIgnoreCase(request.getEmail())) {
+      throw new ConflictException("Publisher with email " + request.getEmail() + " already exists");
     }
     var publisher = publisherMapper.toDomain(request);
     return publisherMapper.toRest(publisherRepository.save(publisher));
@@ -45,10 +45,10 @@ public class PublisherService {
         publisherRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Publisher not found with id: " + id));
-    if (request.email != null
-        && !request.email.equalsIgnoreCase(publisher.getEmail())
-        && publisherRepository.existsByEmailIgnoreCase(request.email)) {
-      throw new ConflictException("Publisher with email " + request.email + " already exists");
+    if (request.getEmail() != null
+        && !request.getEmail().equalsIgnoreCase(publisher.getEmail())
+        && publisherRepository.existsByEmailIgnoreCase(request.getEmail())) {
+      throw new ConflictException("Publisher with email " + request.getEmail() + " already exists");
     }
     publisherMapper.updateEntity(publisher, request);
     return publisherMapper.toRest(publisherRepository.save(publisher));

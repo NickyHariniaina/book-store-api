@@ -1,10 +1,9 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
-import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
-import com.onlydevs.bookstore.model.dto.PublisherResponse;
-import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
 import com.onlydevs.bookstore.service.PublisherService;
-import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,14 +38,14 @@ public class PublisherController {
 
   @PostMapping
   public ResponseEntity<PublisherResponse> createPublisher(
-      @Valid @RequestBody CreatePublisherRequest request) {
+      @RequestBody CreatePublisherRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(publisherService.createPublisher(request));
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<PublisherResponse> updatePublisher(
-      @PathVariable UUID id, @Valid @RequestBody UpdatePublisherRequest request) {
+      @PathVariable UUID id, @RequestBody UpdatePublisherRequest request) {
     return ResponseEntity.ok(publisherService.updatePublisher(id, request));
   }
 

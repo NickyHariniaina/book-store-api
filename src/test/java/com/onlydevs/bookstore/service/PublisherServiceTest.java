@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.onlydevs.bookstore.model.Publisher;
-import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
-import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
@@ -39,11 +39,10 @@ class PublisherServiceTest {
   @Test
   void should_create_publisher_successfully() {
     var request =
-        CreatePublisherRequest.builder()
+        new CreatePublisherRequest()
             .name("Test Publisher")
             .email("test@example.com")
-            .phone("1234567890")
-            .build();
+            .phone("1234567890");
     var savedEntity = new Publisher();
     savedEntity.setId(UUID.randomUUID());
     savedEntity.setName("Test Publisher");
@@ -55,9 +54,9 @@ class PublisherServiceTest {
 
     var response = publisherService.createPublisher(request);
 
-    assertEquals("Test Publisher", response.name);
-    assertEquals("test@example.com", response.email);
-    assertEquals("1234567890", response.phone);
+    assertEquals("Test Publisher", response.getName());
+    assertEquals("test@example.com", response.getEmail());
+    assertEquals("1234567890", response.getPhone());
     verify(publisherRepository).existsByEmailIgnoreCase("test@example.com");
     verify(publisherRepository).save(any());
   }
@@ -65,10 +64,9 @@ class PublisherServiceTest {
   @Test
   void should_throw_exception_when_create_publisher_with_duplicate_email() {
     var request =
-        CreatePublisherRequest.builder()
+        new CreatePublisherRequest()
             .name("Test Publisher")
-            .email("duplicate@example.com")
-            .build();
+            .email("duplicate@example.com");
 
     when(publisherRepository.existsByEmailIgnoreCase("duplicate@example.com")).thenReturn(true);
 
@@ -80,7 +78,7 @@ class PublisherServiceTest {
   @Test
   void should_update_publisher_name_successfully() {
     var id = UUID.randomUUID();
-    var request = UpdatePublisherRequest.builder().name("New Name").build();
+    var request = new UpdatePublisherRequest().name("New Name");
     var existing = new Publisher();
     existing.setId(id);
     existing.setName("Old Name");
@@ -98,7 +96,7 @@ class PublisherServiceTest {
   @Test
   void should_update_publisher_email_successfully() {
     var id = UUID.randomUUID();
-    var request = UpdatePublisherRequest.builder().email("new@example.com").build();
+    var request = new UpdatePublisherRequest().email("new@example.com");
     var existing = new Publisher();
     existing.setId(id);
     existing.setEmail("old@example.com");
@@ -116,7 +114,7 @@ class PublisherServiceTest {
   @Test
   void should_update_publisher_country_successfully() {
     var id = UUID.randomUUID();
-    var request = UpdatePublisherRequest.builder().country("DE").build();
+    var request = new UpdatePublisherRequest().country("DE");
     var existing = new Publisher();
     existing.setId(id);
     existing.setCountry("US");
@@ -132,7 +130,7 @@ class PublisherServiceTest {
   @Test
   void should_update_publisher_phone_successfully() {
     var id = UUID.randomUUID();
-    var request = UpdatePublisherRequest.builder().phone("1111111111").build();
+    var request = new UpdatePublisherRequest().phone("1111111111");
     var existing = new Publisher();
     existing.setId(id);
     existing.setPhone("0000000000");
@@ -148,7 +146,7 @@ class PublisherServiceTest {
   @Test
   void should_throw_exception_when_update_publisher_with_duplicate_email() {
     var id = UUID.randomUUID();
-    var request = UpdatePublisherRequest.builder().email("taken@example.com").build();
+    var request = new UpdatePublisherRequest().email("taken@example.com");
     var existing = new Publisher();
     existing.setId(id);
     existing.setEmail("old@example.com");
@@ -165,7 +163,7 @@ class PublisherServiceTest {
   @Test
   void should_throw_exception_when_update_nonexistent_publisher() {
     var id = UUID.randomUUID();
-    var request = UpdatePublisherRequest.builder().name("New Name").build();
+    var request = new UpdatePublisherRequest().name("New Name");
 
     when(publisherRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -211,7 +209,7 @@ class PublisherServiceTest {
     var result = publisherService.getAllPublishers(pageable);
 
     assertEquals(1, result.getTotalElements());
-    assertEquals("Test", result.getContent().get(0).name);
+    assertEquals("Test", result.getContent().get(0).getName());
     verify(publisherRepository).findAll(pageable);
   }
 
@@ -238,8 +236,8 @@ class PublisherServiceTest {
 
     var response = publisherService.getPublisherById(id);
 
-    assertEquals("Test Publisher", response.name);
-    assertEquals(id, response.id);
+    assertEquals("Test Publisher", response.getName());
+    assertEquals(id, response.getId());
   }
 
   @Test
@@ -255,12 +253,11 @@ class PublisherServiceTest {
   void should_update_all_nullable_contact_fields_at_once() {
     var id = UUID.randomUUID();
     var request =
-        UpdatePublisherRequest.builder()
+        new UpdatePublisherRequest()
             .website("http://new.com")
             .email("new@example.com")
             .phone("1111111111")
-            .country("DE")
-            .build();
+            .country("DE");
     var existing = new Publisher();
     existing.setId(id);
     existing.setWebsite(null);

@@ -3,8 +3,8 @@ package com.onlydevs.bookstore.unit.mapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.onlydevs.bookstore.model.Publisher;
-import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
-import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
 import java.time.Instant;
 import java.util.UUID;
@@ -37,13 +37,13 @@ class PublisherMapperTest {
 
     var response = mapper.toRest(publisher);
 
-    assertEquals(id, response.id);
-    assertEquals("Test Publisher", response.name);
-    assertEquals("http://example.com", response.website);
-    assertEquals("test@example.com", response.email);
-    assertEquals("1234567890", response.phone);
-    assertEquals("US", response.country);
-    assertEquals(now, response.createdAt);
+    assertEquals(id, response.getId());
+    assertEquals("Test Publisher", response.getName());
+    assertEquals("http://example.com", response.getWebsite());
+    assertEquals("test@example.com", response.getEmail());
+    assertEquals("1234567890", response.getPhone());
+    assertEquals("US", response.getCountry());
+    assertEquals(now, response.getCreatedAt());
   }
 
   @Test
@@ -57,22 +57,21 @@ class PublisherMapperTest {
 
     var response = mapper.toRest(publisher);
 
-    assertNull(response.website);
-    assertNull(response.email);
-    assertNull(response.phone);
-    assertNull(response.country);
+    assertNull(response.getWebsite());
+    assertNull(response.getEmail());
+    assertNull(response.getPhone());
+    assertNull(response.getCountry());
   }
 
   @Test
   void toEntity_creates_publisher_from_request() {
     var request =
-        CreatePublisherRequest.builder()
+        new CreatePublisherRequest()
             .name("Test Publisher")
             .website("http://example.com")
             .email("test@example.com")
             .phone("1234567890")
-            .country("US")
-            .build();
+            .country("US");
 
     var publisher = mapper.toDomain(request);
 
@@ -87,7 +86,7 @@ class PublisherMapperTest {
 
   @Test
   void toEntity_creates_publisher_with_minimal_fields() {
-    var request = CreatePublisherRequest.builder().name("Minimal").build();
+    var request = new CreatePublisherRequest().name("Minimal");
 
     var publisher = mapper.toDomain(request);
 
@@ -111,13 +110,12 @@ class PublisherMapperTest {
             .build();
 
     var request =
-        UpdatePublisherRequest.builder()
+        new UpdatePublisherRequest()
             .name("New Name")
             .website("http://new.com")
             .email("new@example.com")
             .phone("1111111111")
-            .country("DE")
-            .build();
+            .country("DE");
 
     mapper.updateEntity(publisher, request);
 
@@ -140,7 +138,7 @@ class PublisherMapperTest {
             .country("US")
             .build();
 
-    var request = UpdatePublisherRequest.builder().name("Updated Name").build();
+    var request = new UpdatePublisherRequest().name("Updated Name");
 
     mapper.updateEntity(publisher, request);
 
@@ -164,12 +162,11 @@ class PublisherMapperTest {
             .build();
 
     var request =
-        UpdatePublisherRequest.builder()
+        new UpdatePublisherRequest()
             .website("http://new.com")
             .email("new@example.com")
             .phone("1111111111")
-            .country("DE")
-            .build();
+            .country("DE");
 
     mapper.updateEntity(publisher, request);
 

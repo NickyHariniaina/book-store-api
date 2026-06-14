@@ -1,51 +1,50 @@
 package com.onlydevs.bookstore.model.mapper;
 
+import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.Publisher;
-import com.onlydevs.bookstore.model.dto.CreatePublisherRequest;
-import com.onlydevs.bookstore.model.dto.PublisherResponse;
-import com.onlydevs.bookstore.model.dto.UpdatePublisherRequest;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PublisherMapper {
 
   public PublisherResponse toRest(Publisher publisher) {
-    return PublisherResponse.builder()
+    return new PublisherResponse()
         .id(publisher.getId())
         .name(publisher.getName())
         .website(publisher.getWebsite())
         .email(publisher.getEmail())
         .phone(publisher.getPhone())
         .country(publisher.getCountry())
-        .createdAt(publisher.getCreatedAt())
-        .build();
+        .createdAt(publisher.getCreatedAt());
   }
 
   public Publisher toDomain(CreatePublisherRequest request) {
     return Publisher.builder()
-        .name(request.name)
-        .website(request.website)
-        .email(request.email)
-        .phone(request.phone)
-        .country(request.country)
+        .name(request.getName())
+        .website(request.getWebsite())
+        .email(request.getEmail())
+        .phone(request.getPhone())
+        .country(request.getCountry())
         .build();
   }
 
   public Publisher updateEntity(Publisher publisher, UpdatePublisherRequest request) {
-    if (request.name != null) {
-      publisher.setName(request.name);
+    if (request.getName() != null) {
+      publisher.setName(request.getName());
     }
-    if (request.website != null) {
-      publisher.setWebsite(request.website);
+    if (request.getWebsite() != null) {
+      publisher.setWebsite(request.getWebsite());
     }
-    if (request.email != null) {
-      publisher.setEmail(request.email);
+    if (request.getEmail() != null) {
+      publisher.setEmail(request.getEmail());
     }
-    if (request.phone != null) {
-      publisher.setPhone(request.phone);
+    if (request.getPhone() != null) {
+      publisher.setPhone(request.getPhone());
     }
-    if (request.country != null) {
-      publisher.setCountry(request.country);
+    if (request.getCountry() != null) {
+      publisher.setCountry(request.getCountry());
     }
     return publisher;
   }
