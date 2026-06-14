@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookMapper;
 import com.onlydevs.bookstore.model.*;
@@ -243,9 +242,9 @@ class BookServiceTest {
     assertThat(secondBook.getAuthorNames()).isEmpty();
     assertThat(secondBook.getGenreNames()).isEmpty();
 
-    then(bookRepository).should(times(1)).findAll(pageable);
-    then(bookMapper).should(times(1)).toBookSummaryResponse(bookWithAuthor);
-    then(bookMapper).should(times(1)).toBookSummaryResponse(bookWithoutAuthor);
+    then(bookRepository).should().findAll(pageable);
+    then(bookMapper).should().toBookSummaryResponse(bookWithAuthor);
+    then(bookMapper).should().toBookSummaryResponse(bookWithoutAuthor);
   }
 
   @Test
@@ -263,7 +262,7 @@ class BookServiceTest {
     assertThat(result.getSize()).isEqualTo(20);
     assertThat(result.isLast()).isTrue();
 
-    then(bookRepository).should(times(1)).findAll(pageable);
+    then(bookRepository).should().findAll(pageable);
     then(bookMapper).should(never()).toBookSummaryResponse(any());
   }
 
@@ -279,7 +278,7 @@ class BookServiceTest {
     assertThat(result.getContent().getFirst().getAuthorNames()).isEmpty();
     assertThat(result.getContent().getFirst().getGenreNames()).isEmpty();
 
-    then(bookRepository).should(times(1)).findAll(pageable);
+    then(bookRepository).should().findAll(pageable);
   }
 
   @Test
@@ -297,7 +296,7 @@ class BookServiceTest {
     assertThat(authorNames.get(0)).isEqualTo("Scott Fitzgerald");
     assertThat(authorNames.get(1)).isEqualTo("Ernest Hemingway");
 
-    then(bookRepository).should(times(1)).findAll(pageable);
+    then(bookRepository).should().findAll(pageable);
   }
 
   @Test
@@ -336,7 +335,7 @@ class BookServiceTest {
     assertThat(result.getContent()).hasSize(1);
     assertThat(result.getContent().getFirst().getLanguage()).isNull();
 
-    then(bookRepository).should(times(1)).findAll(pageable);
+    then(bookRepository).should().findAll(pageable);
   }
 
   @Test
@@ -374,7 +373,7 @@ class BookServiceTest {
     assertThat(result.getContent()).hasSize(1);
     assertThat(result.getContent().getFirst().getCoverUrl()).isNull();
 
-    then(bookRepository).should(times(1)).findAll(pageable);
+    then(bookRepository).should().findAll(pageable);
   }
 
   @Test
@@ -385,7 +384,7 @@ class BookServiceTest {
 
     bookService.getAllBooks(customPageable);
 
-    then(bookRepository).should(times(1)).findAll(customPageable);
+    then(bookRepository).should().findAll(customPageable);
   }
 
   @Test
@@ -396,7 +395,7 @@ class BookServiceTest {
     assertThatThrownBy(() -> bookService.getAllBooks(pageable))
         .isInstanceOf(RuntimeException.class);
 
-    then(bookRepository).should(times(1)).findAll(pageable);
+    then(bookRepository).should().findAll(pageable);
     then(bookMapper).should(never()).toBookSummaryResponse(any());
   }
 
@@ -410,7 +409,7 @@ class BookServiceTest {
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(bookId);
     assertThat(result.getTitle()).isEqualTo("Test Book");
-    then(bookRepository).should(times(1)).findById(bookId);
+    then(bookRepository).should().findById(bookId);
   }
 
   @Test
@@ -421,7 +420,7 @@ class BookServiceTest {
         .isInstanceOf(NotFoundException.class)
         .hasMessageContaining("Book not found");
 
-    then(bookRepository).should(times(1)).findById(bookId);
+    then(bookRepository).should().findById(bookId);
   }
 
   @Test
@@ -439,7 +438,7 @@ class BookServiceTest {
 
     assertThat(result).isNotNull();
     assertThat(result.getTitle()).isEqualTo("Test Book");
-    then(bookRepository).should(times(1)).save(any(Book.class));
+    then(bookRepository).should().save(any(Book.class));
   }
 
   @Test
@@ -465,8 +464,8 @@ class BookServiceTest {
     BookDetailResponse result = bookService.updateBook(bookId, request);
 
     assertThat(result).isNotNull();
-    then(bookRepository).should(times(1)).findById(bookId);
-    then(bookRepository).should(times(1)).save(any(Book.class));
+    then(bookRepository).should().findById(bookId);
+    then(bookRepository).should().save(any(Book.class));
   }
 
   @Test
@@ -477,7 +476,7 @@ class BookServiceTest {
     assertThatThrownBy(() -> bookService.updateBook(bookId, request))
         .isInstanceOf(NotFoundException.class);
 
-    then(bookRepository).should(times(1)).findById(bookId);
+    then(bookRepository).should().findById(bookId);
     then(bookRepository).should(never()).save(any());
   }
 
@@ -487,8 +486,8 @@ class BookServiceTest {
 
     bookService.deleteBook(bookId);
 
-    then(bookRepository).should(times(1)).existsById(bookId);
-    then(bookRepository).should(times(1)).deleteById(bookId);
+    then(bookRepository).should().existsById(bookId);
+    then(bookRepository).should().deleteById(bookId);
   }
 
   @Test
@@ -497,7 +496,7 @@ class BookServiceTest {
 
     assertThatThrownBy(() -> bookService.deleteBook(bookId)).isInstanceOf(NotFoundException.class);
 
-    then(bookRepository).should(times(1)).existsById(bookId);
+    then(bookRepository).should().existsById(bookId);
     then(bookRepository).should(never()).deleteById(any());
   }
 
@@ -524,7 +523,7 @@ class BookServiceTest {
 
     assertThat(result).isNotNull();
     assertThat(result.getAuthorFullName()).isEqualTo("Scott Fitzgerald");
-    then(bookAuthorRepository).should(times(1)).save(any(BookAuthor.class));
+    then(bookAuthorRepository).should().save(any(BookAuthor.class));
   }
 
   @Test
@@ -549,7 +548,7 @@ class BookServiceTest {
 
     bookService.removeAuthorFromBook(bookId, author1.getId());
 
-    then(bookAuthorRepository).should(times(1)).delete(bookAuthor);
+    then(bookAuthorRepository).should().delete(bookAuthor);
   }
 
   @Test
@@ -571,7 +570,7 @@ class BookServiceTest {
     bookService.addGenreToBook(bookId, genreId);
 
     assertThat(book.getGenres()).contains(genre);
-    then(bookRepository).should(times(1)).save(book);
+    then(bookRepository).should().save(book);
   }
 
   @Test
@@ -583,6 +582,6 @@ class BookServiceTest {
     bookService.removeGenreFromBook(bookId, genreId);
 
     assertThat(book.getGenres()).doesNotContain(genre);
-    then(bookRepository).should(times(1)).save(book);
+    then(bookRepository).should().save(book);
   }
 }
