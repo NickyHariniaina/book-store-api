@@ -10,7 +10,7 @@ plugins {
 
     id 'jacoco'
 
-    
+
 }
 
 task generateJavaClient(type: GenerateTask) {
@@ -179,9 +179,6 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
     testCompileOnly 'org.projectlombok:lombok:1.18.30'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
-
-    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
-    implementation 'io.swagger:swagger-annotations:1.6.12'
 
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'io.swagger:swagger-annotations:1.6.12'
