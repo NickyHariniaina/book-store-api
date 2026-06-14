@@ -2,18 +2,18 @@ package com.onlydevs.bookstore.unit.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
 import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookAuthor;
 import com.onlydevs.bookstore.model.Genre;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import com.onlydevs.bookstore.model.mapper.GenreMapper;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
-import java.math.BigDecimal;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

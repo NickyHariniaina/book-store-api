@@ -40,6 +40,7 @@ public class GenreMapper {
   public RevenuePerGenreResponse toRevenuePerGenreResponse(Object[] row) {
     return new RevenuePerGenreResponse()
         .genreName((String) row[0])
-        .revenue(row[1] != null ? BigDecimal.valueOf(((Number) row[1]).doubleValue()) : BigDecimal.ZERO);
+        .revenue(
+            row[1] != null ? BigDecimal.valueOf(((Number) row[1]).doubleValue()) : BigDecimal.ZERO);
   }
 }

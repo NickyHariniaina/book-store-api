@@ -54,7 +54,8 @@ class GenreControllerTest {
   @Test
   void should_create_genre_ok() throws Exception {
     var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
-    var response = new GenreResponse().id(UUID.randomUUID()).name("Fiction").description("Fiction books");
+    var response =
+        new GenreResponse().id(UUID.randomUUID()).name("Fiction").description("Fiction books");
 
     given(genreService.createGenre(any(CreateGenreRequest.class))).willReturn(response);
 
@@ -138,9 +139,7 @@ class GenreControllerTest {
   void should_fail_when_delete_not_found() throws Exception {
     var id = UUID.randomUUID();
 
-    willThrow(new NotFoundException("Genre not found"))
-        .given(genreService)
-        .deleteGenre(id);
+    willThrow(new NotFoundException("Genre not found")).given(genreService).deleteGenre(id);
 
     mockMvc.perform(delete("/genres/{id}", id)).andExpect(status().isNotFound());
   }

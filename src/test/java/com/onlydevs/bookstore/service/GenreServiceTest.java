@@ -82,8 +82,10 @@ class GenreServiceTest {
   @Test
   void rename_genre_ok_when_new_name_not_taken() {
     var request = new RenameGenreRequest().name("Science");
-    var renamedGenre = Genre.builder().id(genreId).name("Science").description("Fiction books").build();
-    var renamedResponse = new GenreResponse().id(genreId).name("Science").description("Fiction books");
+    var renamedGenre =
+        Genre.builder().id(genreId).name("Science").description("Fiction books").build();
+    var renamedResponse =
+        new GenreResponse().id(genreId).name("Science").description("Fiction books");
 
     given(genreRepository.findById(genreId)).willReturn(Optional.of(genre));
     given(genreRepository.existsByNameIgnoreCase("Science")).willReturn(false);
@@ -203,7 +205,8 @@ class GenreServiceTest {
   @Test
   void get_revenue_per_genre_ok_when_data_exists() {
     var row = new Object[] {"Fiction", 500.0};
-    var revenueResponse = new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(500.0));
+    var revenueResponse =
+        new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(500.0));
 
     given(genreRepository.revenueByGenre()).willReturn(List.<Object[]>of(row));
     given(genreMapper.toRevenuePerGenreResponse(row)).willReturn(revenueResponse);

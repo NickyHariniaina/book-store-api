@@ -36,21 +36,20 @@ class GenreIT extends FacadeIT {
   void setup() {
     baseUri = "http://localhost:" + port + "/genres";
     genreRepository.deleteAll();
-    patchTemplate =
-        new RestTemplate(new JdkClientHttpRequestFactory(HttpClient.newHttpClient()));
+    patchTemplate = new RestTemplate(new JdkClientHttpRequestFactory(HttpClient.newHttpClient()));
     patchTemplate.setErrorHandler(
         new org.springframework.web.client.ResponseErrorHandler() {
           @Override
           public boolean hasError(
-              @SuppressWarnings("NullableProblems") org.springframework.http.client.ClientHttpResponse
-                  response) {
+              @SuppressWarnings("NullableProblems")
+                  org.springframework.http.client.ClientHttpResponse response) {
             return false;
           }
 
           @Override
           public void handleError(
-              @SuppressWarnings("NullableProblems") org.springframework.http.client.ClientHttpResponse
-                  response) {}
+              @SuppressWarnings("NullableProblems")
+                  org.springframework.http.client.ClientHttpResponse response) {}
         });
   }
 
@@ -145,8 +144,7 @@ class GenreIT extends FacadeIT {
     var saved = genreRepository.save(Genre.builder().name("Fiction").build());
 
     var response =
-        restTemplate.exchange(
-            baseUri + "/" + saved.getId(), HttpMethod.DELETE, null, String.class);
+        restTemplate.exchange(baseUri + "/" + saved.getId(), HttpMethod.DELETE, null, String.class);
 
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     assertFalse(genreRepository.existsById(saved.getId()));
@@ -165,14 +163,16 @@ class GenreIT extends FacadeIT {
   void should_get_books_by_genre_ok_when_empty() {
     var saved = genreRepository.save(Genre.builder().name("Fiction").build());
 
-    var response = restTemplate.getForEntity(baseUri + "/" + saved.getId() + "/books", String.class);
+    var response =
+        restTemplate.getForEntity(baseUri + "/" + saved.getId() + "/books", String.class);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
   void should_get_books_by_genre_fail_when_not_found() {
-    var response = restTemplate.getForEntity(baseUri + "/" + UUID.randomUUID() + "/books", String.class);
+    var response =
+        restTemplate.getForEntity(baseUri + "/" + UUID.randomUUID() + "/books", String.class);
 
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
