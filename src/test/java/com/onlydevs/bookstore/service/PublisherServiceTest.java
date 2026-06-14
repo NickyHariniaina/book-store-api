@@ -1,11 +1,14 @@
 package com.onlydevs.bookstore.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
-import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
 import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
@@ -49,16 +52,16 @@ class PublisherServiceTest {
     savedEntity.setEmail("test@example.com");
     savedEntity.setPhone("1234567890");
 
-    when(publisherRepository.existsByEmailIgnoreCase("test@example.com")).thenReturn(false);
-    when(publisherRepository.save(any())).thenReturn(savedEntity);
+    given(publisherRepository.existsByEmailIgnoreCase("test@example.com")).willReturn(false);
+    given(publisherRepository.save(any())).willReturn(savedEntity);
 
     var response = publisherService.createPublisher(request);
 
     assertEquals("Test Publisher", response.getName());
     assertEquals("test@example.com", response.getEmail());
     assertEquals("1234567890", response.getPhone());
-    verify(publisherRepository).existsByEmailIgnoreCase("test@example.com");
-    verify(publisherRepository).save(any());
+    then(publisherRepository).should().existsByEmailIgnoreCase("test@example.com");
+    then(publisherRepository).should().save(any());
   }
 
   @Test
@@ -68,11 +71,11 @@ class PublisherServiceTest {
             .name("Test Publisher")
             .email("duplicate@example.com");
 
-    when(publisherRepository.existsByEmailIgnoreCase("duplicate@example.com")).thenReturn(true);
+    given(publisherRepository.existsByEmailIgnoreCase("duplicate@example.com")).willReturn(true);
 
     var ex = assertThrows(ConflictException.class, () -> publisherService.createPublisher(request));
     assertTrue(ex.getMessage().contains("duplicate@example.com"));
-    verify(publisherRepository, never()).save(any());
+    then(publisherRepository).should(never()).save(any());
   }
 
   @Test
@@ -83,14 +86,14 @@ class PublisherServiceTest {
     existing.setId(id);
     existing.setName("Old Name");
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.of(existing));
-    when(publisherRepository.save(existing)).thenReturn(existing);
+    given(publisherRepository.findById(id)).willReturn(Optional.of(existing));
+    given(publisherRepository.save(existing)).willReturn(existing);
 
     publisherService.updatePublisher(id, request);
 
     assertEquals("New Name", existing.getName());
-    verify(publisherRepository).findById(id);
-    verify(publisherRepository).save(existing);
+    then(publisherRepository).should().findById(id);
+    then(publisherRepository).should().save(existing);
   }
 
   @Test
@@ -101,14 +104,14 @@ class PublisherServiceTest {
     existing.setId(id);
     existing.setEmail("old@example.com");
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.of(existing));
-    when(publisherRepository.existsByEmailIgnoreCase("new@example.com")).thenReturn(false);
-    when(publisherRepository.save(existing)).thenReturn(existing);
+    given(publisherRepository.findById(id)).willReturn(Optional.of(existing));
+    given(publisherRepository.existsByEmailIgnoreCase("new@example.com")).willReturn(false);
+    given(publisherRepository.save(existing)).willReturn(existing);
 
     publisherService.updatePublisher(id, request);
 
     assertEquals("new@example.com", existing.getEmail());
-    verify(publisherRepository).existsByEmailIgnoreCase("new@example.com");
+    then(publisherRepository).should().existsByEmailIgnoreCase("new@example.com");
   }
 
   @Test
@@ -119,8 +122,8 @@ class PublisherServiceTest {
     existing.setId(id);
     existing.setCountry("US");
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.of(existing));
-    when(publisherRepository.save(existing)).thenReturn(existing);
+    given(publisherRepository.findById(id)).willReturn(Optional.of(existing));
+    given(publisherRepository.save(existing)).willReturn(existing);
 
     publisherService.updatePublisher(id, request);
 
@@ -135,8 +138,8 @@ class PublisherServiceTest {
     existing.setId(id);
     existing.setPhone("0000000000");
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.of(existing));
-    when(publisherRepository.save(existing)).thenReturn(existing);
+    given(publisherRepository.findById(id)).willReturn(Optional.of(existing));
+    given(publisherRepository.save(existing)).willReturn(existing);
 
     publisherService.updatePublisher(id, request);
 
@@ -151,13 +154,13 @@ class PublisherServiceTest {
     existing.setId(id);
     existing.setEmail("old@example.com");
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.of(existing));
-    when(publisherRepository.existsByEmailIgnoreCase("taken@example.com")).thenReturn(true);
+    given(publisherRepository.findById(id)).willReturn(Optional.of(existing));
+    given(publisherRepository.existsByEmailIgnoreCase("taken@example.com")).willReturn(true);
 
     var ex =
         assertThrows(ConflictException.class, () -> publisherService.updatePublisher(id, request));
     assertTrue(ex.getMessage().contains("taken@example.com"));
-    verify(publisherRepository, never()).save(any());
+    then(publisherRepository).should(never()).save(any());
   }
 
   @Test
@@ -165,10 +168,10 @@ class PublisherServiceTest {
     var id = UUID.randomUUID();
     var request = new UpdatePublisherRequest().name("New Name");
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.empty());
+    given(publisherRepository.findById(id)).willReturn(Optional.empty());
 
     assertThrows(NotFoundException.class, () -> publisherService.updatePublisher(id, request));
-    verify(publisherRepository, never()).save(any());
+    then(publisherRepository).should(never()).save(any());
   }
 
   @Test
@@ -177,21 +180,21 @@ class PublisherServiceTest {
     var publisher = new Publisher();
     publisher.setId(id);
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.of(publisher));
+    given(publisherRepository.findById(id)).willReturn(Optional.of(publisher));
 
     publisherService.deletePublisher(id);
 
-    verify(publisherRepository).delete(publisher);
+    then(publisherRepository).should().delete(publisher);
   }
 
   @Test
   void should_throw_exception_when_delete_nonexistent_publisher() {
     var id = UUID.randomUUID();
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.empty());
+    given(publisherRepository.findById(id)).willReturn(Optional.empty());
 
     assertThrows(NotFoundException.class, () -> publisherService.deletePublisher(id));
-    verify(publisherRepository, never()).delete(any());
+    then(publisherRepository).should(never()).delete(any());
   }
 
   @Test
@@ -204,13 +207,13 @@ class PublisherServiceTest {
 
     var publisherPage = new PageImpl<>(java.util.List.of(publisher));
 
-    when(publisherRepository.findAll(pageable)).thenReturn(publisherPage);
+    given(publisherRepository.findAll(pageable)).willReturn(publisherPage);
 
     var result = publisherService.getAllPublishers(pageable);
 
     assertEquals(1, result.getTotalElements());
     assertEquals("Test", result.getContent().get(0).getName());
-    verify(publisherRepository).findAll(pageable);
+    then(publisherRepository).should().findAll(pageable);
   }
 
   @Test
@@ -218,7 +221,7 @@ class PublisherServiceTest {
     var pageable = PageRequest.of(0, 10);
     Page<Publisher> emptyPage = Page.empty();
 
-    when(publisherRepository.findAll(pageable)).thenReturn(emptyPage);
+    given(publisherRepository.findAll(pageable)).willReturn(emptyPage);
 
     var result = publisherService.getAllPublishers(pageable);
 
@@ -232,7 +235,7 @@ class PublisherServiceTest {
     publisher.setId(id);
     publisher.setName("Test Publisher");
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.of(publisher));
+    given(publisherRepository.findById(id)).willReturn(Optional.of(publisher));
 
     var response = publisherService.getPublisherById(id);
 
@@ -244,7 +247,7 @@ class PublisherServiceTest {
   void should_throw_exception_when_get_publisher_by_id_not_found() {
     var id = UUID.randomUUID();
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.empty());
+    given(publisherRepository.findById(id)).willReturn(Optional.empty());
 
     assertThrows(NotFoundException.class, () -> publisherService.getPublisherById(id));
   }
@@ -265,8 +268,8 @@ class PublisherServiceTest {
     existing.setPhone(null);
     existing.setCountry(null);
 
-    when(publisherRepository.findById(id)).thenReturn(Optional.of(existing));
-    when(publisherRepository.save(existing)).thenReturn(existing);
+    given(publisherRepository.findById(id)).willReturn(Optional.of(existing));
+    given(publisherRepository.save(existing)).willReturn(existing);
 
     publisherService.updatePublisher(id, request);
 

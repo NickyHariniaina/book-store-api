@@ -1,8 +1,8 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,7 +39,7 @@ class PublisherControllerTest {
         .name("Test Publisher");
     var page = new PageImpl<>(List.of(publisher));
 
-    when(publisherService.getAllPublishers(any())).thenReturn(page);
+    given(publisherService.getAllPublishers(any())).willReturn(page);
 
     mockMvc
         .perform(get("/publishers").param("page", "0").param("size", "10"))
@@ -54,7 +54,7 @@ class PublisherControllerTest {
         .id(id)
         .name("Test Publisher");
 
-    when(publisherService.getPublisherById(id)).thenReturn(publisher);
+    given(publisherService.getPublisherById(id)).willReturn(publisher);
 
     mockMvc
         .perform(get("/publishers/{id}", id))
@@ -66,8 +66,8 @@ class PublisherControllerTest {
   void should_return_404_when_publisher_not_found() throws Exception {
     var id = UUID.randomUUID();
 
-    when(publisherService.getPublisherById(id))
-        .thenThrow(new NotFoundException("Publisher not found with id: " + id));
+    given(publisherService.getPublisherById(id))
+        .willThrow(new NotFoundException("Publisher not found with id: " + id));
 
     mockMvc.perform(get("/publishers/{id}", id)).andExpect(status().isNotFound());
   }
@@ -80,7 +80,7 @@ class PublisherControllerTest {
         .id(UUID.randomUUID())
         .name("New Publisher");
 
-    when(publisherService.createPublisher(any())).thenReturn(response);
+    given(publisherService.createPublisher(any())).willReturn(response);
 
     mockMvc
         .perform(
@@ -98,8 +98,8 @@ class PublisherControllerTest {
             .name("Test Publisher")
             .email("duplicate@example.com");
 
-    when(publisherService.createPublisher(any()))
-        .thenThrow(
+    given(publisherService.createPublisher(any()))
+        .willThrow(
             new ConflictException("Publisher with email duplicate@example.com already exists"));
 
     mockMvc
@@ -118,7 +118,7 @@ class PublisherControllerTest {
         .id(id)
         .name("Updated Name");
 
-    when(publisherService.updatePublisher(any(), any())).thenReturn(response);
+    given(publisherService.updatePublisher(any(), any())).willReturn(response);
 
     mockMvc
         .perform(
@@ -134,8 +134,8 @@ class PublisherControllerTest {
     var id = UUID.randomUUID();
     var request = new UpdatePublisherRequest().name("New Name");
 
-    when(publisherService.updatePublisher(any(), any()))
-        .thenThrow(new NotFoundException("Publisher not found with id: " + id));
+    given(publisherService.updatePublisher(any(), any()))
+        .willThrow(new NotFoundException("Publisher not found with id: " + id));
 
     mockMvc
         .perform(
@@ -156,7 +156,7 @@ class PublisherControllerTest {
         .website("http://example.com")
         .phone("1234567890");
 
-    when(publisherService.updatePublisher(any(), any())).thenReturn(response);
+    given(publisherService.updatePublisher(any(), any())).willReturn(response);
 
     mockMvc
         .perform(
@@ -179,8 +179,8 @@ class PublisherControllerTest {
   void should_return_404_when_delete_nonexistent_publisher() throws Exception {
     var id = UUID.randomUUID();
 
-    doThrow(new NotFoundException("Publisher not found with id: " + id))
-        .when(publisherService)
+    willThrow(new NotFoundException("Publisher not found with id: " + id))
+        .given(publisherService)
         .deletePublisher(id);
 
     mockMvc.perform(delete("/publishers/{id}", id)).andExpect(status().isNotFound());
@@ -191,8 +191,8 @@ class PublisherControllerTest {
     var id = UUID.randomUUID();
     var request = new UpdatePublisherRequest().email("taken@example.com");
 
-    when(publisherService.updatePublisher(any(), any()))
-        .thenThrow(new ConflictException("Publisher with email taken@example.com already exists"));
+    given(publisherService.updatePublisher(any(), any()))
+        .willThrow(new ConflictException("Publisher with email taken@example.com already exists"));
 
     mockMvc
         .perform(
