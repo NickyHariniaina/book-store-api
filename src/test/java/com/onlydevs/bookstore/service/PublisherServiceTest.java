@@ -15,9 +15,11 @@ import com.onlydevs.bookstore.model.mapper.PublisherMapper;
 import com.onlydevs.bookstore.repository.PublisherRepository;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -29,15 +31,9 @@ class PublisherServiceTest {
 
   @Mock private PublisherRepository publisherRepository;
 
-  private PublisherMapper publisherMapper;
+  @Spy private PublisherMapper publisherMapper = new PublisherMapper();
 
-  private PublisherService publisherService;
-
-  @BeforeEach
-  void setUp() {
-    publisherMapper = new PublisherMapper();
-    publisherService = new PublisherService(publisherRepository, publisherMapper);
-  }
+  @InjectMocks private PublisherService publisherService;
 
   @Test
   void should_create_publisher_successfully() {
