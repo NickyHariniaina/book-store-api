@@ -33,7 +33,8 @@ public class PublisherService {
   }
 
   public PublisherResponse createPublisher(CreatePublisherRequest request) {
-    if (request.getEmail() != null && publisherRepository.existsByEmailIgnoreCase(request.getEmail())) {
+    if (request.getEmail() != null
+        && publisherRepository.existsByEmailIgnoreCase(request.getEmail())) {
       throw new ConflictException("Publisher with email " + request.getEmail() + " already exists");
     }
     var publisher = publisherMapper.toDomain(request);

@@ -96,8 +96,10 @@ class PublisherServiceTest {
   void update_publisher_ok_when_email_changed_and_not_taken() {
     var request = new UpdatePublisherRequest().email("new@example.com");
     publisher.setEmail("old@example.com");
-    var updatedPublisher = Publisher.builder().id(publisherId).name("Test Publisher").email("new@example.com").build();
-    var updatedResponse = new PublisherResponse().id(publisherId).name("Test Publisher").email("new@example.com");
+    var updatedPublisher =
+        Publisher.builder().id(publisherId).name("Test Publisher").email("new@example.com").build();
+    var updatedResponse =
+        new PublisherResponse().id(publisherId).name("Test Publisher").email("new@example.com");
 
     given(publisherRepository.findById(publisherId)).willReturn(Optional.of(publisher));
     given(publisherRepository.existsByEmailIgnoreCase("new@example.com")).willReturn(false);
@@ -117,7 +119,8 @@ class PublisherServiceTest {
     given(publisherRepository.findById(publisherId)).willReturn(Optional.of(publisher));
     given(publisherRepository.existsByEmailIgnoreCase("taken@example.com")).willReturn(true);
 
-    assertThrows(ConflictException.class, () -> publisherService.updatePublisher(publisherId, request));
+    assertThrows(
+        ConflictException.class, () -> publisherService.updatePublisher(publisherId, request));
     then(publisherRepository).should().findById(publisherId);
     then(publisherRepository).should().existsByEmailIgnoreCase("taken@example.com");
     then(publisherRepository).should(never()).save(any());
@@ -129,7 +132,8 @@ class PublisherServiceTest {
 
     given(publisherRepository.findById(publisherId)).willReturn(Optional.empty());
 
-    assertThrows(NotFoundException.class, () -> publisherService.updatePublisher(publisherId, request));
+    assertThrows(
+        NotFoundException.class, () -> publisherService.updatePublisher(publisherId, request));
     then(publisherRepository).should().findById(publisherId);
     then(publisherRepository).should(never()).save(any());
   }

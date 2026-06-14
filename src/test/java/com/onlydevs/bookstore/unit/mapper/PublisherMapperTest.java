@@ -2,9 +2,9 @@ package com.onlydevs.bookstore.unit.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
 import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
 import java.time.Instant;
 import java.util.UUID;

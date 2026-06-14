@@ -36,7 +36,10 @@ class PublisherIT extends FacadeIT {
   @Test
   void should_create_publisher_ok() {
     var request =
-        new CreatePublisherRequest().name("Test Publisher").email("test@example.com").phone("1234567890");
+        new CreatePublisherRequest()
+            .name("Test Publisher")
+            .email("test@example.com")
+            .phone("1234567890");
 
     ResponseEntity<PublisherResponse> response =
         restTemplate.postForEntity(baseUri, request, PublisherResponse.class);
@@ -52,7 +55,8 @@ class PublisherIT extends FacadeIT {
     publisherRepository.save(
         Publisher.builder().name("Existing").phone("0000000000").email("dup@example.com").build());
 
-    var request = new CreatePublisherRequest().name("Test").email("dup@example.com").phone("1111111111");
+    var request =
+        new CreatePublisherRequest().name("Test").email("dup@example.com").phone("1111111111");
 
     var response = restTemplate.postForEntity(baseUri, request, String.class);
 

@@ -134,7 +134,9 @@ class PublisherControllerTest {
 
   @Test
   void should_delete_publisher_ok() throws Exception {
-    mockMvc.perform(delete("/publishers/{id}", UUID.randomUUID())).andExpect(status().isNoContent());
+    mockMvc
+        .perform(delete("/publishers/{id}", UUID.randomUUID()))
+        .andExpect(status().isNoContent());
   }
 
   @Test
