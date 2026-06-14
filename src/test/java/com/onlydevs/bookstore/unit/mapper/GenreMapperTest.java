@@ -6,13 +6,14 @@ import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookAuthor;
 import com.onlydevs.bookstore.model.Genre;
-import com.onlydevs.bookstore.model.dto.CreateGenreRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import com.onlydevs.bookstore.model.mapper.GenreMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+import java.math.BigDecimal;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,9 +34,9 @@ class GenreMapperTest {
 
     var response = mapper.toRest(genre);
 
-    assertEquals(id, response.id);
-    assertEquals("Fiction", response.name);
-    assertEquals("Fiction books", response.description);
+    assertEquals(id, response.getId());
+    assertEquals("Fiction", response.getName());
+    assertEquals("Fiction books", response.getDescription());
   }
 
   @Test
@@ -44,12 +45,12 @@ class GenreMapperTest {
 
     var response = mapper.toRest(genre);
 
-    assertNull(response.description);
+    assertNull(response.getDescription());
   }
 
   @Test
   void toEntity_creates_genre_from_request() {
-    var request = CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
+    var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
 
     var genre = mapper.toDomain(request);
 
@@ -60,7 +61,7 @@ class GenreMapperTest {
 
   @Test
   void toEntity_creates_genre_with_null_description() {
-    var request = CreateGenreRequest.builder().name("Fiction").build();
+    var request = new CreateGenreRequest().name("Fiction");
 
     var genre = mapper.toDomain(request);
 
@@ -99,13 +100,13 @@ class GenreMapperTest {
 
     var response = mapper.toBookSummaryResponse(book);
 
-    assertEquals(bookId, response.id);
-    assertEquals("Test Book", response.title);
-    assertEquals("ENGLISH", response.language);
-    assertEquals("http://cover.url", response.coverUrl);
-    assertEquals(now, response.createdAt);
-    assertEquals(List.of("John Doe"), response.authorNames);
-    assertEquals(List.of("Fiction"), response.genreNames);
+    assertEquals(bookId, response.getId());
+    assertEquals("Test Book", response.getTitle());
+    assertEquals("ENGLISH", response.getLanguage());
+    assertEquals("http://cover.url", response.getCoverUrl());
+    assertEquals(now, response.getCreatedAt());
+    assertEquals(List.of("John Doe"), response.getAuthorNames());
+    assertEquals(List.of("Fiction"), response.getGenreNames());
   }
 
   @Test
@@ -120,7 +121,7 @@ class GenreMapperTest {
 
     var response = mapper.toBookSummaryResponse(book);
 
-    assertNull(response.language);
+    assertNull(response.getLanguage());
   }
 
   @Test
@@ -129,8 +130,8 @@ class GenreMapperTest {
 
     var response = mapper.toBookSummaryResponse(book);
 
-    assertTrue(response.authorNames.isEmpty());
-    assertTrue(response.genreNames.isEmpty());
+    assertTrue(response.getAuthorNames().isEmpty());
+    assertTrue(response.getGenreNames().isEmpty());
   }
 
   @Test
@@ -139,8 +140,8 @@ class GenreMapperTest {
 
     var response = mapper.toRevenuePerGenreResponse(row);
 
-    assertEquals("Fiction", response.genreName);
-    assertEquals(500.0, response.revenue);
+    assertEquals("Fiction", response.getGenreName());
+    assertEquals(BigDecimal.valueOf(500.0), response.getRevenue());
   }
 
   @Test
@@ -149,7 +150,7 @@ class GenreMapperTest {
 
     var response = mapper.toRevenuePerGenreResponse(row);
 
-    assertEquals("New Genre", response.genreName);
-    assertEquals(0.0, response.revenue);
+    assertEquals("New Genre", response.getGenreName());
+    assertEquals(BigDecimal.ZERO, response.getRevenue());
   }
 }

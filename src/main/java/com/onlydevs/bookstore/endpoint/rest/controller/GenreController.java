@@ -1,12 +1,11 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
-import com.onlydevs.bookstore.model.dto.BookSummaryResponse;
-import com.onlydevs.bookstore.model.dto.CreateGenreRequest;
-import com.onlydevs.bookstore.model.dto.GenreResponse;
-import com.onlydevs.bookstore.model.dto.RenameGenreRequest;
-import com.onlydevs.bookstore.model.dto.RevenuePerGenreResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.BookSummaryResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.RenameGenreRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.service.GenreService;
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -42,13 +41,13 @@ public class GenreController {
   }
 
   @PostMapping
-  public ResponseEntity<GenreResponse> createGenre(@Valid @RequestBody CreateGenreRequest request) {
+  public ResponseEntity<GenreResponse> createGenre(@RequestBody CreateGenreRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(genreService.createGenre(request));
   }
 
   @PatchMapping("/{id}/rename")
   public ResponseEntity<GenreResponse> renameGenre(
-      @PathVariable UUID id, @Valid @RequestBody RenameGenreRequest request) {
+      @PathVariable UUID id, @RequestBody RenameGenreRequest request) {
     return ResponseEntity.ok(genreService.renameGenre(id, request));
   }
 

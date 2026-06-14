@@ -1,10 +1,10 @@
 package com.onlydevs.bookstore.service;
 
-import com.onlydevs.bookstore.model.dto.BookSummaryResponse;
-import com.onlydevs.bookstore.model.dto.CreateGenreRequest;
-import com.onlydevs.bookstore.model.dto.GenreResponse;
-import com.onlydevs.bookstore.model.dto.RenameGenreRequest;
-import com.onlydevs.bookstore.model.dto.RevenuePerGenreResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.BookSummaryResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.RenameGenreRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.GenreMapper;
@@ -29,8 +29,8 @@ public class GenreService {
   }
 
   public GenreResponse createGenre(CreateGenreRequest request) {
-    if (genreRepository.existsByNameIgnoreCase(request.name)) {
-      throw new ConflictException("Genre already exists: " + request.name);
+    if (genreRepository.existsByNameIgnoreCase(request.getName())) {
+      throw new ConflictException("Genre already exists: " + request.getName());
     }
     var genre = genreMapper.toDomain(request);
     return genreMapper.toRest(genreRepository.save(genre));
@@ -41,10 +41,10 @@ public class GenreService {
         genreRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Genre not found with id: " + id));
-    if (genreRepository.existsByNameIgnoreCase(request.name)) {
-      throw new ConflictException("Genre name already taken: " + request.name);
+    if (genreRepository.existsByNameIgnoreCase(request.getName())) {
+      throw new ConflictException("Genre name already taken: " + request.getName());
     }
-    genre.rename(request.name);
+    genre.rename(request.getName());
     return genreMapper.toRest(genreRepository.save(genre));
   }
 

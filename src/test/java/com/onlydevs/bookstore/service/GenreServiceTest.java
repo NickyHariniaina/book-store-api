@@ -6,15 +6,16 @@ import static org.mockito.Mockito.*;
 
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.Genre;
-import com.onlydevs.bookstore.model.dto.BookSummaryResponse;
-import com.onlydevs.bookstore.model.dto.CreateGenreRequest;
-import com.onlydevs.bookstore.model.dto.GenreResponse;
-import com.onlydevs.bookstore.model.dto.RenameGenreRequest;
-import com.onlydevs.bookstore.model.dto.RevenuePerGenreResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.BookSummaryResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.RenameGenreRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.GenreMapper;
 import com.onlydevs.bookstore.repository.GenreRepository;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -44,12 +45,12 @@ class GenreServiceTest {
   }
 
   private GenreResponse createGenreResponse(UUID id, String name, String description) {
-    return GenreResponse.builder().id(id).name(name).description(description).build();
+    return new GenreResponse().id(id).name(name).description(description);
   }
 
   @Test
   void should_create_genre_successfully() {
-    var request = CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
+    var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
     var genre = createGenre(genreId, "Fiction", "Fiction books");
     var savedGenre = createGenre(genreId, "Fiction", "Fiction books");
     var expectedResponse = createGenreResponse(genreId, "Fiction", "Fiction books");
@@ -70,7 +71,7 @@ class GenreServiceTest {
 
   @Test
   void should_throw_exception_when_create_duplicate_genre() {
-    var request = CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
+    var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
 
     when(genreRepository.existsByNameIgnoreCase("Fiction")).thenReturn(true);
 
@@ -83,7 +84,7 @@ class GenreServiceTest {
   @Test
   void should_rename_genre_successfully() {
     var genre = createGenre(genreId, "Old Name", "Description");
-    var request = RenameGenreRequest.builder().name("New Name").build();
+    var request = new RenameGenreRequest().name("New Name");
     var expectedResponse = createGenreResponse(genreId, "New Name", "Description");
 
     when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
@@ -103,7 +104,7 @@ class GenreServiceTest {
   @Test
   void should_throw_exception_when_rename_to_duplicate_name() {
     var genre = createGenre(genreId, "Old Name", "Description");
-    var request = RenameGenreRequest.builder().name("Taken Name").build();
+    var request = new RenameGenreRequest().name("Taken Name");
 
     when(genreRepository.findById(genreId)).thenReturn(Optional.of(genre));
     when(genreRepository.existsByNameIgnoreCase("Taken Name")).thenReturn(true);
@@ -116,7 +117,7 @@ class GenreServiceTest {
 
   @Test
   void should_throw_exception_when_rename_nonexistent_genre() {
-    var request = RenameGenreRequest.builder().name("New Name").build();
+    var request = new RenameGenreRequest().name("New Name");
 
     when(genreRepository.findById(genreId)).thenReturn(Optional.empty());
 
@@ -185,7 +186,7 @@ class GenreServiceTest {
     var pageable = PageRequest.of(0, 10);
     var book = mock(Book.class);
     var bookPage = new PageImpl<>(List.of(book), pageable, 1);
-    var summary = BookSummaryResponse.builder().id(UUID.randomUUID()).title("Test Book").build();
+    var summary = new BookSummaryResponse().id(UUID.randomUUID()).title("Test Book");
 
     when(genreRepository.existsById(genreId)).thenReturn(true);
     when(genreRepository.findBooksByGenreId(genreId, pageable)).thenReturn(bookPage);
@@ -215,8 +216,8 @@ class GenreServiceTest {
   void should_get_revenue_per_genre_for_dashboard() {
     var row1 = new Object[] {"Fiction", 500.0};
     var row2 = new Object[] {"Science", 300.0};
-    var rev1 = RevenuePerGenreResponse.builder().genreName("Fiction").revenue(500.0).build();
-    var rev2 = RevenuePerGenreResponse.builder().genreName("Science").revenue(300.0).build();
+    var rev1 = new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(500.0));
+    var rev2 = new RevenuePerGenreResponse().genreName("Science").revenue(BigDecimal.valueOf(300.0));
 
     when(genreRepository.revenueByGenre()).thenReturn(List.of(row1, row2));
     when(genreMapper.toRevenuePerGenreResponse(row1)).thenReturn(rev1);
@@ -225,10 +226,10 @@ class GenreServiceTest {
     var result = genreService.getRevenuePerGenre();
 
     assertEquals(2, result.size());
-    assertEquals("Fiction", result.get(0).genreName);
-    assertEquals(500.0, result.get(0).revenue);
-    assertEquals("Science", result.get(1).genreName);
-    assertEquals(300.0, result.get(1).revenue);
+    assertEquals("Fiction", result.get(0).getGenreName());
+    assertEquals(BigDecimal.valueOf(500.0), result.get(0).getRevenue());
+    assertEquals("Science", result.get(1).getGenreName());
+    assertEquals(BigDecimal.valueOf(300.0), result.get(1).getRevenue());
     verify(genreRepository).revenueByGenre();
     verify(genreMapper).toRevenuePerGenreResponse(row1);
     verify(genreMapper).toRevenuePerGenreResponse(row2);
@@ -243,20 +244,20 @@ class GenreServiceTest {
     when(genreRepository.revenueByGenre()).thenReturn(List.of(row1, row2, row3));
     when(genreMapper.toRevenuePerGenreResponse(row1))
         .thenReturn(
-            RevenuePerGenreResponse.builder().genreName("Fantasy").revenue(1250.75).build());
+            new RevenuePerGenreResponse().genreName("Fantasy").revenue(BigDecimal.valueOf(1250.75)));
     when(genreMapper.toRevenuePerGenreResponse(row2))
-        .thenReturn(RevenuePerGenreResponse.builder().genreName("History").revenue(890.25).build());
+        .thenReturn(new RevenuePerGenreResponse().genreName("History").revenue(BigDecimal.valueOf(890.25)));
     when(genreMapper.toRevenuePerGenreResponse(row3))
         .thenReturn(
-            RevenuePerGenreResponse.builder().genreName("Biography").revenue(450.00).build());
+            new RevenuePerGenreResponse().genreName("Biography").revenue(BigDecimal.valueOf(450.00)));
 
     var result = genreService.getRevenuePerGenre();
 
     assertEquals(3, result.size());
-    assertEquals(1250.75, result.get(0).revenue);
-    assertEquals(890.25, result.get(1).revenue);
-    assertEquals(450.00, result.get(2).revenue);
-    assertTrue(result.stream().mapToDouble(r -> r.revenue).sum() > 0);
+    assertEquals(BigDecimal.valueOf(1250.75), result.get(0).getRevenue());
+    assertEquals(BigDecimal.valueOf(890.25), result.get(1).getRevenue());
+    assertEquals(BigDecimal.valueOf(450.00), result.get(2).getRevenue());
+    assertTrue(result.stream().mapToDouble(r -> r.getRevenue().doubleValue()).sum() > 0);
   }
 
   @Test
@@ -265,13 +266,13 @@ class GenreServiceTest {
 
     when(genreRepository.revenueByGenre()).thenReturn(List.<Object[]>of(row));
     when(genreMapper.toRevenuePerGenreResponse(row))
-        .thenReturn(RevenuePerGenreResponse.builder().genreName("New Genre").revenue(0.0).build());
+        .thenReturn(new RevenuePerGenreResponse().genreName("New Genre").revenue(BigDecimal.ZERO));
 
     var result = genreService.getRevenuePerGenre();
 
     assertEquals(1, result.size());
-    assertEquals("New Genre", result.get(0).genreName);
-    assertEquals(0.0, result.get(0).revenue);
+    assertEquals("New Genre", result.get(0).getGenreName());
+    assertEquals(BigDecimal.ZERO, result.get(0).getRevenue());
   }
 
   @Test
@@ -281,13 +282,13 @@ class GenreServiceTest {
     when(genreRepository.revenueByGenre()).thenReturn(List.<Object[]>of(row));
     when(genreMapper.toRevenuePerGenreResponse(row))
         .thenReturn(
-            RevenuePerGenreResponse.builder().genreName("Fiction").revenue(1500.00).build());
+            new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(1500.00)));
 
     var result = genreService.getRevenuePerGenre();
 
     assertEquals(1, result.size());
-    assertEquals("Fiction", result.get(0).genreName);
-    assertEquals(1500.00, result.get(0).revenue);
+    assertEquals("Fiction", result.get(0).getGenreName());
+    assertEquals(BigDecimal.valueOf(1500.00), result.get(0).getRevenue());
   }
 
   @Test
@@ -296,12 +297,12 @@ class GenreServiceTest {
 
     when(genreRepository.revenueByGenre()).thenReturn(List.<Object[]>of(row));
     when(genreMapper.toRevenuePerGenreResponse(row))
-        .thenReturn(RevenuePerGenreResponse.builder().genreName("Drama").revenue(750.00).build());
+        .thenReturn(new RevenuePerGenreResponse().genreName("Drama").revenue(BigDecimal.valueOf(750.00)));
 
     var result = genreService.getRevenuePerGenre();
 
     assertEquals(1, result.size());
-    assertEquals("Drama", result.get(0).genreName);
-    assertEquals(750.00, result.get(0).revenue);
+    assertEquals("Drama", result.get(0).getGenreName());
+    assertEquals(BigDecimal.valueOf(750.00), result.get(0).getRevenue());
   }
 }
