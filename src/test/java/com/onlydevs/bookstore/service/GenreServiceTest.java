@@ -205,7 +205,7 @@ class GenreServiceTest {
     var row = new Object[] {"Fiction", 500.0};
     var revenueResponse = new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(500.0));
 
-    given(genreRepository.revenueByGenre()).willReturn(List.of(row));
+    given(genreRepository.revenueByGenre()).willReturn(List.<Object[]>of(row));
     given(genreMapper.toRevenuePerGenreResponse(row)).willReturn(revenueResponse);
 
     var result = genreService.getRevenuePerGenre();
