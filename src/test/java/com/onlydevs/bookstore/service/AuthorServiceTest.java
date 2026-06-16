@@ -64,11 +64,7 @@ class AuthorServiceTest {
     var id = UUID.randomUUID();
     var author = Author.builder().id(id).firstName("Albert").lastName("Camus").build();
     var authorResponse =
-        new AuthorResponse()
-            .id(id)
-            .firstName("Albert")
-            .lastName("Camus")
-            .fullName("Albert Camus");
+        new AuthorResponse().id(id).firstName("Albert").lastName("Camus").fullName("Albert Camus");
     given(authorRepository.findById(id)).willReturn(Optional.of(author));
     given(authorMapper.toRest(author)).willReturn(authorResponse);
 
@@ -122,10 +118,20 @@ class AuthorServiceTest {
   void update_should_modify_and_return_author() {
     var id = UUID.randomUUID();
     var existingAuthor =
-        Author.builder().id(id).firstName("Jane").lastName("Austen").createdAt(Instant.now()).build();
+        Author.builder()
+            .id(id)
+            .firstName("Jane")
+            .lastName("Austen")
+            .createdAt(Instant.now())
+            .build();
     var request = new UpdateAuthorRequest().firstName("Emily").lastName("Bronte");
     var updatedAuthor =
-        Author.builder().id(id).firstName("Emily").lastName("Bronte").createdAt(existingAuthor.getCreatedAt()).build();
+        Author.builder()
+            .id(id)
+            .firstName("Emily")
+            .lastName("Bronte")
+            .createdAt(existingAuthor.getCreatedAt())
+            .build();
     var response =
         new AuthorResponse()
             .id(id)

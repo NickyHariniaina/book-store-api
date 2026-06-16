@@ -6,7 +6,6 @@ import com.onlydevs.bookstore.conf.FacadeIT;
 import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
 import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
 import com.onlydevs.bookstore.endpoint.rest.model.UpdateAuthorRequest;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -20,10 +19,7 @@ class AuthorIT extends FacadeIT {
 
   @BeforeEach
   void setUp() {
-    webTestClient =
-        WebTestClient.bindToServer()
-            .baseUrl("http://localhost:" + port)
-            .build();
+    webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
   }
 
   @Test
