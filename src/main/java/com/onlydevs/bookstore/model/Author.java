@@ -46,6 +46,6 @@ public class Author {
   private List<BookAuthor> bookAuthors = new ArrayList<>();
 
   public String getFullName() {
-    return this.firstName + " " + this.lastName;
+    return firstName + " " + lastName;
   }
 }

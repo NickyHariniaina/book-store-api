@@ -1,1 +1,1 @@
-cd build/gen && mvn clean install -Dmaven.javadoc.skip=true
+cd build/gen && mvn clean install
