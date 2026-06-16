@@ -5,13 +5,24 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.onlydevs.bookstore.conf.FacadeIT;
 import com.onlydevs.bookstore.model.dto.AuthorResponse;
 import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 class AuthorIT extends FacadeIT {
 
-  @Autowired private WebTestClient webTestClient;
+  @LocalServerPort private int port;
+
+  private WebTestClient webTestClient;
+
+  @BeforeEach
+  void setUp() {
+    webTestClient =
+        WebTestClient.bindToServer()
+            .baseUrl("http://localhost:" + port)
+            .build();
+  }
 
   @Test
   void createAuthor_should_persist_and_return_author() {
