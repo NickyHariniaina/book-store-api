@@ -3,23 +3,31 @@ package com.onlydevs.bookstore.endpoint.rest.controller;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
-import com.onlydevs.bookstore.conf.TestUtils;
-import com.onlydevs.bookstore.endpoint.rest.api.AuthorsApi;
-import com.onlydevs.bookstore.endpoint.rest.client.ApiException;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.AuthorResponse;
+import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 class AuthorIT extends FacadeIT {
 
-  @LocalServerPort private int port;
+  @Autowired private WebTestClient webTestClient;
 
   @Test
-  void createAuthor_should_persist_and_return_author() throws ApiException {
-    var api = new AuthorsApi(TestUtils.createApiClient(port));
-    var request = new CreateAuthorRequest().firstName("Jane").lastName("Austen");
+  void createAuthor_should_persist_and_return_author() {
+    var request = new CreateAuthorRequest("Jane", "Austen");
 
-    var result = api.authorsPost(request);
+    var result =
+        webTestClient
+            .post()
+            .uri("/api/v1/authors")
+            .bodyValue(request)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(AuthorResponse.class)
+            .returnResult()
+            .getResponseBody();
 
     assertNotNull(result.getId());
     assertEquals("Jane", result.getFirstName());
@@ -29,12 +37,31 @@ class AuthorIT extends FacadeIT {
   }
 
   @Test
-  void findById_should_return_author() throws ApiException {
-    var api = new AuthorsApi(TestUtils.createApiClient(port));
-    var request = new CreateAuthorRequest().firstName("Jane").lastName("Austen");
+  void findById_should_return_author() {
+    var createRequest = new CreateAuthorRequest("Jane", "Austen");
 
-    var created = api.authorsPost(request);
-    var result = api.authorsIdGet(created.getId());
+    var created =
+        webTestClient
+            .post()
+            .uri("/api/v1/authors")
+            .bodyValue(createRequest)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(AuthorResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+    var result =
+        webTestClient
+            .get()
+            .uri("/api/v1/authors/" + created.getId())
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(AuthorResponse.class)
+            .returnResult()
+            .getResponseBody();
 
     assertEquals(created.getId(), result.getId());
     assertEquals("Jane", result.getFirstName());
