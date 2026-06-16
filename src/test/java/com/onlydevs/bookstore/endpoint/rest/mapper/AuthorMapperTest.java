@@ -2,9 +2,9 @@ package com.onlydevs.bookstore.endpoint.rest.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
+import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.Author;
-import com.onlydevs.bookstore.model.dto.AuthorResponse;
-import com.onlydevs.bookstore.model.dto.CreateAuthorRequest;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ class AuthorMapperTest {
 
   @Test
   void toDomain_should_map_request_to_author() {
-    CreateAuthorRequest request = new CreateAuthorRequest("John", "Doe");
+    CreateAuthorRequest request = new CreateAuthorRequest().firstName("John").lastName("Doe");
 
     Author result = authorMapper.toDomain(request);
 
@@ -35,7 +35,7 @@ class AuthorMapperTest {
 
     AuthorResponse result = authorMapper.toRest(author);
 
-    assertEquals(id.toString(), result.getId());
+    assertEquals(id, result.getId());
     assertEquals("Jane", result.getFirstName());
     assertEquals("Austen", result.getLastName());
     assertEquals("Jane Austen", result.getFullName());
