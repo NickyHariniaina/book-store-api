@@ -39,16 +39,6 @@ task generateJavaClient(type: GenerateTask) {
     generateAliasAsModel = false
     enablePostProcessFile = false
 }
-task publishJavaClientToMavenLocal(type: Exec, dependsOn: generateJavaClient) {
-    if (Os.isFamily(Os.FAMILY_WINDOWS)){
-        commandLine './.shell/publish_gen_to_maven_local.bat'
-    } else {
-        commandLine './.shell/publish_gen_to_maven_local.sh'
-    }
-    ignoreExitValue = true
-}
-tasks.compileJava.dependsOn publishJavaClientToMavenLocal
-
 
 jacoco {
     toolVersion = "0.8.11"
@@ -57,7 +47,7 @@ jacoco {
 
 
 repositories {
-    mavenLocal()
+
 
     mavenCentral()
 }
