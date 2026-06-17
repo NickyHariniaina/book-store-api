@@ -8,62 +8,45 @@ import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
 import com.onlydevs.bookstore.endpoint.rest.model.RenameGenreRequest;
 import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.repository.GenreRepository;
-import java.net.http.HttpClient;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 class GenreIT extends FacadeIT {
 
-  @LocalServerPort private int port;
+  WebTestClient webTestClient;
 
-  @Autowired private TestRestTemplate restTemplate;
+  @LocalServerPort int port;
 
   @Autowired private GenreRepository genreRepository;
 
-  private RestTemplate patchTemplate;
-  private String baseUri;
-
   @BeforeEach
   void setup() {
-    baseUri = "http://localhost:" + port + "/genres";
+    webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
     genreRepository.deleteAll();
-    patchTemplate = new RestTemplate(new JdkClientHttpRequestFactory(HttpClient.newHttpClient()));
-    patchTemplate.setErrorHandler(
-        new org.springframework.web.client.ResponseErrorHandler() {
-          @Override
-          public boolean hasError(
-              @SuppressWarnings("NullableProblems")
-                  org.springframework.http.client.ClientHttpResponse response) {
-            return false;
-          }
-
-          @Override
-          public void handleError(
-              @SuppressWarnings("NullableProblems")
-                  org.springframework.http.client.ClientHttpResponse response) {}
-        });
   }
 
   @Test
   void should_create_genre_ok() {
     var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
 
-    ResponseEntity<GenreResponse> response =
-        restTemplate.postForEntity(baseUri, request, GenreResponse.class);
-
-    assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertNotNull(response.getBody().getId());
-    assertEquals("Fiction", response.getBody().getName());
+    webTestClient
+        .post()
+        .uri("/genres")
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isCreated()
+        .expectBody(GenreResponse.class)
+        .value(
+            response -> {
+              assertNotNull(response.getId());
+              assertEquals("Fiction", response.getName());
+            });
   }
 
   @Test
@@ -72,9 +55,13 @@ class GenreIT extends FacadeIT {
 
     var request = new CreateGenreRequest().name("Fiction");
 
-    var response = restTemplate.postForEntity(baseUri, request, String.class);
-
-    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    webTestClient
+        .post()
+        .uri("/genres")
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(HttpStatus.CONFLICT);
   }
 
   @Test
@@ -82,12 +69,19 @@ class GenreIT extends FacadeIT {
     genreRepository.save(Genre.builder().name("Science").build());
     genreRepository.save(Genre.builder().name("Fiction").build());
 
-    var response = restTemplate.getForEntity(baseUri, String.class);
-
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertTrue(response.getBody().contains("Fiction"));
-    assertTrue(response.getBody().contains("Science"));
+    webTestClient
+        .get()
+        .uri("/genres")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .value(
+            body -> {
+              assertNotNull(body);
+              assertTrue(body.contains("Fiction"));
+              assertTrue(body.contains("Science"));
+            });
   }
 
   @Test
@@ -96,30 +90,28 @@ class GenreIT extends FacadeIT {
 
     var request = new RenameGenreRequest().name("Science");
 
-    var response =
-        patchTemplate.exchange(
-            baseUri + "/" + saved.getId() + "/rename",
-            HttpMethod.PATCH,
-            new org.springframework.http.HttpEntity<>(request),
-            GenreResponse.class);
-
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertEquals("Science", response.getBody().getName());
+    webTestClient
+        .patch()
+        .uri("/genres/{id}/rename", saved.getId())
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(GenreResponse.class)
+        .value(response -> assertEquals("Science", response.getName()));
   }
 
   @Test
   void should_fail_when_rename_not_found() {
     var request = new RenameGenreRequest().name("Science");
 
-    var response =
-        patchTemplate.exchange(
-            baseUri + "/" + UUID.randomUUID() + "/rename",
-            HttpMethod.PATCH,
-            new org.springframework.http.HttpEntity<>(request),
-            String.class);
-
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    webTestClient
+        .patch()
+        .uri("/genres/{id}/rename", UUID.randomUUID())
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Test
@@ -129,58 +121,58 @@ class GenreIT extends FacadeIT {
 
     var request = new RenameGenreRequest().name("Science");
 
-    var response =
-        patchTemplate.exchange(
-            baseUri + "/" + saved.getId() + "/rename",
-            HttpMethod.PATCH,
-            new org.springframework.http.HttpEntity<>(request),
-            String.class);
-
-    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    webTestClient
+        .patch()
+        .uri("/genres/{id}/rename", saved.getId())
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(HttpStatus.CONFLICT);
   }
 
   @Test
   void should_delete_genre_ok() {
     var saved = genreRepository.save(Genre.builder().name("Fiction").build());
 
-    var response =
-        restTemplate.exchange(baseUri + "/" + saved.getId(), HttpMethod.DELETE, null, String.class);
+    webTestClient
+        .delete()
+        .uri("/genres/{id}", saved.getId())
+        .exchange()
+        .expectStatus()
+        .isNoContent();
 
-    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     assertFalse(genreRepository.existsById(saved.getId()));
   }
 
   @Test
   void should_fail_when_delete_not_found() {
-    var response =
-        restTemplate.exchange(
-            baseUri + "/" + UUID.randomUUID(), HttpMethod.DELETE, null, String.class);
-
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    webTestClient
+        .delete()
+        .uri("/genres/{id}", UUID.randomUUID())
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Test
   void should_get_books_by_genre_ok_when_empty() {
     var saved = genreRepository.save(Genre.builder().name("Fiction").build());
 
-    var response =
-        restTemplate.getForEntity(baseUri + "/" + saved.getId() + "/books", String.class);
-
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    webTestClient.get().uri("/genres/{id}/books", saved.getId()).exchange().expectStatus().isOk();
   }
 
   @Test
   void should_get_books_by_genre_fail_when_not_found() {
-    var response =
-        restTemplate.getForEntity(baseUri + "/" + UUID.randomUUID() + "/books", String.class);
-
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    webTestClient
+        .get()
+        .uri("/genres/{id}/books", UUID.randomUUID())
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Test
   void should_get_revenue_per_genre_ok() {
-    var response = restTemplate.getForEntity(baseUri + "/revenue", String.class);
-
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    webTestClient.get().uri("/genres/revenue").exchange().expectStatus().isOk();
   }
 }
