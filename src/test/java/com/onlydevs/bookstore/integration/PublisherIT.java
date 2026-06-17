@@ -11,25 +11,21 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 class PublisherIT extends FacadeIT {
 
-  @LocalServerPort private int port;
+  WebTestClient webTestClient;
 
-  @Autowired private TestRestTemplate restTemplate;
+  @LocalServerPort int port;
 
   @Autowired private PublisherRepository publisherRepository;
 
-  private String baseUri;
-
   @BeforeEach
   void setup() {
-    baseUri = "http://localhost:" + port + "/publishers";
+    webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
     publisherRepository.deleteAll();
   }
 
@@ -41,13 +37,19 @@ class PublisherIT extends FacadeIT {
             .email("test@example.com")
             .phone("1234567890");
 
-    ResponseEntity<PublisherResponse> response =
-        restTemplate.postForEntity(baseUri, request, PublisherResponse.class);
-
-    assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertNotNull(response.getBody().getId());
-    assertEquals("Test Publisher", response.getBody().getName());
+    webTestClient
+        .post()
+        .uri("/publishers")
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isCreated()
+        .expectBody(PublisherResponse.class)
+        .value(
+            response -> {
+              assertNotNull(response.getId());
+              assertEquals("Test Publisher", response.getName());
+            });
   }
 
   @Test
@@ -58,9 +60,13 @@ class PublisherIT extends FacadeIT {
     var request =
         new CreatePublisherRequest().name("Test").email("dup@example.com").phone("1111111111");
 
-    var response = restTemplate.postForEntity(baseUri, request, String.class);
-
-    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    webTestClient
+        .post()
+        .uri("/publishers")
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(HttpStatus.CONFLICT);
   }
 
   @Test
@@ -68,12 +74,19 @@ class PublisherIT extends FacadeIT {
     publisherRepository.save(Publisher.builder().name("Publisher A").phone("1111111111").build());
     publisherRepository.save(Publisher.builder().name("Publisher B").phone("2222222222").build());
 
-    var response = restTemplate.getForEntity(baseUri, String.class);
-
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertTrue(response.getBody().contains("Publisher A"));
-    assertTrue(response.getBody().contains("Publisher B"));
+    webTestClient
+        .get()
+        .uri("/publishers")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .value(
+            body -> {
+              assertNotNull(body);
+              assertTrue(body.contains("Publisher A"));
+              assertTrue(body.contains("Publisher B"));
+            });
   }
 
   @Test
@@ -81,20 +94,28 @@ class PublisherIT extends FacadeIT {
     var saved =
         publisherRepository.save(Publisher.builder().name("Test").phone("1234567890").build());
 
-    var response =
-        restTemplate.getForEntity(baseUri + "/" + saved.getId(), PublisherResponse.class);
-
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertEquals(saved.getId(), response.getBody().getId());
-    assertEquals("Test", response.getBody().getName());
+    webTestClient
+        .get()
+        .uri("/publishers/{id}", saved.getId())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(PublisherResponse.class)
+        .value(
+            response -> {
+              assertEquals(saved.getId(), response.getId());
+              assertEquals("Test", response.getName());
+            });
   }
 
   @Test
   void should_fail_when_publisher_not_found() {
-    var response = restTemplate.getForEntity(baseUri + "/" + UUID.randomUUID(), String.class);
-
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    webTestClient
+        .get()
+        .uri("/publishers/{id}", UUID.randomUUID())
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Test
@@ -104,28 +125,35 @@ class PublisherIT extends FacadeIT {
 
     var request = new CreatePublisherRequest().name("Updated").phone("9999999999");
 
-    restTemplate.put(baseUri + "/" + saved.getId(), request);
+    webTestClient
+        .put()
+        .uri("/publishers/{id}", saved.getId())
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isOk();
 
-    var response =
-        restTemplate.getForEntity(baseUri + "/" + saved.getId(), PublisherResponse.class);
-
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertEquals("Updated", response.getBody().getName());
+    webTestClient
+        .get()
+        .uri("/publishers/{id}", saved.getId())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(PublisherResponse.class)
+        .value(response -> assertEquals("Updated", response.getName()));
   }
 
   @Test
   void should_fail_when_update_not_found() {
     var request = new CreatePublisherRequest().name("Updated").phone("9999999999");
 
-    var response =
-        restTemplate.exchange(
-            baseUri + "/" + UUID.randomUUID(),
-            HttpMethod.PUT,
-            new org.springframework.http.HttpEntity<>(request),
-            String.class);
-
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    webTestClient
+        .put()
+        .uri("/publishers/{id}", UUID.randomUUID())
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Test
@@ -133,19 +161,28 @@ class PublisherIT extends FacadeIT {
     var saved =
         publisherRepository.save(Publisher.builder().name("Test").phone("1234567890").build());
 
-    restTemplate.delete(baseUri + "/" + saved.getId());
+    webTestClient
+        .delete()
+        .uri("/publishers/{id}", saved.getId())
+        .exchange()
+        .expectStatus()
+        .isNoContent();
 
-    var response = restTemplate.getForEntity(baseUri + "/" + saved.getId(), String.class);
-
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    webTestClient
+        .get()
+        .uri("/publishers/{id}", saved.getId())
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Test
   void should_fail_when_delete_not_found() {
-    var response =
-        restTemplate.exchange(
-            baseUri + "/" + UUID.randomUUID(), HttpMethod.DELETE, null, String.class);
-
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    webTestClient
+        .delete()
+        .uri("/publishers/{id}", UUID.randomUUID())
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 }
