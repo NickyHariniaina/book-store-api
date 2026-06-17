@@ -10,34 +10,7 @@ plugins {
 
     id 'jacoco'
 
-
-}
-
-task generateJavaClient(type: GenerateTask) {
-    generatorName = "java"
-    inputSpec = "$rootDir/doc/api.yml".toString()
-    outputDir = "$buildDir/gen".toString()
-    apiPackage = "com.onlydevs.bookstore.endpoint.rest.api"
-    invokerPackage = "com.onlydevs.bookstore.endpoint.rest.client"
-    modelPackage = "com.onlydevs.bookstore.endpoint.rest.model"
-
-    configOptions = [
-            serializableModel: "true",
-            serializationLibrary: "jackson",
-            dateLibrary: "custom"
-    ]
-    typeMappings = [
-            Date: "java.time.LocalDate",
-            DateTime: "java.time.Instant",
-    ]
-    library = "native"
-
-    groupId = 'com.onlydevs'
-    id = 'bookstore-23c96d64-gen'
-    skipValidateSpec = true
-    logToStderr = true
-    generateAliasAsModel = false
-    enablePostProcessFile = false
+    
 }
 
 jacoco {
@@ -47,7 +20,6 @@ jacoco {
 
 
 repositories {
-
 
     mavenCentral()
 }
@@ -63,6 +35,7 @@ configurations {
         extendsFrom annotationProcessor
     }
 }
+
 
 
 
@@ -174,15 +147,13 @@ dependencies {
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'io.swagger:swagger-annotations:1.6.12'
 
-    implementation 'com.onlydevs:bookstore-23c96d64-gen:1.0.0'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.2'
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.2'
     testImplementation 'org.junit-pioneer:junit-pioneer:2.2.0'
-    testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 implementation 'org.springframework.boot:spring-boot-starter-validation'
 testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 }
