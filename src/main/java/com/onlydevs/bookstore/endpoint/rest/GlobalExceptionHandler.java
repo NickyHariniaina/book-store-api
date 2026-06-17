@@ -1,5 +1,6 @@
 package com.onlydevs.bookstore.endpoint.rest;
 
+import com.onlydevs.bookstore.endpoint.rest.model.RestErrorResponse;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.exception.NotImplementedException;
@@ -21,30 +22,26 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(value = {BadRequestException.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleBadRequest(
-      BadRequestException e) {
+  ResponseEntity<RestErrorResponse> handleBadRequest(BadRequestException e) {
     log.info("Bad request", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(value = {MissingServletRequestParameterException.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleBadRequest(
-      MissingServletRequestParameterException e) {
+  ResponseEntity<RestErrorResponse> handleBadRequest(MissingServletRequestParameterException e) {
     log.info("Missing parameter", e);
     return handleBadRequest(new BadRequestException(e.getMessage()));
   }
 
   @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleConversionFailed(
-      MethodArgumentTypeMismatchException e) {
+  ResponseEntity<RestErrorResponse> handleConversionFailed(MethodArgumentTypeMismatchException e) {
     log.info("Conversion failed", e);
     String message = e.getCause().getCause().getMessage();
     return handleBadRequest(new BadRequestException(message));
   }
 
   @ExceptionHandler(value = {MethodArgumentNotValidException.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleValidation(
-      MethodArgumentNotValidException e) {
+  ResponseEntity<RestErrorResponse> handleValidation(MethodArgumentNotValidException e) {
     log.info("Validation failed", e);
     String message =
         e.getBindingResult().getFieldErrors().stream()
@@ -55,8 +52,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(value = {TooManyRequestsException.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleTooManyRequests(
-      TooManyRequestsException e) {
+  ResponseEntity<RestErrorResponse> handleTooManyRequests(TooManyRequestsException e) {
     log.info("Too many requests", e);
     return new ResponseEntity<>(
         toRest(e, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS);
@@ -68,38 +64,31 @@ public class GlobalExceptionHandler {
         CannotAcquireLockException.class,
         OptimisticLockException.class
       })
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception>
-      handleLockAcquisitionException(Exception e) {
+  ResponseEntity<RestErrorResponse> handleLockAcquisitionException(Exception e) {
     log.warn("Database lock could not be acquired: too many requests assumed", e);
     return handleTooManyRequests(new TooManyRequestsException(e));
   }
 
   @ExceptionHandler(value = {NotFoundException.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleNotFound(
-      NotFoundException e) {
+  ResponseEntity<RestErrorResponse> handleNotFound(NotFoundException e) {
     log.info("Not found", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(value = {NotImplementedException.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleNotImplemented(
-      NotImplementedException e) {
+  ResponseEntity<RestErrorResponse> handleNotImplemented(NotImplementedException e) {
     log.error("Not implemented", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.NOT_IMPLEMENTED), HttpStatus.NOT_IMPLEMENTED);
   }
 
   @ExceptionHandler(value = {Exception.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleDefault(Exception e) {
+  ResponseEntity<RestErrorResponse> handleDefault(Exception e) {
     log.error("Internal error", e);
     return new ResponseEntity<>(
         toRest(e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  private com.onlydevs.bookstore.endpoint.rest.model.Exception toRest(
-      Exception e, HttpStatus status) {
-    var restException = new com.onlydevs.bookstore.endpoint.rest.model.Exception();
-    restException.setType(status.toString());
-    restException.setMessage(e.getMessage());
-    return restException;
+  private RestErrorResponse toRest(Exception e, HttpStatus status) {
+    return RestErrorResponse.builder().type(status.toString()).message(e.getMessage()).build();
   }
 }
