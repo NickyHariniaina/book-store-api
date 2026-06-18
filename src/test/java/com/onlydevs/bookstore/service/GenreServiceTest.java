@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
+import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
@@ -16,7 +17,6 @@ import com.onlydevs.bookstore.model.dto.response.GenreResponse;
 import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
-import com.onlydevs.bookstore.model.mapper.GenreMapper;
 import com.onlydevs.bookstore.repository.GenreRepository;
 import java.math.BigDecimal;
 import java.util.List;
@@ -37,7 +37,7 @@ class GenreServiceTest {
 
   @Mock private GenreRepository genreRepository;
 
-  @Mock private GenreMapper genreMapper;
+  @Mock private AuthorMapper.GenreMapper genreMapper;
 
   @InjectMocks private GenreService genreService;
 

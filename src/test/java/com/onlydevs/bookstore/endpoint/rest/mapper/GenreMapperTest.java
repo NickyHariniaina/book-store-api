@@ -9,7 +9,7 @@ import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
-import com.onlydevs.bookstore.model.mapper.GenreMapper;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class GenreMapperTest {
 
-  private final GenreMapper mapper = new GenreMapper();
+  private final AuthorMapper.GenreMapper mapper = new AuthorMapper.GenreMapper();
 
   @Test
   void toResponse_maps_all_fields() {
