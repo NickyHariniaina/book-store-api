@@ -1,11 +1,13 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
-import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -17,170 +19,214 @@ class AuthorIT extends FacadeIT {
 
   private WebTestClient webTestClient;
 
+  private AuthorResponse createdAuthor;
+
   @BeforeEach
   void setUp() {
     webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
+    createdAuthor =
+        webTestClient
+            .post()
+            .uri("/api/v1/authors")
+            .bodyValue(CreateAuthorRequest.builder().firstName("Jane").lastName("Austen").build())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(AuthorResponse.class)
+            .returnResult()
+            .getResponseBody();
   }
 
   @Test
   void createAuthor_should_persist_and_return_author() {
-    var request = new CreateAuthorRequest().firstName("Jane").lastName("Austen");
+    var request = CreateAuthorRequest.builder().firstName("Jane").lastName("Austen").build();
 
-    var result =
-        webTestClient
-            .post()
-            .uri("/api/v1/authors")
-            .bodyValue(request)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    assertNotNull(result);
-    assertNotNull(result.getId());
-    assertEquals("Jane", result.getFirstName());
-    assertEquals("Austen", result.getLastName());
-    assertEquals("Jane Austen", result.getFullName());
-    assertNotNull(result.getCreatedAt());
+    webTestClient
+        .post()
+        .uri("/api/v1/authors")
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isCreated()
+        .expectBody()
+        .jsonPath("$.firstName")
+        .isEqualTo("Jane")
+        .jsonPath("$.lastName")
+        .isEqualTo("Austen")
+        .jsonPath("$.fullName")
+        .isEqualTo("Jane Austen")
+        .jsonPath("$.id")
+        .isNotEmpty()
+        .jsonPath("$.createdAt")
+        .isNotEmpty();
   }
 
   @Test
   void findById_should_return_author() {
-    var createRequest = new CreateAuthorRequest().firstName("Jane").lastName("Austen");
-
-    var created =
-        webTestClient
-            .post()
-            .uri("/api/v1/authors")
-            .bodyValue(createRequest)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    var result =
-        webTestClient
-            .get()
-            .uri("/api/v1/authors/" + created.getId())
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    assertEquals(created.getId(), result.getId());
-    assertEquals("Jane", result.getFirstName());
-    assertEquals("Austen", result.getLastName());
+    webTestClient
+        .get()
+        .uri("/api/v1/authors/" + createdAuthor.getId())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.firstName")
+        .isEqualTo("Jane")
+        .jsonPath("$.lastName")
+        .isEqualTo("Austen")
+        .jsonPath("$.fullName")
+        .isEqualTo("Jane Austen");
   }
 
   @Test
   void getAll_should_return_all_authors() {
-    var author1 =
-        webTestClient
-            .post()
-            .uri("/api/v1/authors")
-            .bodyValue(new CreateAuthorRequest().firstName("Jane").lastName("Austen"))
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
-    var author2 =
-        webTestClient
-            .post()
-            .uri("/api/v1/authors")
-            .bodyValue(new CreateAuthorRequest().firstName("Albert").lastName("Camus"))
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
+    webTestClient
+        .post()
+        .uri("/api/v1/authors")
+        .bodyValue(CreateAuthorRequest.builder().firstName("Albert").lastName("Camus").build())
+        .exchange()
+        .expectStatus()
+        .isCreated();
 
-    var result =
-        webTestClient
-            .get()
-            .uri("/api/v1/authors")
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBodyList(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    assertTrue(result.stream().anyMatch(a -> a.getId().equals(author1.getId())));
-    assertTrue(result.stream().anyMatch(a -> a.getId().equals(author2.getId())));
+    webTestClient
+        .get()
+        .uri("/api/v1/authors")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.totalElements")
+        .value(greaterThanOrEqualTo(2));
   }
 
   @Test
   void update_should_modify_and_return_author() {
-    var createRequest = new CreateAuthorRequest().firstName("Jane").lastName("Austen");
+    var updateRequest = UpdateAuthorRequest.builder().firstName("Emily").lastName("Bronte").build();
 
-    var created =
-        webTestClient
-            .post()
-            .uri("/api/v1/authors")
-            .bodyValue(createRequest)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    var updateRequest = new UpdateAuthorRequest().firstName("Emily").lastName("Bronte");
-
-    var updated =
-        webTestClient
-            .put()
-            .uri("/api/v1/authors/" + created.getId())
-            .bodyValue(updateRequest)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    assertEquals(created.getId(), updated.getId());
-    assertEquals("Emily", updated.getFirstName());
-    assertEquals("Bronte", updated.getLastName());
+    webTestClient
+        .put()
+        .uri("/api/v1/authors/" + createdAuthor.getId())
+        .bodyValue(updateRequest)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.firstName")
+        .isEqualTo("Emily")
+        .jsonPath("$.lastName")
+        .isEqualTo("Bronte")
+        .jsonPath("$.id")
+        .isEqualTo(createdAuthor.getId().toString());
   }
 
   @Test
   void delete_should_remove_author() {
-    var createRequest = new CreateAuthorRequest().firstName("Jane").lastName("Austen");
-
-    var created =
-        webTestClient
-            .post()
-            .uri("/api/v1/authors")
-            .bodyValue(createRequest)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
-
     webTestClient
         .delete()
-        .uri("/api/v1/authors/" + created.getId())
+        .uri("/api/v1/authors/" + createdAuthor.getId())
         .exchange()
         .expectStatus()
-        .isOk();
+        .isNoContent();
 
     webTestClient
         .get()
-        .uri("/api/v1/authors/" + created.getId())
+        .uri("/api/v1/authors/" + createdAuthor.getId())
         .exchange()
         .expectStatus()
         .isNotFound();
+  }
+
+  @Test
+  void getById_should_return_404_when_not_found() {
+    webTestClient
+        .get()
+        .uri("/api/v1/authors/" + UUID.randomUUID())
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.type")
+        .isEqualTo("404 NOT_FOUND")
+        .jsonPath("$.message")
+        .value(containsString("doesn't exist"));
+  }
+
+  @Test
+  void update_should_return_404_when_not_found() {
+    webTestClient
+        .put()
+        .uri("/api/v1/authors/" + UUID.randomUUID())
+        .bodyValue(UpdateAuthorRequest.builder().firstName("Test").lastName("Test").build())
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.type")
+        .isEqualTo("404 NOT_FOUND")
+        .jsonPath("$.message")
+        .value(containsString("doesn't exist"));
+  }
+
+  @Test
+  void delete_should_return_404_when_not_found() {
+    webTestClient
+        .delete()
+        .uri("/api/v1/authors/" + UUID.randomUUID())
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.type")
+        .isEqualTo("404 NOT_FOUND")
+        .jsonPath("$.message")
+        .value(containsString("doesn't exist"));
+  }
+
+  @Test
+  void createAuthor_should_return_400_when_firstName_missing() {
+    webTestClient
+        .post()
+        .uri("/api/v1/authors")
+        .bodyValue(CreateAuthorRequest.builder().lastName("Austen").build())
+        .exchange()
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.type")
+        .isEqualTo("400 BAD_REQUEST")
+        .jsonPath("$.message")
+        .value(containsString("firstName"));
+  }
+
+  @Test
+  void createAuthor_should_return_400_when_lastName_missing() {
+    webTestClient
+        .post()
+        .uri("/api/v1/authors")
+        .bodyValue(CreateAuthorRequest.builder().firstName("Jane").build())
+        .exchange()
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.type")
+        .isEqualTo("400 BAD_REQUEST")
+        .jsonPath("$.message")
+        .value(containsString("lastName"));
+  }
+
+  @Test
+  void update_should_do_nothing_when_body_empty() {
+    webTestClient
+        .put()
+        .uri("/api/v1/authors/" + createdAuthor.getId())
+        .bodyValue(UpdateAuthorRequest.builder().build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.firstName")
+        .isEqualTo("Jane")
+        .jsonPath("$.lastName")
+        .isEqualTo("Austen");
   }
 }

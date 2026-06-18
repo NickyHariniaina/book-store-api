@@ -5,21 +5,26 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
-import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdateAuthorRequest;
 import com.onlydevs.bookstore.model.Author;
+import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.AuthorRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorServiceTest {
@@ -28,9 +33,36 @@ class AuthorServiceTest {
   @Mock private AuthorRepository authorRepository;
   @InjectMocks private AuthorService authorService;
 
+  private Author janeAusten;
+  private Author albertCamus;
+  private AuthorResponse janeResponse;
+  private AuthorResponse albertResponse;
+
+  @BeforeEach
+  void setUp() {
+    janeAusten =
+        Author.builder().id(UUID.randomUUID()).firstName("Jane").lastName("Austen").build();
+    albertCamus =
+        Author.builder().id(UUID.randomUUID()).firstName("Albert").lastName("Camus").build();
+    janeResponse =
+        AuthorResponse.builder()
+            .id(janeAusten.getId())
+            .firstName("Jane")
+            .lastName("Austen")
+            .fullName("Jane Austen")
+            .build();
+    albertResponse =
+        AuthorResponse.builder()
+            .id(albertCamus.getId())
+            .firstName("Albert")
+            .lastName("Camus")
+            .fullName("Albert Camus")
+            .build();
+  }
+
   @Test
-  void save_should_create_user() {
-    var request = new CreateAuthorRequest().firstName("Albert").lastName("Camus");
+  void createAuthor_should_persist_and_return() {
+    var request = CreateAuthorRequest.builder().firstName("Albert").lastName("Camus").build();
     var authorToCreate = Author.builder().firstName("Albert").lastName("Camus").build();
     var savedAuthor =
         Author.builder()
@@ -40,18 +72,19 @@ class AuthorServiceTest {
             .createdAt(Instant.now())
             .build();
     var expectedResponse =
-        new AuthorResponse()
+        AuthorResponse.builder()
             .id(savedAuthor.getId())
             .firstName("Albert")
             .lastName("Camus")
             .fullName("Albert Camus")
-            .createdAt(savedAuthor.getCreatedAt());
+            .createdAt(savedAuthor.getCreatedAt())
+            .build();
 
     given(authorMapper.toDomain(request)).willReturn(authorToCreate);
     given(authorRepository.save(authorToCreate)).willReturn(savedAuthor);
     given(authorMapper.toRest(savedAuthor)).willReturn(expectedResponse);
 
-    var actualResponse = authorService.save(request);
+    var actualResponse = authorService.createAuthor(request);
 
     assertEquals(expectedResponse, actualResponse);
     then(authorMapper).should().toDomain(request);
@@ -64,7 +97,12 @@ class AuthorServiceTest {
     var id = UUID.randomUUID();
     var author = Author.builder().id(id).firstName("Albert").lastName("Camus").build();
     var authorResponse =
-        new AuthorResponse().id(id).firstName("Albert").lastName("Camus").fullName("Albert Camus");
+        AuthorResponse.builder()
+            .id(id)
+            .firstName("Albert")
+            .lastName("Camus")
+            .fullName("Albert Camus")
+            .build();
     given(authorRepository.findById(id)).willReturn(Optional.of(author));
     given(authorMapper.toRest(author)).willReturn(authorResponse);
 
@@ -86,32 +124,35 @@ class AuthorServiceTest {
   }
 
   @Test
-  void getAll_should_return_list_of_authors() {
-    var authors =
-        List.of(
-            Author.builder().id(UUID.randomUUID()).firstName("Jane").lastName("Austen").build(),
-            Author.builder().id(UUID.randomUUID()).firstName("Albert").lastName("Camus").build());
-    var responses =
-        List.of(
-            new AuthorResponse()
-                .id(authors.get(0).getId())
-                .firstName("Jane")
-                .lastName("Austen")
-                .fullName("Jane Austen"),
-            new AuthorResponse()
-                .id(authors.get(1).getId())
-                .firstName("Albert")
-                .lastName("Camus")
-                .fullName("Albert Camus"));
+  void getAllAuthors_should_return_page() {
+    Pageable pageable = PageRequest.of(0, 20);
+    var authors = List.of(janeAusten, albertCamus);
+    Page<Author> authorPage = new PageImpl<>(authors, pageable, 2);
 
-    given(authorRepository.findAll()).willReturn(authors);
-    given(authorMapper.toRest(authors)).willReturn(responses);
+    given(authorRepository.findAll(pageable)).willReturn(authorPage);
+    given(authorMapper.toRest(janeAusten)).willReturn(janeResponse);
+    given(authorMapper.toRest(albertCamus)).willReturn(albertResponse);
 
-    var result = authorService.getAll();
+    var result = authorService.getAllAuthors(pageable);
 
-    assertEquals(2, result.size());
-    then(authorRepository).should().findAll();
-    then(authorMapper).should().toRest(authors);
+    assertEquals(2, result.getContent().size());
+    assertEquals("Jane Austen", result.getContent().get(0).getFullName());
+    then(authorRepository).should().findAll(pageable);
+    then(authorMapper).should().toRest(janeAusten);
+    then(authorMapper).should().toRest(albertCamus);
+  }
+
+  @Test
+  void getAllAuthors_should_return_empty_page() {
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<Author> emptyPage = Page.empty(pageable);
+
+    given(authorRepository.findAll(pageable)).willReturn(emptyPage);
+
+    var result = authorService.getAllAuthors(pageable);
+
+    assertTrue(result.isEmpty());
+    then(authorRepository).should().findAll(pageable);
   }
 
   @Test
@@ -124,7 +165,7 @@ class AuthorServiceTest {
             .lastName("Austen")
             .createdAt(Instant.now())
             .build();
-    var request = new UpdateAuthorRequest().firstName("Emily").lastName("Bronte");
+    var request = UpdateAuthorRequest.builder().firstName("Emily").lastName("Bronte").build();
     var updatedAuthor =
         Author.builder()
             .id(id)
@@ -133,12 +174,13 @@ class AuthorServiceTest {
             .createdAt(existingAuthor.getCreatedAt())
             .build();
     var response =
-        new AuthorResponse()
+        AuthorResponse.builder()
             .id(id)
             .firstName("Emily")
             .lastName("Bronte")
             .fullName("Emily Bronte")
-            .createdAt(existingAuthor.getCreatedAt());
+            .createdAt(existingAuthor.getCreatedAt())
+            .build();
 
     given(authorRepository.findById(id)).willReturn(Optional.of(existingAuthor));
     given(authorRepository.save(existingAuthor)).willReturn(updatedAuthor);
