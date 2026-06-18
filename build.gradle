@@ -10,7 +10,7 @@ plugins {
 
     id 'jacoco'
 
-    
+
 }
 
 task generateJavaClient(type: GenerateTask) {
@@ -48,6 +48,8 @@ task publishJavaClientToMavenLocal(type: Exec, dependsOn: generateJavaClient) {
     }
     ignoreExitValue = true
 }
+
+tasks.compileJava.dependsOn publishJavaClientToMavenLocal
 
 jacoco {
     toolVersion = "0.8.11"
@@ -182,6 +184,8 @@ dependencies {
 
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'io.swagger:swagger-annotations:1.6.12'
+
+    implementation 'com.onlydevs:bookstore-23c96d64-gen:1.0.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.2'
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.2'
