@@ -15,17 +15,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class GenreMapperTest {
 
-  private GenreMapper mapper;
-
-  @BeforeEach
-  void setUp() {
-    mapper = new GenreMapper();
-  }
+  private final GenreMapper mapper = new GenreMapper();
+  ;
 
   @Test
   void toResponse_maps_all_fields() {
