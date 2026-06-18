@@ -1,8 +1,8 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
-import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
 import com.onlydevs.bookstore.service.PublisherService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/publishers")
+@RequestMapping("/api/v1/publishers")
 @RequiredArgsConstructor
 public class PublisherController {
 

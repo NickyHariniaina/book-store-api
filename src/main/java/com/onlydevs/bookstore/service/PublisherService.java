@@ -1,8 +1,8 @@
 package com.onlydevs.bookstore.service;
 
-import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;

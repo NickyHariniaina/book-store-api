@@ -1,23 +1,24 @@
 package com.onlydevs.bookstore.model.mapper;
 
-import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.Publisher;
+import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PublisherMapper {
 
   public PublisherResponse toRest(Publisher publisher) {
-    return new PublisherResponse()
+    return PublisherResponse.builder()
         .id(publisher.getId())
         .name(publisher.getName())
         .website(publisher.getWebsite())
         .email(publisher.getEmail())
         .phone(publisher.getPhone())
         .country(publisher.getCountry())
-        .createdAt(publisher.getCreatedAt());
+        .createdAt(publisher.getCreatedAt())
+        .build();
   }
 
   public Publisher toDomain(CreatePublisherRequest request) {
