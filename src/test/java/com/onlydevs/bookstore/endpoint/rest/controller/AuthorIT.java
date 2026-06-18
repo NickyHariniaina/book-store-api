@@ -1,10 +1,10 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
+import static org.hamcrest.Matchers.containsString;
+
 import com.onlydevs.bookstore.conf.FacadeIT;
 import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
-import static org.hamcrest.Matchers.containsString;
-
 import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
