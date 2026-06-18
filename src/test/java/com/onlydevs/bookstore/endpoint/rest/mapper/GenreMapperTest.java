@@ -1,4 +1,4 @@
-package com.onlydevs.bookstore.unit.mapper;
+package com.onlydevs.bookstore.endpoint.rest.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
