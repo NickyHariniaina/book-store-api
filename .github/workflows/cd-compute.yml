@@ -102,6 +102,28 @@ jobs:
           echo "to_upload_filename=$(echo $response | jq -r '.filename')" >> $GITHUB_ENV
           curl -X GET -o template.yml "$(echo $response | jq -r '.build_template_file_uri')"
 
+      - name: Patch template.yml (fix malformed SAM parameters)
+        run: |
+          python3 -m pip install pyyaml -q
+          python3 << 'PYEOF'
+          import yaml
+          with open('template.yml') as f:
+              data = yaml.safe_load(f)
+          modified = False
+          if 'Parameters' in data:
+              for k, v in data['Parameters'].items():
+                  if isinstance(v, str):
+                      print(f'Fixing parameter {k}: was string, converting to object')
+                      data['Parameters'][k] = {'Type': 'String', 'Default': v}
+                      modified = True
+          if modified:
+              with open('template.yml', 'w') as f:
+                  yaml.dump(data, f, default_flow_style=False)
+              print('Template patched successfully')
+          else:
+              print('No malformed parameters found')
+          PYEOF
+
       - name: Build project
         run: sam build
 
