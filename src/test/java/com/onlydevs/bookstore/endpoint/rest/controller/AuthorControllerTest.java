@@ -10,9 +10,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
 import com.onlydevs.bookstore.service.AuthorService;
 import java.time.Instant;
 import java.util.List;
@@ -38,14 +38,15 @@ class AuthorControllerTest {
 
   @Test
   void createAuthor_should_return_created() throws Exception {
-    var request = new CreateAuthorRequest().firstName("Jane").lastName("Austen");
+    var request = CreateAuthorRequest.builder().firstName("Jane").lastName("Austen").build();
     var response =
-        new AuthorResponse()
+        AuthorResponse.builder()
             .id(UUID.randomUUID())
             .firstName("Jane")
             .lastName("Austen")
             .fullName("Jane Austen")
-            .createdAt(Instant.now());
+            .createdAt(Instant.now())
+            .build();
 
     given(authorService.createAuthor(any())).willReturn(response);
 
@@ -64,7 +65,7 @@ class AuthorControllerTest {
 
   @Test
   void createAuthor_should_return_400_when_firstName_missing() throws Exception {
-    var request = new CreateAuthorRequest().lastName("Austen");
+    var request = CreateAuthorRequest.builder().lastName("Austen").build();
 
     mockMvc
         .perform(
@@ -76,7 +77,7 @@ class AuthorControllerTest {
 
   @Test
   void createAuthor_should_return_400_when_lastName_missing() throws Exception {
-    var request = new CreateAuthorRequest().firstName("Jane");
+    var request = CreateAuthorRequest.builder().firstName("Jane").build();
 
     mockMvc
         .perform(
@@ -89,11 +90,12 @@ class AuthorControllerTest {
   @Test
   void getAllAuthors_should_return_page() throws Exception {
     var response =
-        new AuthorResponse()
+        AuthorResponse.builder()
             .id(UUID.randomUUID())
             .firstName("Jane")
             .lastName("Austen")
-            .fullName("Jane Austen");
+            .fullName("Jane Austen")
+            .build();
 
     Page<AuthorResponse> page = new PageImpl<>(List.of(response), PageRequest.of(0, 20), 1);
 
@@ -113,11 +115,12 @@ class AuthorControllerTest {
   void getById_should_return_author() throws Exception {
     var id = UUID.randomUUID().toString();
     var response =
-        new AuthorResponse()
+        AuthorResponse.builder()
             .id(UUID.fromString(id))
             .firstName("Jane")
             .lastName("Austen")
-            .fullName("Jane Austen");
+            .fullName("Jane Austen")
+            .build();
 
     given(authorService.getById(id)).willReturn(response);
 
@@ -132,13 +135,14 @@ class AuthorControllerTest {
   @Test
   void update_should_return_updated_author() throws Exception {
     var id = UUID.randomUUID().toString();
-    var request = new UpdateAuthorRequest().firstName("Emily").lastName("Bronte");
+    var request = UpdateAuthorRequest.builder().firstName("Emily").lastName("Bronte").build();
     var response =
-        new AuthorResponse()
+        AuthorResponse.builder()
             .id(UUID.fromString(id))
             .firstName("Emily")
             .lastName("Bronte")
-            .fullName("Emily Bronte");
+            .fullName("Emily Bronte")
+            .build();
 
     given(authorService.update(any(), any())).willReturn(response);
 
