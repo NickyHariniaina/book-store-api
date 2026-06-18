@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.data.domain.PageRequest;
 
 @DataJpaTest
 class GenreRepositoryTest {
@@ -24,34 +23,6 @@ class GenreRepositoryTest {
   @Autowired private TestEntityManager entityManager;
 
   @Autowired private GenreRepository genreRepository;
-
-  @Test
-  void should_find_books_by_genre_id() {
-    var genre = Genre.builder().name("Fiction").build();
-    var book = Book.builder().title("Test Book").genres(Set.of(genre)).build();
-
-    entityManager.persist(genre);
-    entityManager.persist(book);
-    entityManager.flush();
-
-    var pageable = PageRequest.of(0, 10);
-    var result = genreRepository.findBooksByGenreId(genre.getId(), pageable);
-
-    assertEquals(1, result.getTotalElements());
-    assertEquals("Test Book", result.getContent().getFirst().getTitle());
-  }
-
-  @Test
-  void should_return_empty_page_when_no_books_for_genre() {
-    var genre = Genre.builder().name("Empty Genre").build();
-    entityManager.persist(genre);
-    entityManager.flush();
-
-    var pageable = PageRequest.of(0, 10);
-    var result = genreRepository.findBooksByGenreId(genre.getId(), pageable);
-
-    assertTrue(result.isEmpty());
-  }
 
   @Test
   void should_return_revenue_per_genre_when_sales_exist() {

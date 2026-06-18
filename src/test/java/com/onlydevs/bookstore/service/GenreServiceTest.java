@@ -180,7 +180,7 @@ class GenreServiceTest {
     var summary = BookSummaryResponse.builder().id(UUID.randomUUID()).title("Test Book").build();
 
     given(genreRepository.existsById(genreId)).willReturn(true);
-    given(genreRepository.findBooksByGenreId(genreId, pageable)).willReturn(bookPage);
+    given(genreRepository.findByGenres_Id(genreId, pageable)).willReturn(bookPage);
     given(genreMapper.toBookSummaryResponse(book)).willReturn(summary);
 
     var result = genreService.getBooksByGenreId(genreId, pageable);
@@ -188,7 +188,7 @@ class GenreServiceTest {
     assertEquals(1, result.getTotalElements());
     assertEquals(summary, result.getContent().getFirst());
     then(genreRepository).should().existsById(genreId);
-    then(genreRepository).should().findBooksByGenreId(genreId, pageable);
+    then(genreRepository).should().findByGenres_Id(genreId, pageable);
     then(genreMapper).should().toBookSummaryResponse(book);
   }
 
@@ -200,7 +200,7 @@ class GenreServiceTest {
 
     assertThrows(NotFoundException.class, () -> genreService.getBooksByGenreId(genreId, pageable));
     then(genreRepository).should().existsById(genreId);
-    then(genreRepository).should(never()).findBooksByGenreId(any(), any());
+    then(genreRepository).should(never()).findByGenres_Id(any(), any());
   }
 
   @Test
