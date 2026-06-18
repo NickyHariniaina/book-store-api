@@ -44,10 +44,10 @@ public class GlobalExceptionHandler {
   ResponseEntity<RestErrorResponse> handleValidation(MethodArgumentNotValidException e) {
     log.info("Validation failed", e);
     String message =
-            e.getBindingResult().getFieldErrors().stream()
-                    .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
-                    .reduce((a, b) -> a + "; " + b)
-                    .orElse(e.getMessage());
+        e.getBindingResult().getFieldErrors().stream()
+            .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+            .reduce((a, b) -> a + "; " + b)
+            .orElse(e.getMessage());
     return handleBadRequest(new BadRequestException(message));
   }
 
@@ -55,15 +55,15 @@ public class GlobalExceptionHandler {
   ResponseEntity<RestErrorResponse> handleTooManyRequests(TooManyRequestsException e) {
     log.info("Too many requests", e);
     return new ResponseEntity<>(
-            toRest(e, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS);
+        toRest(e, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS);
   }
 
   @ExceptionHandler(
-          value = {
-                  LockAcquisitionException.class,
-                  CannotAcquireLockException.class,
-                  OptimisticLockException.class
-          })
+      value = {
+        LockAcquisitionException.class,
+        CannotAcquireLockException.class,
+        OptimisticLockException.class
+      })
   ResponseEntity<RestErrorResponse> handleLockAcquisitionException(Exception e) {
     log.warn("Database lock could not be acquired: too many requests assumed", e);
     return handleTooManyRequests(new TooManyRequestsException(e));
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
   ResponseEntity<RestErrorResponse> handleDefault(Exception e) {
     log.error("Internal error", e);
     return new ResponseEntity<>(
-            toRest(e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+        toRest(e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   private RestErrorResponse toRest(Exception e, HttpStatus status) {
