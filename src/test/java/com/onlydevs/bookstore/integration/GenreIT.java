@@ -18,7 +18,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 class GenreIT extends FacadeIT {
 
-  WebTestClient webTestClient;
+  private WebTestClient webTestClient;
 
   @LocalServerPort int port;
 
