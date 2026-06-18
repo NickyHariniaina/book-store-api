@@ -71,8 +71,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(value = {ConflictException.class})
-  ResponseEntity<com.onlydevs.bookstore.endpoint.rest.model.Exception> handleConflict(
-      ConflictException e) {
+  ResponseEntity<RestErrorResponse> handleConflict(ConflictException e) {
     log.info("Conflict", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
   }
