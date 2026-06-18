@@ -5,9 +5,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
-import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
 import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.AuthorRepository;
@@ -42,21 +42,23 @@ class AuthorServiceTest {
   void setUp() {
     janeAusten = Author.builder().id(UUID.randomUUID()).firstName("Jane").lastName("Austen").build();
     albertCamus = Author.builder().id(UUID.randomUUID()).firstName("Albert").lastName("Camus").build();
-    janeResponse = new AuthorResponse()
+    janeResponse = AuthorResponse.builder()
         .id(janeAusten.getId())
         .firstName("Jane")
         .lastName("Austen")
-        .fullName("Jane Austen");
-    albertResponse = new AuthorResponse()
+        .fullName("Jane Austen")
+        .build();
+    albertResponse = AuthorResponse.builder()
         .id(albertCamus.getId())
         .firstName("Albert")
         .lastName("Camus")
-        .fullName("Albert Camus");
+        .fullName("Albert Camus")
+        .build();
   }
 
   @Test
   void createAuthor_should_persist_and_return() {
-    var request = new CreateAuthorRequest().firstName("Albert").lastName("Camus");
+    var request = CreateAuthorRequest.builder().firstName("Albert").lastName("Camus").build();
     var authorToCreate = Author.builder().firstName("Albert").lastName("Camus").build();
     var savedAuthor =
         Author.builder()
@@ -66,12 +68,13 @@ class AuthorServiceTest {
             .createdAt(Instant.now())
             .build();
     var expectedResponse =
-        new AuthorResponse()
+        AuthorResponse.builder()
             .id(savedAuthor.getId())
             .firstName("Albert")
             .lastName("Camus")
             .fullName("Albert Camus")
-            .createdAt(savedAuthor.getCreatedAt());
+            .createdAt(savedAuthor.getCreatedAt())
+            .build();
 
     given(authorMapper.toDomain(request)).willReturn(authorToCreate);
     given(authorRepository.save(authorToCreate)).willReturn(savedAuthor);
@@ -90,7 +93,7 @@ class AuthorServiceTest {
     var id = UUID.randomUUID();
     var author = Author.builder().id(id).firstName("Albert").lastName("Camus").build();
     var authorResponse =
-        new AuthorResponse().id(id).firstName("Albert").lastName("Camus").fullName("Albert Camus");
+        AuthorResponse.builder().id(id).firstName("Albert").lastName("Camus").fullName("Albert Camus").build();
     given(authorRepository.findById(id)).willReturn(Optional.of(author));
     given(authorMapper.toRest(author)).willReturn(authorResponse);
 
@@ -153,7 +156,7 @@ class AuthorServiceTest {
             .lastName("Austen")
             .createdAt(Instant.now())
             .build();
-    var request = new UpdateAuthorRequest().firstName("Emily").lastName("Bronte");
+    var request = UpdateAuthorRequest.builder().firstName("Emily").lastName("Bronte").build();
     var updatedAuthor =
         Author.builder()
             .id(id)
@@ -162,12 +165,13 @@ class AuthorServiceTest {
             .createdAt(existingAuthor.getCreatedAt())
             .build();
     var response =
-        new AuthorResponse()
+        AuthorResponse.builder()
             .id(id)
             .firstName("Emily")
             .lastName("Bronte")
             .fullName("Emily Bronte")
-            .createdAt(existingAuthor.getCreatedAt());
+            .createdAt(existingAuthor.getCreatedAt())
+            .build();
 
     given(authorRepository.findById(id)).willReturn(Optional.of(existingAuthor));
     given(authorRepository.save(existingAuthor)).willReturn(updatedAuthor);
