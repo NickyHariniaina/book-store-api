@@ -62,7 +62,7 @@ public class GenreService {
       throw new NotFoundException("Genre not found with id: " + genreId);
     }
     return genreRepository
-        .findByGenres_Id(genreId, pageable)
+        .findBooksByGenreId(genreId, pageable)
         .map(genreMapper::toBookSummaryResponse);
   }
 

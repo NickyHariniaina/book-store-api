@@ -36,7 +36,7 @@ class GenreIT extends FacadeIT {
 
     webTestClient
         .post()
-        .uri("/genres")
+        .uri("/api/v1/genres")
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -57,7 +57,7 @@ class GenreIT extends FacadeIT {
 
     webTestClient
         .post()
-        .uri("/genres")
+        .uri("/api/v1/genres")
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -71,7 +71,7 @@ class GenreIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/genres")
+        .uri("/api/v1/genres")
         .exchange()
         .expectStatus()
         .isOk()
@@ -92,7 +92,7 @@ class GenreIT extends FacadeIT {
 
     webTestClient
         .patch()
-        .uri("/genres/{id}/rename", saved.getId())
+        .uri("/api/v1/genres/{id}/rename", saved.getId())
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -107,7 +107,7 @@ class GenreIT extends FacadeIT {
 
     webTestClient
         .patch()
-        .uri("/genres/{id}/rename", UUID.randomUUID())
+        .uri("/api/v1/genres/{id}/rename", UUID.randomUUID())
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -123,7 +123,7 @@ class GenreIT extends FacadeIT {
 
     webTestClient
         .patch()
-        .uri("/genres/{id}/rename", saved.getId())
+        .uri("/api/v1/genres/{id}/rename", saved.getId())
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -136,7 +136,7 @@ class GenreIT extends FacadeIT {
 
     webTestClient
         .delete()
-        .uri("/genres/{id}", saved.getId())
+        .uri("/api/v1/genres/{id}", saved.getId())
         .exchange()
         .expectStatus()
         .isNoContent();
@@ -148,7 +148,7 @@ class GenreIT extends FacadeIT {
   void should_fail_when_delete_not_found() {
     webTestClient
         .delete()
-        .uri("/genres/{id}", UUID.randomUUID())
+        .uri("/api/v1/genres/{id}", UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound();
@@ -158,14 +158,19 @@ class GenreIT extends FacadeIT {
   void should_get_books_by_genre_ok_when_empty() {
     var saved = genreRepository.save(Genre.builder().name("Fiction").build());
 
-    webTestClient.get().uri("/genres/{id}/books", saved.getId()).exchange().expectStatus().isOk();
+    webTestClient
+        .get()
+        .uri("/api/v1/genres/{id}/books", saved.getId())
+        .exchange()
+        .expectStatus()
+        .isOk();
   }
 
   @Test
   void should_get_books_by_genre_fail_when_not_found() {
     webTestClient
         .get()
-        .uri("/genres/{id}/books", UUID.randomUUID())
+        .uri("/api/v1/genres/{id}/books", UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound();
@@ -173,6 +178,6 @@ class GenreIT extends FacadeIT {
 
   @Test
   void should_get_revenue_per_genre_ok() {
-    webTestClient.get().uri("/genres/revenue").exchange().expectStatus().isOk();
+    webTestClient.get().uri("/api/v1/genres/revenue").exchange().expectStatus().isOk();
   }
 }

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 class GenreMapperTest {
 
   private final GenreMapper mapper = new GenreMapper();
-  ;
 
   @Test
   void toResponse_maps_all_fields() {

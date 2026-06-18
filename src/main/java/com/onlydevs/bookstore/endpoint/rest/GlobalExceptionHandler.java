@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.endpoint.rest;
 
 import com.onlydevs.bookstore.endpoint.rest.model.RestErrorResponse;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
+import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.exception.NotImplementedException;
 import com.onlydevs.bookstore.model.exception.TooManyRequestsException;
@@ -73,6 +74,12 @@ public class GlobalExceptionHandler {
   ResponseEntity<RestErrorResponse> handleNotFound(NotFoundException e) {
     log.info("Not found", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(value = {ConflictException.class})
+  ResponseEntity<RestErrorResponse> handleConflict(ConflictException e) {
+    log.info("Conflict", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(value = {NotImplementedException.class})
