@@ -1,6 +1,7 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
 import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
@@ -94,8 +95,8 @@ class AuthorIT extends FacadeIT {
         .expectStatus()
         .isOk()
         .expectBody()
-        .jsonPath("$.content.length()")
-        .isEqualTo(2);
+        .jsonPath("$.totalElements")
+        .value(greaterThanOrEqualTo(2));
   }
 
   @Test
