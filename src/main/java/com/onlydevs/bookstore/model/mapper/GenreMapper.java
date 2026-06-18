@@ -1,11 +1,11 @@
 package com.onlydevs.bookstore.model.mapper;
 
-import com.onlydevs.bookstore.endpoint.rest.model.BookSummaryResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.Genre;
+import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
+import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import com.onlydevs.bookstore.model.dto.response.GenreResponse;
+import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +13,11 @@ import org.springframework.stereotype.Component;
 public class GenreMapper {
 
   public GenreResponse toRest(Genre genre) {
-    return new GenreResponse()
+    return GenreResponse.builder()
         .id(genre.getId())
         .name(genre.getName())
-        .description(genre.getDescription());
+        .description(genre.getDescription())
+        .build();
   }
 
   public Genre toDomain(CreateGenreRequest request) {
@@ -24,7 +25,7 @@ public class GenreMapper {
   }
 
   public BookSummaryResponse toBookSummaryResponse(Book book) {
-    return new BookSummaryResponse()
+    return BookSummaryResponse.builder()
         .id(book.getId())
         .title(book.getTitle())
         .language(book.getLanguage() != null ? book.getLanguage().name() : null)
@@ -34,13 +35,15 @@ public class GenreMapper {
                 .map(ba -> ba.getAuthor().getFirstName() + " " + ba.getAuthor().getLastName())
                 .toList())
         .genreNames(book.getGenres().stream().map(Genre::getName).toList())
-        .createdAt(book.getCreatedAt());
+        .createdAt(book.getCreatedAt())
+        .build();
   }
 
   public RevenuePerGenreResponse toRevenuePerGenreResponse(Object[] row) {
-    return new RevenuePerGenreResponse()
+    return RevenuePerGenreResponse.builder()
         .genreName((String) row[0])
         .revenue(
-            row[1] != null ? BigDecimal.valueOf(((Number) row[1]).doubleValue()) : BigDecimal.ZERO);
+            row[1] != null ? BigDecimal.valueOf(((Number) row[1]).doubleValue()) : BigDecimal.ZERO)
+        .build();
   }
 }

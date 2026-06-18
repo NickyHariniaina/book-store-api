@@ -1,10 +1,10 @@
 package com.onlydevs.bookstore.service;
 
-import com.onlydevs.bookstore.endpoint.rest.model.BookSummaryResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.RenameGenreRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.RevenuePerGenreResponse;
+import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
+import com.onlydevs.bookstore.model.dto.request.RenameGenreRequest;
+import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import com.onlydevs.bookstore.model.dto.response.GenreResponse;
+import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.GenreMapper;
