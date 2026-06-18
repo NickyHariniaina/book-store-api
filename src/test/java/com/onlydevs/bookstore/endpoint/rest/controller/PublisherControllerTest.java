@@ -8,9 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.service.PublisherService;
@@ -35,14 +35,15 @@ class PublisherControllerTest {
 
   @Test
   void should_create_publisher_ok() throws Exception {
-    var request = new CreatePublisherRequest().name("New Publisher").email("new@example.com");
-    var response = new PublisherResponse().id(UUID.randomUUID()).name("New Publisher");
+    var request =
+        CreatePublisherRequest.builder().name("New Publisher").email("new@example.com").build();
+    var response = PublisherResponse.builder().id(UUID.randomUUID()).name("New Publisher").build();
 
     given(publisherService.createPublisher(any(CreatePublisherRequest.class))).willReturn(response);
 
     mockMvc
         .perform(
-            post("/publishers")
+            post("/api/v1/publishers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -51,14 +52,15 @@ class PublisherControllerTest {
 
   @Test
   void should_fail_when_duplicate_email() throws Exception {
-    var request = new CreatePublisherRequest().name("Test").email("duplicate@example.com");
+    var request =
+        CreatePublisherRequest.builder().name("Test").email("duplicate@example.com").build();
 
     given(publisherService.createPublisher(any(CreatePublisherRequest.class)))
         .willThrow(new ConflictException("Email already exists"));
 
     mockMvc
         .perform(
-            post("/publishers")
+            post("/api/v1/publishers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isConflict());
@@ -66,12 +68,13 @@ class PublisherControllerTest {
 
   @Test
   void should_get_all_publishers_ok() throws Exception {
-    var publisher = new PublisherResponse().id(UUID.randomUUID()).name("Test Publisher");
+    var publisher =
+        PublisherResponse.builder().id(UUID.randomUUID()).name("Test Publisher").build();
 
     given(publisherService.getAllPublishers(any())).willReturn(new PageImpl<>(List.of(publisher)));
 
     mockMvc
-        .perform(get("/publishers"))
+        .perform(get("/api/v1/publishers"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].name").value("Test Publisher"));
   }
@@ -79,12 +82,12 @@ class PublisherControllerTest {
   @Test
   void should_get_publisher_by_id_ok() throws Exception {
     var id = UUID.randomUUID();
-    var response = new PublisherResponse().id(id).name("Test Publisher");
+    var response = PublisherResponse.builder().id(id).name("Test Publisher").build();
 
     given(publisherService.getPublisherById(id)).willReturn(response);
 
     mockMvc
-        .perform(get("/publishers/{id}", id))
+        .perform(get("/api/v1/publishers/{id}", id))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("Test Publisher"));
   }
@@ -96,20 +99,20 @@ class PublisherControllerTest {
     given(publisherService.getPublisherById(id))
         .willThrow(new NotFoundException("Publisher not found"));
 
-    mockMvc.perform(get("/publishers/{id}", id)).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/v1/publishers/{id}", id)).andExpect(status().isNotFound());
   }
 
   @Test
   void should_update_publisher_ok() throws Exception {
     var id = UUID.randomUUID();
-    var request = new UpdatePublisherRequest().name("Updated Name");
-    var response = new PublisherResponse().id(id).name("Updated Name");
+    var request = UpdatePublisherRequest.builder().name("Updated Name").build();
+    var response = PublisherResponse.builder().id(id).name("Updated Name").build();
 
     given(publisherService.updatePublisher(any(), any())).willReturn(response);
 
     mockMvc
         .perform(
-            put("/publishers/{id}", id)
+            put("/api/v1/publishers/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -119,14 +122,14 @@ class PublisherControllerTest {
   @Test
   void should_fail_when_update_not_found() throws Exception {
     var id = UUID.randomUUID();
-    var request = new UpdatePublisherRequest().name("New Name");
+    var request = UpdatePublisherRequest.builder().name("New Name").build();
 
     given(publisherService.updatePublisher(any(), any()))
         .willThrow(new NotFoundException("Publisher not found"));
 
     mockMvc
         .perform(
-            put("/publishers/{id}", id)
+            put("/api/v1/publishers/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isNotFound());
@@ -135,7 +138,7 @@ class PublisherControllerTest {
   @Test
   void should_delete_publisher_ok() throws Exception {
     mockMvc
-        .perform(delete("/publishers/{id}", UUID.randomUUID()))
+        .perform(delete("/api/v1/publishers/{id}", UUID.randomUUID()))
         .andExpect(status().isNoContent());
   }
 
@@ -147,6 +150,6 @@ class PublisherControllerTest {
         .given(publisherService)
         .deletePublisher(id);
 
-    mockMvc.perform(delete("/publishers/{id}", id)).andExpect(status().isNotFound());
+    mockMvc.perform(delete("/api/v1/publishers/{id}", id)).andExpect(status().isNotFound());
   }
 }

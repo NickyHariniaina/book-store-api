@@ -3,9 +3,10 @@ package com.onlydevs.bookstore.integration;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
-import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
 import com.onlydevs.bookstore.model.Publisher;
+import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
 import com.onlydevs.bookstore.repository.PublisherRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +18,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 class PublisherIT extends FacadeIT {
 
-  WebTestClient webTestClient;
+  private WebTestClient webTestClient;
 
   @LocalServerPort int port;
 
@@ -32,14 +33,15 @@ class PublisherIT extends FacadeIT {
   @Test
   void should_create_publisher_ok() {
     var request =
-        new CreatePublisherRequest()
+        CreatePublisherRequest.builder()
             .name("Test Publisher")
             .email("test@example.com")
-            .phone("1234567890");
+            .phone("1234567890")
+            .build();
 
     webTestClient
         .post()
-        .uri("/publishers")
+        .uri("/api/v1/publishers")
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -58,11 +60,15 @@ class PublisherIT extends FacadeIT {
         Publisher.builder().name("Existing").phone("0000000000").email("dup@example.com").build());
 
     var request =
-        new CreatePublisherRequest().name("Test").email("dup@example.com").phone("1111111111");
+        CreatePublisherRequest.builder()
+            .name("Test")
+            .email("dup@example.com")
+            .phone("1111111111")
+            .build();
 
     webTestClient
         .post()
-        .uri("/publishers")
+        .uri("/api/v1/publishers")
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -76,7 +82,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/publishers")
+        .uri("/api/v1/publishers")
         .exchange()
         .expectStatus()
         .isOk()
@@ -96,7 +102,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/publishers/{id}", saved.getId())
+        .uri("/api/v1/publishers/{id}", saved.getId())
         .exchange()
         .expectStatus()
         .isOk()
@@ -112,7 +118,7 @@ class PublisherIT extends FacadeIT {
   void should_fail_when_publisher_not_found() {
     webTestClient
         .get()
-        .uri("/publishers/{id}", UUID.randomUUID())
+        .uri("/api/v1/publishers/{id}", UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound();
@@ -123,11 +129,11 @@ class PublisherIT extends FacadeIT {
     var saved =
         publisherRepository.save(Publisher.builder().name("Original").phone("0000000000").build());
 
-    var request = new CreatePublisherRequest().name("Updated").phone("9999999999");
+    var request = UpdatePublisherRequest.builder().name("Updated").phone("9999999999").build();
 
     webTestClient
         .put()
-        .uri("/publishers/{id}", saved.getId())
+        .uri("/api/v1/publishers/{id}", saved.getId())
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -135,7 +141,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/publishers/{id}", saved.getId())
+        .uri("/api/v1/publishers/{id}", saved.getId())
         .exchange()
         .expectStatus()
         .isOk()
@@ -145,11 +151,11 @@ class PublisherIT extends FacadeIT {
 
   @Test
   void should_fail_when_update_not_found() {
-    var request = new CreatePublisherRequest().name("Updated").phone("9999999999");
+    var request = UpdatePublisherRequest.builder().name("Updated").phone("9999999999").build();
 
     webTestClient
         .put()
-        .uri("/publishers/{id}", UUID.randomUUID())
+        .uri("/api/v1/publishers/{id}", UUID.randomUUID())
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -163,24 +169,19 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .delete()
-        .uri("/publishers/{id}", saved.getId())
+        .uri("/api/v1/publishers/{id}", saved.getId())
         .exchange()
         .expectStatus()
         .isNoContent();
 
-    webTestClient
-        .get()
-        .uri("/publishers/{id}", saved.getId())
-        .exchange()
-        .expectStatus()
-        .isNotFound();
+    assertFalse(publisherRepository.existsById(saved.getId()));
   }
 
   @Test
   void should_fail_when_delete_not_found() {
     webTestClient
         .delete()
-        .uri("/publishers/{id}", UUID.randomUUID())
+        .uri("/api/v1/publishers/{id}", UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound();

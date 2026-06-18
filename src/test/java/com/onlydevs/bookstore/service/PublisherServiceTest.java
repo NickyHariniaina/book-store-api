@@ -6,10 +6,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
-import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.PublisherResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.Publisher;
+import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
@@ -43,12 +43,13 @@ class PublisherServiceTest {
   void setUp() {
     publisherId = UUID.randomUUID();
     publisher = Publisher.builder().id(publisherId).name("Test Publisher").build();
-    publisherResponse = new PublisherResponse().id(publisherId).name("Test Publisher");
+    publisherResponse = PublisherResponse.builder().id(publisherId).name("Test Publisher").build();
   }
 
   @Test
   void create_publisher_ok_when_email_not_taken() {
-    var request = new CreatePublisherRequest().name("Test Publisher").email("test@example.com");
+    var request =
+        CreatePublisherRequest.builder().name("Test Publisher").email("test@example.com").build();
     given(publisherRepository.existsByEmailIgnoreCase("test@example.com")).willReturn(false);
     given(publisherMapper.toDomain(request)).willReturn(publisher);
     given(publisherRepository.save(publisher)).willReturn(publisher);
@@ -65,7 +66,8 @@ class PublisherServiceTest {
 
   @Test
   void create_publisher_ko_when_email_already_taken() {
-    var request = new CreatePublisherRequest().name("Test Publisher").email("taken@example.com");
+    var request =
+        CreatePublisherRequest.builder().name("Test Publisher").email("taken@example.com").build();
     given(publisherRepository.existsByEmailIgnoreCase("taken@example.com")).willReturn(true);
 
     assertThrows(ConflictException.class, () -> publisherService.createPublisher(request));
@@ -76,9 +78,9 @@ class PublisherServiceTest {
 
   @Test
   void update_publisher_ok_when_email_not_taken() {
-    var request = new UpdatePublisherRequest().name("Updated Name");
+    var request = UpdatePublisherRequest.builder().name("Updated Name").build();
     var updatedPublisher = Publisher.builder().id(publisherId).name("Updated Name").build();
-    var updatedResponse = new PublisherResponse().id(publisherId).name("Updated Name");
+    var updatedResponse = PublisherResponse.builder().id(publisherId).name("Updated Name").build();
 
     given(publisherRepository.findById(publisherId)).willReturn(Optional.of(publisher));
     given(publisherRepository.save(publisher)).willReturn(updatedPublisher);
@@ -94,12 +96,16 @@ class PublisherServiceTest {
 
   @Test
   void update_publisher_ok_when_email_changed_and_not_taken() {
-    var request = new UpdatePublisherRequest().email("new@example.com");
+    var request = UpdatePublisherRequest.builder().email("new@example.com").build();
     publisher.setEmail("old@example.com");
     var updatedPublisher =
         Publisher.builder().id(publisherId).name("Test Publisher").email("new@example.com").build();
     var updatedResponse =
-        new PublisherResponse().id(publisherId).name("Test Publisher").email("new@example.com");
+        PublisherResponse.builder()
+            .id(publisherId)
+            .name("Test Publisher")
+            .email("new@example.com")
+            .build();
 
     given(publisherRepository.findById(publisherId)).willReturn(Optional.of(publisher));
     given(publisherRepository.existsByEmailIgnoreCase("new@example.com")).willReturn(false);
@@ -113,7 +119,7 @@ class PublisherServiceTest {
 
   @Test
   void update_publisher_ko_when_email_already_taken() {
-    var request = new UpdatePublisherRequest().email("taken@example.com");
+    var request = UpdatePublisherRequest.builder().email("taken@example.com").build();
     publisher.setEmail("old@example.com");
 
     given(publisherRepository.findById(publisherId)).willReturn(Optional.of(publisher));
@@ -128,7 +134,7 @@ class PublisherServiceTest {
 
   @Test
   void update_publisher_ko_when_publisher_not_found() {
-    var request = new UpdatePublisherRequest().name("New Name");
+    var request = UpdatePublisherRequest.builder().name("New Name").build();
 
     given(publisherRepository.findById(publisherId)).willReturn(Optional.empty());
 

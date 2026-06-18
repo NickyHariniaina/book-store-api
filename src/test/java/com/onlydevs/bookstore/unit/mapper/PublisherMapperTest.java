@@ -2,9 +2,9 @@ package com.onlydevs.bookstore.unit.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.onlydevs.bookstore.endpoint.rest.model.CreatePublisherRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.Publisher;
+import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
 import java.time.Instant;
 import java.util.UUID;
@@ -66,12 +66,13 @@ class PublisherMapperTest {
   @Test
   void toEntity_creates_publisher_from_request() {
     var request =
-        new CreatePublisherRequest()
+        CreatePublisherRequest.builder()
             .name("Test Publisher")
             .website("http://example.com")
             .email("test@example.com")
             .phone("1234567890")
-            .country("US");
+            .country("US")
+            .build();
 
     var publisher = mapper.toDomain(request);
 
@@ -86,7 +87,7 @@ class PublisherMapperTest {
 
   @Test
   void toEntity_creates_publisher_with_minimal_fields() {
-    var request = new CreatePublisherRequest().name("Minimal");
+    var request = CreatePublisherRequest.builder().name("Minimal").build();
 
     var publisher = mapper.toDomain(request);
 
@@ -110,12 +111,13 @@ class PublisherMapperTest {
             .build();
 
     var request =
-        new UpdatePublisherRequest()
+        UpdatePublisherRequest.builder()
             .name("New Name")
             .website("http://new.com")
             .email("new@example.com")
             .phone("1111111111")
-            .country("DE");
+            .country("DE")
+            .build();
 
     mapper.updateEntity(publisher, request);
 
@@ -138,7 +140,7 @@ class PublisherMapperTest {
             .country("US")
             .build();
 
-    var request = new UpdatePublisherRequest().name("Updated Name");
+    var request = UpdatePublisherRequest.builder().name("Updated Name").build();
 
     mapper.updateEntity(publisher, request);
 
@@ -162,11 +164,12 @@ class PublisherMapperTest {
             .build();
 
     var request =
-        new UpdatePublisherRequest()
+        UpdatePublisherRequest.builder()
             .website("http://new.com")
             .email("new@example.com")
             .phone("1111111111")
-            .country("DE");
+            .country("DE")
+            .build();
 
     mapper.updateEntity(publisher, request);
 
