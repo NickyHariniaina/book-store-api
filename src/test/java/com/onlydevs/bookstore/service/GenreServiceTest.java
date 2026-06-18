@@ -7,13 +7,13 @@ import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
-import com.onlydevs.bookstore.endpoint.rest.model.BookSummaryResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.RenameGenreRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.Genre;
+import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
+import com.onlydevs.bookstore.model.dto.request.RenameGenreRequest;
+import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import com.onlydevs.bookstore.model.dto.response.GenreResponse;
+import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.mapper.GenreMapper;
@@ -48,12 +48,13 @@ class GenreServiceTest {
   void setUp() {
     genreId = UUID.randomUUID();
     genre = Genre.builder().id(genreId).name("Fiction").description("Fiction books").build();
-    genreResponse = new GenreResponse().id(genreId).name("Fiction").description("Fiction books");
+    genreResponse =
+        GenreResponse.builder().id(genreId).name("Fiction").description("Fiction books").build();
   }
 
   @Test
   void create_genre_ok_when_name_not_taken() {
-    var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
+    var request = CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
     given(genreRepository.existsByNameIgnoreCase("Fiction")).willReturn(false);
     given(genreMapper.toDomain(request)).willReturn(genre);
     given(genreRepository.save(genre)).willReturn(genre);
@@ -70,7 +71,7 @@ class GenreServiceTest {
 
   @Test
   void create_genre_ko_when_name_already_taken() {
-    var request = new CreateGenreRequest().name("Fiction");
+    var request = CreateGenreRequest.builder().name("Fiction").build();
     given(genreRepository.existsByNameIgnoreCase("Fiction")).willReturn(true);
 
     assertThrows(ConflictException.class, () -> genreService.createGenre(request));
@@ -81,11 +82,11 @@ class GenreServiceTest {
 
   @Test
   void rename_genre_ok_when_new_name_not_taken() {
-    var request = new RenameGenreRequest().name("Science");
+    var request = RenameGenreRequest.builder().name("Science").build();
     var renamedGenre =
         Genre.builder().id(genreId).name("Science").description("Fiction books").build();
     var renamedResponse =
-        new GenreResponse().id(genreId).name("Science").description("Fiction books");
+        GenreResponse.builder().id(genreId).name("Science").description("Fiction books").build();
 
     given(genreRepository.findById(genreId)).willReturn(Optional.of(genre));
     given(genreRepository.existsByNameIgnoreCase("Science")).willReturn(false);
@@ -103,7 +104,7 @@ class GenreServiceTest {
 
   @Test
   void rename_genre_ko_when_new_name_already_taken() {
-    var request = new RenameGenreRequest().name("Taken");
+    var request = RenameGenreRequest.builder().name("Taken").build();
 
     given(genreRepository.findById(genreId)).willReturn(Optional.of(genre));
     given(genreRepository.existsByNameIgnoreCase("Taken")).willReturn(true);
@@ -116,7 +117,7 @@ class GenreServiceTest {
 
   @Test
   void rename_genre_ko_when_genre_not_found() {
-    var request = new RenameGenreRequest().name("Science");
+    var request = RenameGenreRequest.builder().name("Science").build();
 
     given(genreRepository.findById(genreId)).willReturn(Optional.empty());
 
@@ -148,7 +149,7 @@ class GenreServiceTest {
   @Test
   void get_all_genres_ok_when_genres_exist() {
     var g1 = Genre.builder().id(genreId).name("Fiction").build();
-    var r1 = new GenreResponse().id(genreId).name("Fiction");
+    var r1 = GenreResponse.builder().id(genreId).name("Fiction").build();
 
     given(genreRepository.findAll()).willReturn(List.of(g1));
     given(genreMapper.toRest(g1)).willReturn(r1);
@@ -176,7 +177,7 @@ class GenreServiceTest {
     var pageable = PageRequest.of(0, 10);
     var book = mock(Book.class);
     var bookPage = new PageImpl<>(List.of(book), pageable, 1);
-    var summary = new BookSummaryResponse().id(UUID.randomUUID()).title("Test Book");
+    var summary = BookSummaryResponse.builder().id(UUID.randomUUID()).title("Test Book").build();
 
     given(genreRepository.existsById(genreId)).willReturn(true);
     given(genreRepository.findBooksByGenreId(genreId, pageable)).willReturn(bookPage);
@@ -206,7 +207,10 @@ class GenreServiceTest {
   void get_revenue_per_genre_ok_when_data_exists() {
     var row = new Object[] {"Fiction", 500.0};
     var revenueResponse =
-        new RevenuePerGenreResponse().genreName("Fiction").revenue(BigDecimal.valueOf(500.0));
+        RevenuePerGenreResponse.builder()
+            .genreName("Fiction")
+            .revenue(BigDecimal.valueOf(500.0))
+            .build();
 
     given(genreRepository.revenueByGenre()).willReturn(List.<Object[]>of(row));
     given(genreMapper.toRevenuePerGenreResponse(row)).willReturn(revenueResponse);

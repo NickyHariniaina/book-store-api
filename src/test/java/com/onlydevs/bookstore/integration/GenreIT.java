@@ -3,10 +3,10 @@ package com.onlydevs.bookstore.integration;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
-import com.onlydevs.bookstore.endpoint.rest.model.GenreResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.RenameGenreRequest;
 import com.onlydevs.bookstore.model.Genre;
+import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
+import com.onlydevs.bookstore.model.dto.request.RenameGenreRequest;
+import com.onlydevs.bookstore.model.dto.response.GenreResponse;
 import com.onlydevs.bookstore.repository.GenreRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ class GenreIT extends FacadeIT {
 
   @Test
   void should_create_genre_ok() {
-    var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
+    var request = CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
 
     webTestClient
         .post()
@@ -53,7 +53,7 @@ class GenreIT extends FacadeIT {
   void should_fail_when_duplicate_name() {
     genreRepository.save(Genre.builder().name("Fiction").build());
 
-    var request = new CreateGenreRequest().name("Fiction");
+    var request = CreateGenreRequest.builder().name("Fiction").build();
 
     webTestClient
         .post()
@@ -88,7 +88,7 @@ class GenreIT extends FacadeIT {
   void should_rename_genre_ok() {
     var saved = genreRepository.save(Genre.builder().name("Fiction").build());
 
-    var request = new RenameGenreRequest().name("Science");
+    var request = RenameGenreRequest.builder().name("Science").build();
 
     webTestClient
         .patch()
@@ -103,7 +103,7 @@ class GenreIT extends FacadeIT {
 
   @Test
   void should_fail_when_rename_not_found() {
-    var request = new RenameGenreRequest().name("Science");
+    var request = RenameGenreRequest.builder().name("Science").build();
 
     webTestClient
         .patch()
@@ -119,7 +119,7 @@ class GenreIT extends FacadeIT {
     genreRepository.save(Genre.builder().name("Science").build());
     var saved = genreRepository.save(Genre.builder().name("Fiction").build());
 
-    var request = new RenameGenreRequest().name("Science");
+    var request = RenameGenreRequest.builder().name("Science").build();
 
     webTestClient
         .patch()

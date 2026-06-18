@@ -2,11 +2,11 @@ package com.onlydevs.bookstore.unit.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.onlydevs.bookstore.endpoint.rest.model.CreateGenreRequest;
 import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookAuthor;
 import com.onlydevs.bookstore.model.Genre;
+import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import com.onlydevs.bookstore.model.mapper.GenreMapper;
@@ -50,7 +50,7 @@ class GenreMapperTest {
 
   @Test
   void toEntity_creates_genre_from_request() {
-    var request = new CreateGenreRequest().name("Fiction").description("Fiction books");
+    var request = CreateGenreRequest.builder().name("Fiction").description("Fiction books").build();
 
     var genre = mapper.toDomain(request);
 
@@ -61,7 +61,7 @@ class GenreMapperTest {
 
   @Test
   void toEntity_creates_genre_with_null_description() {
-    var request = new CreateGenreRequest().name("Fiction");
+    var request = CreateGenreRequest.builder().name("Fiction").build();
 
     var genre = mapper.toDomain(request);
 
