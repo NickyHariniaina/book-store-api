@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/genres")
+@RequestMapping("/api/v1/genres")
 @RequiredArgsConstructor
 public class GenreController {
 
