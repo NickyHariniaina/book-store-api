@@ -16,72 +16,81 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import java.util.UUID;
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(value = {BadRequestException.class})
+  @ExceptionHandler(value = { BadRequestException.class })
   ResponseEntity<RestErrorResponse> handleBadRequest(BadRequestException e) {
     log.info("Bad request", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
   }
 
-  @ExceptionHandler(value = {MissingServletRequestParameterException.class})
+  @ExceptionHandler(value = { MissingServletRequestParameterException.class })
   ResponseEntity<RestErrorResponse> handleBadRequest(MissingServletRequestParameterException e) {
     log.info("Missing parameter", e);
     return handleBadRequest(new BadRequestException(e.getMessage()));
   }
 
-  @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class})
+  @ExceptionHandler(value = { MethodArgumentTypeMismatchException.class })
   ResponseEntity<RestErrorResponse> handleConversionFailed(MethodArgumentTypeMismatchException e) {
-    log.info("Conversion failed", e);
-    String message = e.getCause().getCause().getMessage();
+    log.info("Conversion failed for parameter '{}' with value '{}'",
+        e.getName(), e.getValue());
+    String message;
+    if (e.getRequiredType() == UUID.class) {
+      message = String.format("Invalid UUID format: '%s'. Expected format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          e.getValue());
+    } else if (e.getCause() != null) {
+      message = e.getCause().getMessage();
+    } else {
+      message = String.format("Invalid value '%s' for parameter '%s'",
+          e.getValue(), e.getName());
+    }
     return handleBadRequest(new BadRequestException(message));
   }
 
-  @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+  @ExceptionHandler(value = { MethodArgumentNotValidException.class })
   ResponseEntity<RestErrorResponse> handleValidation(MethodArgumentNotValidException e) {
     log.info("Validation failed", e);
-    String message =
-        e.getBindingResult().getFieldErrors().stream()
-            .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
-            .reduce((a, b) -> a + "; " + b)
-            .orElse(e.getMessage());
+    String message = e.getBindingResult().getFieldErrors().stream()
+        .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+        .reduce((a, b) -> a + "; " + b)
+        .orElse(e.getMessage());
     return handleBadRequest(new BadRequestException(message));
   }
 
-  @ExceptionHandler(value = {TooManyRequestsException.class})
+  @ExceptionHandler(value = { TooManyRequestsException.class })
   ResponseEntity<RestErrorResponse> handleTooManyRequests(TooManyRequestsException e) {
     log.info("Too many requests", e);
     return new ResponseEntity<>(
         toRest(e, HttpStatus.TOO_MANY_REQUESTS), HttpStatus.TOO_MANY_REQUESTS);
   }
 
-  @ExceptionHandler(
-      value = {
-        LockAcquisitionException.class,
-        CannotAcquireLockException.class,
-        OptimisticLockException.class
-      })
+  @ExceptionHandler(value = {
+      LockAcquisitionException.class,
+      CannotAcquireLockException.class,
+      OptimisticLockException.class
+  })
   ResponseEntity<RestErrorResponse> handleLockAcquisitionException(Exception e) {
     log.warn("Database lock could not be acquired: too many requests assumed", e);
     return handleTooManyRequests(new TooManyRequestsException(e));
   }
 
-  @ExceptionHandler(value = {NotFoundException.class})
+  @ExceptionHandler(value = { NotFoundException.class })
   ResponseEntity<RestErrorResponse> handleNotFound(NotFoundException e) {
     log.info("Not found", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
   }
 
-  @ExceptionHandler(value = {NotImplementedException.class})
+  @ExceptionHandler(value = { NotImplementedException.class })
   ResponseEntity<RestErrorResponse> handleNotImplemented(NotImplementedException e) {
     log.error("Not implemented", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.NOT_IMPLEMENTED), HttpStatus.NOT_IMPLEMENTED);
   }
 
-  @ExceptionHandler(value = {Exception.class})
+  @ExceptionHandler(value = { Exception.class })
   ResponseEntity<RestErrorResponse> handleDefault(Exception e) {
     log.error("Internal error", e);
     return new ResponseEntity<>(
