@@ -1,9 +1,15 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
 import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
 import com.onlydevs.bookstore.endpoint.rest.model.UpdateAuthorRequest;
@@ -12,19 +18,23 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(AuthorController.class)
 class AuthorControllerTest {
 
-  @Mock private AuthorService authorService;
-  @InjectMocks private AuthorController controller;
+  @Autowired private MockMvc mockMvc;
+
+  @Autowired private ObjectMapper objectMapper;
+
+  @MockBean private AuthorService authorService;
 
   @Test
-  void createAuthor_should_delegate_to_service_and_return_response() {
+  void createAuthor_should_return_created() throws Exception {
     var request = new CreateAuthorRequest().firstName("Jane").lastName("Austen");
     var response =
         new AuthorResponse()
@@ -33,33 +43,68 @@ class AuthorControllerTest {
             .lastName("Austen")
             .fullName("Jane Austen")
             .createdAt(Instant.now());
-    given(authorService.save(request)).willReturn(response);
 
-    AuthorResponse result = controller.createAuthor(request);
+    given(authorService.save(any())).willReturn(response);
 
-    assertSame(response, result);
-    then(authorService).should().save(request);
+    mockMvc
+        .perform(
+            post("/api/v1/authors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(response.getId().toString()))
+        .andExpect(jsonPath("$.firstName").value("Jane"))
+        .andExpect(jsonPath("$.lastName").value("Austen"))
+        .andExpect(jsonPath("$.fullName").value("Jane Austen"))
+        .andExpect(jsonPath("$.createdAt").isNotEmpty());
   }
 
   @Test
-  void getAll_should_delegate_to_service_and_return_list() {
-    var responses =
-        List.of(
-            new AuthorResponse()
-                .id(UUID.randomUUID())
-                .firstName("Jane")
-                .lastName("Austen")
-                .fullName("Jane Austen"));
-    given(authorService.getAll()).willReturn(responses);
+  void createAuthor_should_return_400_when_firstName_missing() throws Exception {
+    var request = new CreateAuthorRequest().lastName("Austen");
 
-    var result = controller.getAll();
-
-    assertSame(responses, result);
-    then(authorService).should().getAll();
+    mockMvc
+        .perform(
+            post("/api/v1/authors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  void getById_should_delegate_to_service_and_return_response() {
+  void createAuthor_should_return_400_when_lastName_missing() throws Exception {
+    var request = new CreateAuthorRequest().firstName("Jane");
+
+    mockMvc
+        .perform(
+            post("/api/v1/authors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getAll_should_return_list() throws Exception {
+    var response =
+        new AuthorResponse()
+            .id(UUID.randomUUID())
+            .firstName("Jane")
+            .lastName("Austen")
+            .fullName("Jane Austen");
+
+    given(authorService.getAll()).willReturn(List.of(response));
+
+    mockMvc
+        .perform(get("/api/v1/authors").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].id").value(response.getId().toString()))
+        .andExpect(jsonPath("$[0].firstName").value("Jane"))
+        .andExpect(jsonPath("$[0].lastName").value("Austen"))
+        .andExpect(jsonPath("$[0].fullName").value("Jane Austen"));
+  }
+
+  @Test
+  void getById_should_return_author() throws Exception {
     var id = UUID.randomUUID().toString();
     var response =
         new AuthorResponse()
@@ -67,16 +112,19 @@ class AuthorControllerTest {
             .firstName("Jane")
             .lastName("Austen")
             .fullName("Jane Austen");
+
     given(authorService.getById(id)).willReturn(response);
 
-    AuthorResponse result = controller.getById(id);
-
-    assertSame(response, result);
-    then(authorService).should().getById(id);
+    mockMvc
+        .perform(get("/api/v1/authors/{id}", id))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(id))
+        .andExpect(jsonPath("$.firstName").value("Jane"))
+        .andExpect(jsonPath("$.lastName").value("Austen"));
   }
 
   @Test
-  void update_should_delegate_to_service_and_return_response() {
+  void update_should_return_updated_author() throws Exception {
     var id = UUID.randomUUID().toString();
     var request = new UpdateAuthorRequest().firstName("Emily").lastName("Bronte");
     var response =
@@ -85,20 +133,24 @@ class AuthorControllerTest {
             .firstName("Emily")
             .lastName("Bronte")
             .fullName("Emily Bronte");
-    given(authorService.update(id, request)).willReturn(response);
 
-    AuthorResponse result = controller.update(id, request);
+    given(authorService.update(any(), any())).willReturn(response);
 
-    assertSame(response, result);
-    then(authorService).should().update(id, request);
+    mockMvc
+        .perform(
+            put("/api/v1/authors/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.firstName").value("Emily"))
+        .andExpect(jsonPath("$.lastName").value("Bronte"));
   }
 
   @Test
-  void delete_should_delegate_to_service() {
+  void delete_should_return_ok() throws Exception {
     var id = UUID.randomUUID().toString();
+    willDoNothing().given(authorService).deleteById(id);
 
-    controller.delete(id);
-
-    then(authorService).should().deleteById(id);
+    mockMvc.perform(delete("/api/v1/authors/{id}", id)).andExpect(status().isOk());
   }
 }
