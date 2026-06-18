@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.onlydevs.bookstore.conf.FacadeIT;
 import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
 import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
+import com.onlydevs.bookstore.endpoint.rest.model.RestErrorResponse;
 import com.onlydevs.bookstore.endpoint.rest.model.UpdateAuthorRequest;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -182,5 +184,145 @@ class AuthorIT extends FacadeIT {
         .exchange()
         .expectStatus()
         .isNotFound();
+  }
+
+  @Test
+  void getAll_should_return_empty_list_when_no_authors() {
+    var result =
+        webTestClient
+            .get()
+            .uri("/api/v1/authors")
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBodyList(AuthorResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void getById_should_return_404_when_not_found() {
+    var result =
+        webTestClient
+            .get()
+            .uri("/api/v1/authors/" + UUID.randomUUID())
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody(RestErrorResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+    assertNotNull(result);
+    assertEquals("404 NOT_FOUND", result.getType());
+    assertTrue(result.getMessage().contains("doesn't exist"));
+  }
+
+  @Test
+  void update_should_return_404_when_not_found() {
+    var result =
+        webTestClient
+            .put()
+            .uri("/api/v1/authors/" + UUID.randomUUID())
+            .bodyValue(new UpdateAuthorRequest().firstName("Test").lastName("Test"))
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody(RestErrorResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+    assertNotNull(result);
+    assertEquals("404 NOT_FOUND", result.getType());
+    assertTrue(result.getMessage().contains("doesn't exist"));
+  }
+
+  @Test
+  void delete_should_return_404_when_not_found() {
+    var result =
+        webTestClient
+            .delete()
+            .uri("/api/v1/authors/" + UUID.randomUUID())
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody(RestErrorResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+    assertNotNull(result);
+    assertEquals("404 NOT_FOUND", result.getType());
+    assertTrue(result.getMessage().contains("doesn't exist"));
+  }
+
+  @Test
+  void createAuthor_should_return_400_when_firstName_missing() {
+    var result =
+        webTestClient
+            .post()
+            .uri("/api/v1/authors")
+            .bodyValue(new CreateAuthorRequest().lastName("Austen"))
+            .exchange()
+            .expectStatus()
+            .isBadRequest()
+            .expectBody(RestErrorResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+    assertNotNull(result);
+    assertEquals("400 BAD_REQUEST", result.getType());
+    assertTrue(result.getMessage().contains("firstName"));
+  }
+
+  @Test
+  void createAuthor_should_return_400_when_lastName_missing() {
+    var result =
+        webTestClient
+            .post()
+            .uri("/api/v1/authors")
+            .bodyValue(new CreateAuthorRequest().firstName("Jane"))
+            .exchange()
+            .expectStatus()
+            .isBadRequest()
+            .expectBody(RestErrorResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+    assertNotNull(result);
+    assertEquals("400 BAD_REQUEST", result.getType());
+    assertTrue(result.getMessage().contains("lastName"));
+  }
+
+  @Test
+  void update_should_do_nothing_when_body_empty() {
+    var created =
+        webTestClient
+            .post()
+            .uri("/api/v1/authors")
+            .bodyValue(new CreateAuthorRequest().firstName("Jane").lastName("Austen"))
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(AuthorResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+    var updated =
+        webTestClient
+            .put()
+            .uri("/api/v1/authors/" + created.getId())
+            .bodyValue(new UpdateAuthorRequest())
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(AuthorResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+    assertEquals(created.getFirstName(), updated.getFirstName());
+    assertEquals(created.getLastName(), updated.getLastName());
   }
 }
