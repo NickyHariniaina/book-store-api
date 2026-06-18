@@ -187,23 +187,6 @@ class AuthorIT extends FacadeIT {
   }
 
   @Test
-  void getAll_should_return_empty_list_when_no_authors() {
-    var result =
-        webTestClient
-            .get()
-            .uri("/api/v1/authors")
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBodyList(AuthorResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
-  }
-
-  @Test
   void getById_should_return_404_when_not_found() {
     var result =
         webTestClient

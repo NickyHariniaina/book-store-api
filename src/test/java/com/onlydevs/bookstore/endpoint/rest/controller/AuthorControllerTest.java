@@ -48,7 +48,7 @@ class AuthorControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/authors")
+            post("/authors")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -65,7 +65,7 @@ class AuthorControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/authors")
+            post("/authors")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -77,7 +77,7 @@ class AuthorControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/authors")
+            post("/authors")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -95,7 +95,7 @@ class AuthorControllerTest {
     given(authorService.getAll()).willReturn(List.of(response));
 
     mockMvc
-        .perform(get("/api/v1/authors").contentType(MediaType.APPLICATION_JSON))
+        .perform(get("/authors").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value(response.getId().toString()))
         .andExpect(jsonPath("$[0].firstName").value("Jane"))
@@ -116,7 +116,7 @@ class AuthorControllerTest {
     given(authorService.getById(id)).willReturn(response);
 
     mockMvc
-        .perform(get("/api/v1/authors/{id}", id))
+        .perform(get("/authors/{id}", id))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(id))
         .andExpect(jsonPath("$.firstName").value("Jane"))
@@ -138,7 +138,7 @@ class AuthorControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/authors/{id}", id)
+            put("/authors/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -151,6 +151,6 @@ class AuthorControllerTest {
     var id = UUID.randomUUID().toString();
     willDoNothing().given(authorService).deleteById(id);
 
-    mockMvc.perform(delete("/api/v1/authors/{id}", id)).andExpect(status().isOk());
+    mockMvc.perform(delete("/authors/{id}", id)).andExpect(status().isOk());
   }
 }
