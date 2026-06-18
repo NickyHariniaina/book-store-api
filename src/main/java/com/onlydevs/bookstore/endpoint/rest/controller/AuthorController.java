@@ -4,6 +4,7 @@ import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
 import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
 import com.onlydevs.bookstore.endpoint.rest.model.UpdateAuthorRequest;
 import com.onlydevs.bookstore.service.AuthorService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,7 +23,7 @@ public class AuthorController {
   private final AuthorService authorService;
 
   @PostMapping
-  public AuthorResponse createAuthor(@RequestBody CreateAuthorRequest request) {
+  public AuthorResponse createAuthor(@Valid @RequestBody CreateAuthorRequest request) {
     return authorService.save(request);
   }
 
