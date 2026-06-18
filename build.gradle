@@ -188,6 +188,7 @@ dependencies {
     testImplementation 'org.junit-pioneer:junit-pioneer:2.2.0'
 
 implementation 'org.springframework.boot:spring-boot-starter-validation'
+testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 implementation 'com.onlydevs:bookstore-23c96d64-gen:1.0.0'
 
