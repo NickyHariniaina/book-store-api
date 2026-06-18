@@ -31,49 +31,50 @@ class CustomerMapperTest {
   void setUp() {
     customerMapper = new CustomerMapper();
 
-    customer = Customer.builder()
-        .id(UUID.randomUUID())
-        .firstName("John")
-        .lastName("Doe")
-        .email("john.doe@example.com")
-        .phone("+123456789")
-        .createdAt(Instant.now())
-        .updatedAt(Instant.now())
-        .build();
+    customer =
+        Customer.builder()
+            .id(UUID.randomUUID())
+            .firstName("John")
+            .lastName("Doe")
+            .email("john.doe@example.com")
+            .phone("+123456789")
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
 
-    BookStore bookStore = BookStore.builder()
-        .id(UUID.randomUUID())
-        .name("Main Store")
-        .build();
+    BookStore bookStore = BookStore.builder().id(UUID.randomUUID()).name("Main Store").build();
 
-    sale = Sale.builder()
-        .id(UUID.randomUUID())
-        .bookStore(bookStore)
-        .customer(customer)
-        .status(SaleStatus.COMPLETED)
-        .paymentMethod(PaymentMethod.CREDIT_CARD)
-        .createdAt(Instant.now())
-        .build();
+    sale =
+        Sale.builder()
+            .id(UUID.randomUUID())
+            .bookStore(bookStore)
+            .customer(customer)
+            .status(SaleStatus.COMPLETED)
+            .paymentMethod(PaymentMethod.CREDIT_CARD)
+            .createdAt(Instant.now())
+            .build();
 
-    saleItem = SaleItem.builder()
-        .id(UUID.randomUUID())
-        .sale(sale)
-        .quantity(2)
-        .unitPrice(new BigDecimal("10.00"))
-        .discountPercent(BigDecimal.ZERO)
-        .build();
+    saleItem =
+        SaleItem.builder()
+            .id(UUID.randomUUID())
+            .sale(sale)
+            .quantity(2)
+            .unitPrice(new BigDecimal("10.00"))
+            .discountPercent(BigDecimal.ZERO)
+            .build();
 
     sale.setSaleItems(List.of(saleItem));
   }
 
   @Test
   void toDomain_ShouldMapCreateRequestToCustomer() {
-    CreateCustomerRequest request = CreateCustomerRequest.builder()
-        .firstName("Jane")
-        .lastName("Smith")
-        .email("jane.smith@example.com")
-        .phone("+987654321")
-        .build();
+    CreateCustomerRequest request =
+        CreateCustomerRequest.builder()
+            .firstName("Jane")
+            .lastName("Smith")
+            .email("jane.smith@example.com")
+            .phone("+987654321")
+            .build();
 
     Customer result = customerMapper.toDomain(request);
 
@@ -86,11 +87,12 @@ class CustomerMapperTest {
 
   @Test
   void toDomain_WhenPhoneIsNull_ShouldMapWithNullPhone() {
-    CreateCustomerRequest request = CreateCustomerRequest.builder()
-        .firstName("Jane")
-        .lastName("Smith")
-        .email("jane@example.com")
-        .build();
+    CreateCustomerRequest request =
+        CreateCustomerRequest.builder()
+            .firstName("Jane")
+            .lastName("Smith")
+            .email("jane@example.com")
+            .build();
 
     Customer result = customerMapper.toDomain(request);
 
@@ -99,10 +101,8 @@ class CustomerMapperTest {
 
   @Test
   void updateDomain_ShouldUpdateNonNullFields() {
-    UpdateCustomerRequest request = UpdateCustomerRequest.builder()
-        .firstName("Jane")
-        .email("jane@example.com")
-        .build();
+    UpdateCustomerRequest request =
+        UpdateCustomerRequest.builder().firstName("Jane").email("jane@example.com").build();
 
     customerMapper.updateDomain(customer, request);
 
@@ -154,12 +154,13 @@ class CustomerMapperTest {
 
   @Test
   void toRest_List_ShouldMapListOfCustomers() {
-    Customer customer2 = Customer.builder()
-        .id(UUID.randomUUID())
-        .firstName("Jane")
-        .lastName("Smith")
-        .email("jane@example.com")
-        .build();
+    Customer customer2 =
+        Customer.builder()
+            .id(UUID.randomUUID())
+            .firstName("Jane")
+            .lastName("Smith")
+            .email("jane@example.com")
+            .build();
 
     List<CustomerResponse> result = customerMapper.toRest(List.of(customer, customer2));
 
@@ -214,12 +215,13 @@ class CustomerMapperTest {
 
   @Test
   void toSaleSummary_List_ShouldMapListOfSales() {
-    Sale sale2 = Sale.builder()
-        .id(UUID.randomUUID())
-        .bookStore(sale.getBookStore())
-        .status(SaleStatus.PENDING)
-        .saleItems(List.of())
-        .build();
+    Sale sale2 =
+        Sale.builder()
+            .id(UUID.randomUUID())
+            .bookStore(sale.getBookStore())
+            .status(SaleStatus.PENDING)
+            .saleItems(List.of())
+            .build();
 
     List<SaleSummaryResponse> result = customerMapper.toSaleSummary(List.of(sale, sale2));
 

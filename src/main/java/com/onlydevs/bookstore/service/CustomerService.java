@@ -29,8 +29,10 @@ public class CustomerService {
 
   @Transactional(readOnly = true)
   public CustomerResponse getCustomerById(UUID id) {
-    Customer customer = customerRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Customer not found with id: " + id));
+    Customer customer =
+        customerRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Customer not found with id: " + id));
     return customerMapper.toRest(customer);
   }
 
@@ -43,8 +45,10 @@ public class CustomerService {
 
   @Transactional
   public CustomerResponse updateCustomer(UUID id, UpdateCustomerRequest request) {
-    Customer customer = customerRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Customer not found with id: " + id));
+    Customer customer =
+        customerRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Customer not found with id: " + id));
     customerMapper.updateDomain(customer, request);
     Customer saved = customerRepository.save(customer);
     return customerMapper.toRest(saved);

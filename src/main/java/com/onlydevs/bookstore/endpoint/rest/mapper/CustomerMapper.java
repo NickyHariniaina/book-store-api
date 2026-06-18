@@ -70,8 +70,7 @@ public class CustomerMapper {
         .id(sale.getId())
         .storeId(sale.getBookStore().getId())
         .storeName(sale.getBookStore().getName())
-        .customerId(
-            sale.getCustomer() != null ? sale.getCustomer().getId() : null)
+        .customerId(sale.getCustomer() != null ? sale.getCustomer().getId() : null)
         .customerName(
             sale.getCustomer() != null
                 ? sale.getCustomer().getFirstName() + " " + sale.getCustomer().getLastName()
@@ -91,17 +90,20 @@ public class CustomerMapper {
       return BigDecimal.ZERO;
     }
     return sale.getSaleItems().stream()
-        .map(item -> {
-          BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-          BigDecimal lineTotal = item.getUnitPrice().multiply(qty);
-          if (item.getDiscountPercent() != null
-              && item.getDiscountPercent().compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal discount = lineTotal.multiply(item.getDiscountPercent())
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-            lineTotal = lineTotal.subtract(discount);
-          }
-          return lineTotal;
-        })
+        .map(
+            item -> {
+              BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
+              BigDecimal lineTotal = item.getUnitPrice().multiply(qty);
+              if (item.getDiscountPercent() != null
+                  && item.getDiscountPercent().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal discount =
+                    lineTotal
+                        .multiply(item.getDiscountPercent())
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                lineTotal = lineTotal.subtract(discount);
+              }
+              return lineTotal;
+            })
         .filter(Objects::nonNull)
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }

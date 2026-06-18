@@ -48,37 +48,38 @@ class CustomerServiceTest {
   void setUp() {
     customerId = UUID.randomUUID();
 
-    customer = Customer.builder()
-        .id(customerId)
-        .firstName("John")
-        .lastName("Doe")
-        .email("john.doe@example.com")
-        .phone("+123456789")
-        .createdAt(Instant.now())
-        .updatedAt(Instant.now())
-        .build();
+    customer =
+        Customer.builder()
+            .id(customerId)
+            .firstName("John")
+            .lastName("Doe")
+            .email("john.doe@example.com")
+            .phone("+123456789")
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
 
-    customerResponse = CustomerResponse.builder()
-        .id(customerId)
-        .firstName("John")
-        .lastName("Doe")
-        .fullName("John Doe")
-        .email("john.doe@example.com")
-        .phone("+123456789")
-        .createdAt(customer.getCreatedAt())
-        .updatedAt(customer.getUpdatedAt())
-        .build();
+    customerResponse =
+        CustomerResponse.builder()
+            .id(customerId)
+            .firstName("John")
+            .lastName("Doe")
+            .fullName("John Doe")
+            .email("john.doe@example.com")
+            .phone("+123456789")
+            .createdAt(customer.getCreatedAt())
+            .updatedAt(customer.getUpdatedAt())
+            .build();
 
-    createRequest = CreateCustomerRequest.builder()
-        .firstName("John")
-        .lastName("Doe")
-        .email("john.doe@example.com")
-        .phone("+123456789")
-        .build();
+    createRequest =
+        CreateCustomerRequest.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .email("john.doe@example.com")
+            .phone("+123456789")
+            .build();
 
-    updateRequest = UpdateCustomerRequest.builder()
-        .firstName("Jane")
-        .build();
+    updateRequest = UpdateCustomerRequest.builder().firstName("Jane").build();
   }
 
   @Test
@@ -168,15 +169,10 @@ class CustomerServiceTest {
 
   @Test
   void getCustomerSales_WhenCustomerExists_ShouldReturnSales() {
-    Sale sale = Sale.builder()
-        .id(UUID.randomUUID())
-        .status(SaleStatus.COMPLETED)
-        .build();
+    Sale sale = Sale.builder().id(UUID.randomUUID()).status(SaleStatus.COMPLETED).build();
 
-    SaleSummaryResponse saleResponse = SaleSummaryResponse.builder()
-        .id(sale.getId())
-        .status(SaleStatus.COMPLETED)
-        .build();
+    SaleSummaryResponse saleResponse =
+        SaleSummaryResponse.builder().id(sale.getId()).status(SaleStatus.COMPLETED).build();
 
     given(customerRepository.existsById(customerId)).willReturn(true);
     given(saleRepository.findByCustomerIdOrderByCreatedAtDesc(customerId))

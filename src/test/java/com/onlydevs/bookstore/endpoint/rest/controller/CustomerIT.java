@@ -25,15 +25,16 @@ class CustomerIT extends FacadeIT {
   @Test
   void customerCrud_ShouldWorkEndToEnd() {
     // Create
-    CreateCustomerRequest createRequest = CreateCustomerRequest.builder()
-        .firstName("John")
-        .lastName("Doe")
-        .email("john.doe@example.com")
-        .phone("+123456789")
-        .build();
+    CreateCustomerRequest createRequest =
+        CreateCustomerRequest.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .email("john.doe@example.com")
+            .phone("+123456789")
+            .build();
 
-    ResponseEntity<String> createResponse = restTemplate.postForEntity(
-        baseUri, createRequest, String.class);
+    ResponseEntity<String> createResponse =
+        restTemplate.postForEntity(baseUri, createRequest, String.class);
     assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
     assertNotNull(createResponse.getBody());
     assertTrue(createResponse.getBody().contains("John Doe"));
@@ -44,8 +45,8 @@ class CustomerIT extends FacadeIT {
     UUID customerId = UUID.fromString(location.substring(location.lastIndexOf('/') + 1));
 
     // Get by ID
-    ResponseEntity<String> getResponse = restTemplate.getForEntity(
-        baseUri + "/" + customerId, String.class);
+    ResponseEntity<String> getResponse =
+        restTemplate.getForEntity(baseUri + "/" + customerId, String.class);
     assertEquals(HttpStatus.OK, getResponse.getStatusCode());
 
     // Get all
@@ -53,20 +54,19 @@ class CustomerIT extends FacadeIT {
     assertEquals(HttpStatus.OK, getAllResponse.getStatusCode());
 
     // Update
-    UpdateCustomerRequest updateRequest = UpdateCustomerRequest.builder()
-        .firstName("Jane")
-        .lastName("Smith")
-        .build();
+    UpdateCustomerRequest updateRequest =
+        UpdateCustomerRequest.builder().firstName("Jane").lastName("Smith").build();
 
-    ResponseEntity<String> updateResponse = restTemplate.exchange(
-        RequestEntity.put(URI.create(baseUri + "/" + customerId))
-            .body(updateRequest), String.class);
+    ResponseEntity<String> updateResponse =
+        restTemplate.exchange(
+            RequestEntity.put(URI.create(baseUri + "/" + customerId)).body(updateRequest),
+            String.class);
     assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
     assertTrue(updateResponse.getBody().contains("Jane Smith"));
 
     // Get sales (empty)
-    ResponseEntity<String> salesResponse = restTemplate.getForEntity(
-        baseUri + "/" + customerId + "/sales", String.class);
+    ResponseEntity<String> salesResponse =
+        restTemplate.getForEntity(baseUri + "/" + customerId + "/sales", String.class);
     assertEquals(HttpStatus.OK, salesResponse.getStatusCode());
   }
 }
