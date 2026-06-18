@@ -1,10 +1,10 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
-import com.onlydevs.bookstore.endpoint.rest.model.AuthorResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateAuthorRequest;
 import com.onlydevs.bookstore.endpoint.rest.model.RestErrorResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.UpdateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
+import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class AuthorIT extends FacadeIT {
         webTestClient
             .post()
             .uri("/api/v1/authors")
-            .bodyValue(new CreateAuthorRequest().firstName("Jane").lastName("Austen"))
+            .bodyValue(CreateAuthorRequest.builder().firstName("Jane").lastName("Austen").build())
             .exchange()
             .expectStatus()
             .isCreated()
@@ -37,7 +37,7 @@ class AuthorIT extends FacadeIT {
 
   @Test
   void createAuthor_should_persist_and_return_author() {
-    var request = new CreateAuthorRequest().firstName("Jane").lastName("Austen");
+    var request = CreateAuthorRequest.builder().firstName("Jane").lastName("Austen").build();
 
     webTestClient
         .post()
@@ -73,7 +73,7 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .post()
         .uri("/api/v1/authors")
-        .bodyValue(new CreateAuthorRequest().firstName("Albert").lastName("Camus"))
+            .bodyValue(CreateAuthorRequest.builder().firstName("Albert").lastName("Camus").build())
         .exchange()
         .expectStatus()
         .isCreated();
@@ -90,7 +90,7 @@ class AuthorIT extends FacadeIT {
 
   @Test
   void update_should_modify_and_return_author() {
-    var updateRequest = new UpdateAuthorRequest().firstName("Emily").lastName("Bronte");
+    var updateRequest = UpdateAuthorRequest.builder().firstName("Emily").lastName("Bronte").build();
 
     webTestClient
         .put()
@@ -140,7 +140,7 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .put()
         .uri("/api/v1/authors/" + UUID.randomUUID())
-        .bodyValue(new UpdateAuthorRequest().firstName("Test").lastName("Test"))
+            .bodyValue(UpdateAuthorRequest.builder().firstName("Test").lastName("Test").build())
         .exchange()
         .expectStatus()
         .isNotFound()
@@ -167,7 +167,7 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .post()
         .uri("/api/v1/authors")
-        .bodyValue(new CreateAuthorRequest().lastName("Austen"))
+            .bodyValue(CreateAuthorRequest.builder().lastName("Austen").build())
         .exchange()
         .expectStatus()
         .isBadRequest()
@@ -181,7 +181,7 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .post()
         .uri("/api/v1/authors")
-        .bodyValue(new CreateAuthorRequest().firstName("Jane"))
+            .bodyValue(CreateAuthorRequest.builder().firstName("Jane").build())
         .exchange()
         .expectStatus()
         .isBadRequest()
@@ -195,7 +195,7 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .put()
         .uri("/api/v1/authors/" + createdAuthor.getId())
-        .bodyValue(new UpdateAuthorRequest())
+            .bodyValue(UpdateAuthorRequest.builder().build())
         .exchange()
         .expectStatus()
         .isOk()
