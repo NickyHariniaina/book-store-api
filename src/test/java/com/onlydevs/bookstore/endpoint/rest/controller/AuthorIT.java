@@ -1,9 +1,10 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
-import com.onlydevs.bookstore.endpoint.rest.model.RestErrorResponse;
 import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
+import static org.hamcrest.Matchers.containsString;
+
 import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,11 +48,16 @@ class AuthorIT extends FacadeIT {
         .expectStatus()
         .isCreated()
         .expectBody()
-        .jsonPath("$.firstName").isEqualTo("Jane")
-        .jsonPath("$.lastName").isEqualTo("Austen")
-        .jsonPath("$.fullName").isEqualTo("Jane Austen")
-        .jsonPath("$.id").isNotEmpty()
-        .jsonPath("$.createdAt").isNotEmpty();
+        .jsonPath("$.firstName")
+        .isEqualTo("Jane")
+        .jsonPath("$.lastName")
+        .isEqualTo("Austen")
+        .jsonPath("$.fullName")
+        .isEqualTo("Jane Austen")
+        .jsonPath("$.id")
+        .isNotEmpty()
+        .jsonPath("$.createdAt")
+        .isNotEmpty();
   }
 
   @Test
@@ -63,9 +69,12 @@ class AuthorIT extends FacadeIT {
         .expectStatus()
         .isOk()
         .expectBody()
-        .jsonPath("$.firstName").isEqualTo("Jane")
-        .jsonPath("$.lastName").isEqualTo("Austen")
-        .jsonPath("$.fullName").isEqualTo("Jane Austen");
+        .jsonPath("$.firstName")
+        .isEqualTo("Jane")
+        .jsonPath("$.lastName")
+        .isEqualTo("Austen")
+        .jsonPath("$.fullName")
+        .isEqualTo("Jane Austen");
   }
 
   @Test
@@ -73,7 +82,7 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .post()
         .uri("/api/v1/authors")
-            .bodyValue(CreateAuthorRequest.builder().firstName("Albert").lastName("Camus").build())
+        .bodyValue(CreateAuthorRequest.builder().firstName("Albert").lastName("Camus").build())
         .exchange()
         .expectStatus()
         .isCreated();
@@ -85,7 +94,8 @@ class AuthorIT extends FacadeIT {
         .expectStatus()
         .isOk()
         .expectBody()
-        .jsonPath("$.content.length()").isEqualTo(2);
+        .jsonPath("$.content.length()")
+        .isEqualTo(2);
   }
 
   @Test
@@ -100,9 +110,12 @@ class AuthorIT extends FacadeIT {
         .expectStatus()
         .isOk()
         .expectBody()
-        .jsonPath("$.firstName").isEqualTo("Emily")
-        .jsonPath("$.lastName").isEqualTo("Bronte")
-        .jsonPath("$.id").isEqualTo(createdAuthor.getId().toString());
+        .jsonPath("$.firstName")
+        .isEqualTo("Emily")
+        .jsonPath("$.lastName")
+        .isEqualTo("Bronte")
+        .jsonPath("$.id")
+        .isEqualTo(createdAuthor.getId().toString());
   }
 
   @Test
@@ -131,8 +144,10 @@ class AuthorIT extends FacadeIT {
         .expectStatus()
         .isNotFound()
         .expectBody()
-        .jsonPath("$.type").isEqualTo("404 NOT_FOUND")
-        .jsonPath("$.message").value(msg -> msg.contains("doesn't exist"));
+        .jsonPath("$.type")
+        .isEqualTo("404 NOT_FOUND")
+        .jsonPath("$.message")
+        .value(containsString("doesn't exist"));
   }
 
   @Test
@@ -140,13 +155,15 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .put()
         .uri("/api/v1/authors/" + UUID.randomUUID())
-            .bodyValue(UpdateAuthorRequest.builder().firstName("Test").lastName("Test").build())
+        .bodyValue(UpdateAuthorRequest.builder().firstName("Test").lastName("Test").build())
         .exchange()
         .expectStatus()
         .isNotFound()
         .expectBody()
-        .jsonPath("$.type").isEqualTo("404 NOT_FOUND")
-        .jsonPath("$.message").value(msg -> msg.contains("doesn't exist"));
+        .jsonPath("$.type")
+        .isEqualTo("404 NOT_FOUND")
+        .jsonPath("$.message")
+        .value(containsString("doesn't exist"));
   }
 
   @Test
@@ -158,8 +175,10 @@ class AuthorIT extends FacadeIT {
         .expectStatus()
         .isNotFound()
         .expectBody()
-        .jsonPath("$.type").isEqualTo("404 NOT_FOUND")
-        .jsonPath("$.message").value(msg -> msg.contains("doesn't exist"));
+        .jsonPath("$.type")
+        .isEqualTo("404 NOT_FOUND")
+        .jsonPath("$.message")
+        .value(containsString("doesn't exist"));
   }
 
   @Test
@@ -167,13 +186,15 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .post()
         .uri("/api/v1/authors")
-            .bodyValue(CreateAuthorRequest.builder().lastName("Austen").build())
+        .bodyValue(CreateAuthorRequest.builder().lastName("Austen").build())
         .exchange()
         .expectStatus()
         .isBadRequest()
         .expectBody()
-        .jsonPath("$.type").isEqualTo("400 BAD_REQUEST")
-        .jsonPath("$.message").value(msg -> msg.contains("firstName"));
+        .jsonPath("$.type")
+        .isEqualTo("400 BAD_REQUEST")
+        .jsonPath("$.message")
+        .value(containsString("firstName"));
   }
 
   @Test
@@ -181,13 +202,15 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .post()
         .uri("/api/v1/authors")
-            .bodyValue(CreateAuthorRequest.builder().firstName("Jane").build())
+        .bodyValue(CreateAuthorRequest.builder().firstName("Jane").build())
         .exchange()
         .expectStatus()
         .isBadRequest()
         .expectBody()
-        .jsonPath("$.type").isEqualTo("400 BAD_REQUEST")
-        .jsonPath("$.message").value(msg -> msg.contains("lastName"));
+        .jsonPath("$.type")
+        .isEqualTo("400 BAD_REQUEST")
+        .jsonPath("$.message")
+        .value(containsString("lastName"));
   }
 
   @Test
@@ -195,12 +218,14 @@ class AuthorIT extends FacadeIT {
     webTestClient
         .put()
         .uri("/api/v1/authors/" + createdAuthor.getId())
-            .bodyValue(UpdateAuthorRequest.builder().build())
+        .bodyValue(UpdateAuthorRequest.builder().build())
         .exchange()
         .expectStatus()
         .isOk()
         .expectBody()
-        .jsonPath("$.firstName").isEqualTo("Jane")
-        .jsonPath("$.lastName").isEqualTo("Austen");
+        .jsonPath("$.firstName")
+        .isEqualTo("Jane")
+        .jsonPath("$.lastName")
+        .isEqualTo("Austen");
   }
 }

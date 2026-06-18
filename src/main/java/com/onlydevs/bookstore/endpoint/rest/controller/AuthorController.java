@@ -29,7 +29,8 @@ public class AuthorController {
   private final AuthorService authorService;
 
   @PostMapping
-  public ResponseEntity<AuthorResponse> createAuthor(@Valid @RequestBody CreateAuthorRequest request) {
+  public ResponseEntity<AuthorResponse> createAuthor(
+      @Valid @RequestBody CreateAuthorRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(authorService.createAuthor(request));
   }
 
@@ -51,7 +52,8 @@ public class AuthorController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<AuthorResponse> update(@PathVariable String id, @RequestBody UpdateAuthorRequest request) {
+  public ResponseEntity<AuthorResponse> update(
+      @PathVariable String id, @RequestBody UpdateAuthorRequest request) {
     return ResponseEntity.ok(authorService.update(id, request));
   }
 

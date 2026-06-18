@@ -5,10 +5,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
+import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
-import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.AuthorRepository;
 import java.time.Instant;
@@ -40,20 +40,24 @@ class AuthorServiceTest {
 
   @BeforeEach
   void setUp() {
-    janeAusten = Author.builder().id(UUID.randomUUID()).firstName("Jane").lastName("Austen").build();
-    albertCamus = Author.builder().id(UUID.randomUUID()).firstName("Albert").lastName("Camus").build();
-    janeResponse = AuthorResponse.builder()
-        .id(janeAusten.getId())
-        .firstName("Jane")
-        .lastName("Austen")
-        .fullName("Jane Austen")
-        .build();
-    albertResponse = AuthorResponse.builder()
-        .id(albertCamus.getId())
-        .firstName("Albert")
-        .lastName("Camus")
-        .fullName("Albert Camus")
-        .build();
+    janeAusten =
+        Author.builder().id(UUID.randomUUID()).firstName("Jane").lastName("Austen").build();
+    albertCamus =
+        Author.builder().id(UUID.randomUUID()).firstName("Albert").lastName("Camus").build();
+    janeResponse =
+        AuthorResponse.builder()
+            .id(janeAusten.getId())
+            .firstName("Jane")
+            .lastName("Austen")
+            .fullName("Jane Austen")
+            .build();
+    albertResponse =
+        AuthorResponse.builder()
+            .id(albertCamus.getId())
+            .firstName("Albert")
+            .lastName("Camus")
+            .fullName("Albert Camus")
+            .build();
   }
 
   @Test
@@ -93,7 +97,12 @@ class AuthorServiceTest {
     var id = UUID.randomUUID();
     var author = Author.builder().id(id).firstName("Albert").lastName("Camus").build();
     var authorResponse =
-        AuthorResponse.builder().id(id).firstName("Albert").lastName("Camus").fullName("Albert Camus").build();
+        AuthorResponse.builder()
+            .id(id)
+            .firstName("Albert")
+            .lastName("Camus")
+            .fullName("Albert Camus")
+            .build();
     given(authorRepository.findById(id)).willReturn(Optional.of(author));
     given(authorMapper.toRest(author)).willReturn(authorResponse);
 

@@ -15,7 +15,8 @@ class AuthorMapperTest {
 
   @Test
   void toDomain_should_map_request_to_author() {
-    CreateAuthorRequest request = CreateAuthorRequest.builder().firstName("John").lastName("Doe").build();
+    CreateAuthorRequest request =
+        CreateAuthorRequest.builder().firstName("John").lastName("Doe").build();
 
     Author result = authorMapper.toDomain(request);
 
