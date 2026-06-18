@@ -44,7 +44,7 @@ class GenreControllerTest {
     given(genreService.getAllGenres()).willReturn(List.of(g1, g2));
 
     mockMvc
-        .perform(get("/genres"))
+        .perform(get("/api/v1/genres"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.size()").value(2))
         .andExpect(jsonPath("$[0].name").value("Fiction"))
@@ -65,7 +65,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            post("/genres")
+            post("/api/v1/genres")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -81,7 +81,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            post("/genres")
+            post("/api/v1/genres")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isConflict());
@@ -97,7 +97,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            patch("/genres/{id}/rename", id)
+            patch("/api/v1/genres/{id}/rename", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -114,7 +114,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            patch("/genres/{id}/rename", id)
+            patch("/api/v1/genres/{id}/rename", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isNotFound());
@@ -129,14 +129,16 @@ class GenreControllerTest {
     given(genreService.getBooksByGenreId(eq(id), any())).willReturn(page);
 
     mockMvc
-        .perform(get("/genres/{id}/books", id))
+        .perform(get("/api/v1/genres/{id}/books", id))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].title").value("Test Book"));
   }
 
   @Test
   void should_delete_genre_ok() throws Exception {
-    mockMvc.perform(delete("/genres/{id}", UUID.randomUUID())).andExpect(status().isNoContent());
+    mockMvc
+        .perform(delete("/api/v1/genres/{id}", UUID.randomUUID()))
+        .andExpect(status().isNoContent());
   }
 
   @Test
@@ -145,7 +147,7 @@ class GenreControllerTest {
 
     willThrow(new NotFoundException("Genre not found")).given(genreService).deleteGenre(id);
 
-    mockMvc.perform(delete("/genres/{id}", id)).andExpect(status().isNotFound());
+    mockMvc.perform(delete("/api/v1/genres/{id}", id)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -159,7 +161,7 @@ class GenreControllerTest {
     given(genreService.getRevenuePerGenre()).willReturn(List.of(r1));
 
     mockMvc
-        .perform(get("/genres/revenue"))
+        .perform(get("/api/v1/genres/revenue"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].genreName").value("Fiction"))
         .andExpect(jsonPath("$[0].revenue").value(500.0));
