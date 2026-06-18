@@ -45,7 +45,7 @@ public class BookController {
 
   @GetMapping("/{id}")
   public ResponseEntity<BookDetailResponse> getBookById(@PathVariable UUID id) {
-    return ResponseEntity.ok(bookService.getBookById(id));
+    return ResponseEntity.status(HttpStatus.OK).body(bookService.getBookById(id));
   }
 
   @PostMapping
@@ -57,13 +57,13 @@ public class BookController {
   @PutMapping("/{id}")
   public ResponseEntity<BookDetailResponse> updateBook(
       @PathVariable UUID id, @Valid @RequestBody UpdateBookRequest request) {
-    return ResponseEntity.ok(bookService.updateBook(id, request));
+    return ResponseEntity.status(HttpStatus.OK).body(bookService.updateBook(id, request));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteBook(@PathVariable UUID id) {
     bookService.deleteBook(id);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @PostMapping("/{id}/authors/{authorId}")
@@ -77,19 +77,19 @@ public class BookController {
   public ResponseEntity<Void> removeAuthorFromBook(
       @PathVariable UUID id, @PathVariable UUID authorId) {
     bookService.removeAuthorFromBook(id, authorId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @PostMapping("/{id}/genres/{genreId}")
   public ResponseEntity<Void> addGenreToBook(@PathVariable UUID id, @PathVariable UUID genreId) {
     bookService.addGenreToBook(id, genreId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @DeleteMapping("/{id}/genres/{genreId}")
   public ResponseEntity<Void> removeGenreFromBook(
       @PathVariable UUID id, @PathVariable UUID genreId) {
     bookService.removeGenreFromBook(id, genreId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

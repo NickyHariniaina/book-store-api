@@ -7,6 +7,7 @@ import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.exception.NotImplementedException;
 import com.onlydevs.bookstore.model.exception.TooManyRequestsException;
 import jakarta.persistence.OptimisticLockException;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.dao.CannotAcquireLockException;
@@ -36,8 +37,18 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class})
   ResponseEntity<RestErrorResponse> handleConversionFailed(MethodArgumentTypeMismatchException e) {
-    log.info("Conversion failed", e);
-    String message = e.getCause().getCause().getMessage();
+    log.info("Conversion failed for parameter '{}' with value '{}'", e.getName(), e.getValue());
+    String message;
+    if (e.getRequiredType() == UUID.class) {
+      message =
+          String.format(
+              "Invalid UUID format: '%s'. Expected format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              e.getValue());
+    } else if (e.getCause() != null) {
+      message = e.getCause().getMessage();
+    } else {
+      message = String.format("Invalid value '%s' for parameter '%s'", e.getValue(), e.getName());
+    }
     return handleBadRequest(new BadRequestException(message));
   }
 
