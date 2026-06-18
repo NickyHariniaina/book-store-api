@@ -1,4 +1,4 @@
-package com.onlydevs.bookstore.unit.mapper;
+package com.onlydevs.bookstore.endpoint.rest.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -8,17 +8,11 @@ import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.mapper.PublisherMapper;
 import java.time.Instant;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class PublisherMapperTest {
 
-  private PublisherMapper mapper;
-
-  @BeforeEach
-  void setUp() {
-    mapper = new PublisherMapper();
-  }
+  private final PublisherMapper mapper = new PublisherMapper();
 
   @Test
   void toResponse_maps_all_fields() {
