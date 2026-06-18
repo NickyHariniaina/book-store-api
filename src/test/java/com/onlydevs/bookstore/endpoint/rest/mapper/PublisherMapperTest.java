@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
-import com.onlydevs.bookstore.model.mapper.PublisherMapper;
+
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

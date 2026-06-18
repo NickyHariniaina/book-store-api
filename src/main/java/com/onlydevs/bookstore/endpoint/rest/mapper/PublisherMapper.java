@@ -1,4 +1,4 @@
-package com.onlydevs.bookstore.model.mapper;
+package com.onlydevs.bookstore.endpoint.rest.mapper;
 
 import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;

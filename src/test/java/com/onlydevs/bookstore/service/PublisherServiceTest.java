@@ -12,7 +12,7 @@ import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
-import com.onlydevs.bookstore.model.mapper.PublisherMapper;
+import com.onlydevs.bookstore.endpoint.rest.mapper.PublisherMapper;
 import com.onlydevs.bookstore.repository.PublisherRepository;
 import java.util.Optional;
 import java.util.UUID;
