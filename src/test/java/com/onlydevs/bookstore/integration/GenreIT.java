@@ -71,17 +71,15 @@ class GenreIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/api/v1/genres")
+        .uri("/api/v1/genres?page=0&size=10")
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(String.class)
-        .value(
-            body -> {
-              assertNotNull(body);
-              assertTrue(body.contains("Fiction"));
-              assertTrue(body.contains("Science"));
-            });
+        .expectBody()
+        .jsonPath("$.content.length()")
+        .isEqualTo(2)
+        .jsonPath("$.totalElements")
+        .isEqualTo(2);
   }
 
   @Test

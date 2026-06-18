@@ -30,8 +30,8 @@ public class GenreController {
   private final GenreService genreService;
 
   @GetMapping
-  public ResponseEntity<List<GenreResponse>> getAllGenres() {
-    return ResponseEntity.ok(genreService.getAllGenres());
+  public ResponseEntity<Page<GenreResponse>> getAllGenres(Pageable pageable) {
+    return ResponseEntity.ok(genreService.getAllGenres(pageable));
   }
 
   @GetMapping("/{id}/books")

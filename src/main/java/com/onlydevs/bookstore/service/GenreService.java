@@ -24,8 +24,8 @@ public class GenreService {
   private final GenreRepository genreRepository;
   private final GenreMapper genreMapper;
 
-  public List<GenreResponse> getAllGenres() {
-    return genreRepository.findAll().stream().map(genreMapper::toRest).toList();
+  public Page<GenreResponse> getAllGenres(Pageable pageable) {
+    return genreRepository.findAll(pageable).map(genreMapper::toRest);
   }
 
   public GenreResponse createGenre(CreateGenreRequest request) {

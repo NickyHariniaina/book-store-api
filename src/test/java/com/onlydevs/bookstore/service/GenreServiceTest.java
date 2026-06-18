@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
@@ -148,28 +149,33 @@ class GenreServiceTest {
 
   @Test
   void get_all_genres_ok_when_genres_exist() {
+    var pageable = PageRequest.of(0, 10);
     var g1 = Genre.builder().id(genreId).name("Fiction").build();
     var r1 = GenreResponse.builder().id(genreId).name("Fiction").build();
+    var genrePage = new PageImpl<>(List.of(g1), pageable, 1);
 
-    given(genreRepository.findAll()).willReturn(List.of(g1));
+    given(genreRepository.findAll(pageable)).willReturn(genrePage);
     given(genreMapper.toRest(g1)).willReturn(r1);
 
-    var result = genreService.getAllGenres();
+    var result = genreService.getAllGenres(pageable);
 
-    assertEquals(1, result.size());
-    assertTrue(result.contains(r1));
-    then(genreRepository).should().findAll();
+    assertEquals(1, result.getTotalElements());
+    assertEquals(r1, result.getContent().getFirst());
+    then(genreRepository).should().findAll(pageable);
     then(genreMapper).should().toRest(g1);
   }
 
   @Test
   void get_all_genres_ok_when_no_genres() {
-    given(genreRepository.findAll()).willReturn(List.of());
+    var pageable = PageRequest.of(0, 10);
+    var emptyPage = Page.<Genre>empty(pageable);
 
-    var result = genreService.getAllGenres();
+    given(genreRepository.findAll(pageable)).willReturn(emptyPage);
+
+    var result = genreService.getAllGenres(pageable);
 
     assertTrue(result.isEmpty());
-    then(genreRepository).should().findAll();
+    then(genreRepository).should().findAll(pageable);
   }
 
   @Test

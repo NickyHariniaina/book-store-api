@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -40,15 +42,17 @@ class GenreControllerTest {
   void should_get_all_genres_ok() throws Exception {
     var g1 = GenreResponse.builder().id(UUID.randomUUID()).name("Fiction").build();
     var g2 = GenreResponse.builder().id(UUID.randomUUID()).name("Science").build();
+    var page = new PageImpl<>(List.of(g1, g2));
 
-    given(genreService.getAllGenres()).willReturn(List.of(g1, g2));
+    given(genreService.getAllGenres(any(Pageable.class))).willReturn(page);
 
     mockMvc
         .perform(get("/api/v1/genres"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()").value(2))
-        .andExpect(jsonPath("$[0].name").value("Fiction"))
-        .andExpect(jsonPath("$[1].name").value("Science"));
+        .andExpect(jsonPath("$.content.size()").value(2))
+        .andExpect(jsonPath("$.content[0].name").value("Fiction"))
+        .andExpect(jsonPath("$.content[1].name").value("Science"))
+        .andExpect(jsonPath("$.totalElements").value(2));
   }
 
   @Test
