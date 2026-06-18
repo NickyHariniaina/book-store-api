@@ -24,7 +24,8 @@ task generateJavaClient(type: GenerateTask) {
     configOptions = [
             serializableModel: "true",
             serializationLibrary: "jackson",
-            dateLibrary: "custom"
+            dateLibrary: "custom",
+            useBeanValidation: "true"
     ]
     typeMappings = [
             Date: "java.time.LocalDate",
