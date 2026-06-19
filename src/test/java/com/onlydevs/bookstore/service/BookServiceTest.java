@@ -102,7 +102,7 @@ class BookServiceTest {
             .coverUrl("https://example.com/gatsby.jpg")
             .createdAt(Instant.now())
             .updatedAt(Instant.now())
-            .bookAuthors(List.of(bookAuthor))
+            .bookAuthors(Set.of(bookAuthor))
             .genres(Set.of(genre))
             .build();
 
@@ -126,7 +126,7 @@ class BookServiceTest {
             .coverUrl("https://example.com/1984.jpg")
             .createdAt(Instant.now())
             .updatedAt(Instant.now())
-            .bookAuthors(List.of())
+            .bookAuthors(Set.of())
             .genres(Set.of())
             .build();
 
@@ -166,7 +166,7 @@ class BookServiceTest {
             .coverUrl("https://example.com/sun.jpg")
             .createdAt(Instant.now())
             .updatedAt(Instant.now())
-            .bookAuthors(List.of(bookAuthor1, bookAuthor2))
+            .bookAuthors(Set.of(bookAuthor1, bookAuthor2))
             .genres(Set.of())
             .build();
 
@@ -190,7 +190,7 @@ class BookServiceTest {
             .coverUrl("https://example.com/cover.jpg")
             .createdAt(Instant.now())
             .updatedAt(Instant.now())
-            .bookAuthors(List.of())
+            .bookAuthors(Set.of())
             .genres(new HashSet<>())
             .build();
 
@@ -310,7 +310,7 @@ class BookServiceTest {
             .coverUrl(null)
             .createdAt(Instant.now())
             .updatedAt(Instant.now())
-            .bookAuthors(List.of())
+            .bookAuthors(Set.of())
             .genres(Set.of())
             .build();
 
@@ -349,7 +349,7 @@ class BookServiceTest {
             .coverUrl(null)
             .createdAt(Instant.now())
             .updatedAt(Instant.now())
-            .bookAuthors(List.of())
+            .bookAuthors(Set.of())
             .genres(Set.of())
             .build();
 
