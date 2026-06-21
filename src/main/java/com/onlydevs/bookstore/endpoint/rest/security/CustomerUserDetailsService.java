@@ -15,8 +15,10 @@ public class CustomerUserDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-    var customer = customerRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("Customer not found: " + email));
+    var customer =
+        customerRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("Customer not found: " + email));
 
     return User.builder()
         .username(customer.getEmail())

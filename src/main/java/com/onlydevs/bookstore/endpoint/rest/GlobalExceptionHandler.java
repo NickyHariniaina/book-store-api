@@ -104,8 +104,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = {AuthenticationException.class})
   ResponseEntity<RestErrorResponse> handleAuthentication(AuthenticationException e) {
     log.info("Authentication failed", e);
-    return new ResponseEntity<>(
-        toRest(e, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+    return new ResponseEntity<>(toRest(e, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
   }
 
   @ExceptionHandler(value = {AccessDeniedException.class})
