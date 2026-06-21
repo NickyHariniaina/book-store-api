@@ -19,17 +19,17 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class InventoryService {
 
-  private final InventoryItemRepository itemRepository;
-  private final InventoryMovementRepository movementRepository;
+  private final InventoryItemRepository inventoryItemRepository;
+  private final InventoryMovementRepository inventoryMovementRepository;
   private final BookStoreRepository bookStoreRepository;
   private final BookEditionRepository bookEditionRepository;
 
   public List<InventoryItem> getInventoryByStore(UUID storeId) {
-    return itemRepository.findByBookStoreId(storeId);
+    return inventoryItemRepository.findByBookStoreId(storeId);
   }
 
   public InventoryItem getStockByEdition(UUID storeId, UUID editionId) {
-    return itemRepository
+    return inventoryItemRepository
         .findByBookStoreIdAndBookEditionId(storeId, editionId)
         .orElseThrow(
             () ->
@@ -40,12 +40,13 @@ public class InventoryService {
   @Transactional
   public InventoryItem recordArrival(
       UUID storeId, UUID editionId, Integer quantity, String reference) {
-    var optItem = itemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId);
+    var optItem =
+        inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId);
 
     if (optItem.isPresent()) {
       InventoryItem item = optItem.get();
       item.setQuantityOnHand(item.getQuantityOnHand() + quantity);
-      itemRepository.save(item);
+      inventoryItemRepository.save(item);
 
       createMovement(
           item.getBookStore(),
@@ -69,7 +70,7 @@ public class InventoryService {
             .reorderLevel(0)
             .build();
 
-    itemRepository.save(newItem);
+    inventoryItemRepository.save(newItem);
 
     createMovement(
         storeRef, editionRef, InventoryMovementType.ARRIVAL, quantity, "Arrival", reference);
@@ -87,7 +88,7 @@ public class InventoryService {
           "Insufficient stock: current=" + item.getQuantityOnHand() + ", adjustment=" + quantity);
     }
     item.setQuantityOnHand(newQuantity);
-    itemRepository.save(item);
+    inventoryItemRepository.save(item);
 
     String movementReason = (reason != null) ? reason : "Stock adjustment";
     createMovement(
@@ -137,14 +138,14 @@ public class InventoryService {
   }
 
   public List<InventoryMovement> getMovementsByEdition(UUID editionId) {
-    return movementRepository.findByBookEditionId(editionId);
+    return inventoryMovementRepository.findByBookEditionId(editionId);
   }
 
   public List<InventoryMovement> getMovements(UUID storeId, InventoryMovementType type) {
     if (type == null) {
-      return movementRepository.findByBookStoreId(storeId);
+      return inventoryMovementRepository.findByBookStoreId(storeId);
     }
-    return movementRepository.findByBookStoreIdAndInventoryMovementType(storeId, type);
+    return inventoryMovementRepository.findByBookStoreIdAndInventoryMovementType(storeId, type);
   }
 
   private void applyStockDecrement(InventoryItem item, Integer quantity) {
@@ -157,7 +158,7 @@ public class InventoryService {
               + quantity);
     }
     item.setQuantityOnHand(newQuantity);
-    itemRepository.save(item);
+    inventoryItemRepository.save(item);
   }
 
   private void createMovement(
@@ -177,6 +178,6 @@ public class InventoryService {
             .reference(reference)
             .build();
 
-    movementRepository.save(movement);
+    inventoryMovementRepository.save(movement);
   }
 }
