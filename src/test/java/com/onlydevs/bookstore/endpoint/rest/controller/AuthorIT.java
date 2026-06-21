@@ -7,7 +7,6 @@ import com.onlydevs.bookstore.conf.FacadeIT;
 import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
-import java.util.Base64;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -229,9 +228,5 @@ class AuthorIT extends FacadeIT {
         .isEqualTo("Jane")
         .jsonPath("$.lastName")
         .isEqualTo("Austen");
-  }
-
-  private String basicAuth(String username, String password) {
-    return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
   }
 }
