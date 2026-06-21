@@ -20,7 +20,6 @@ public class SecurityConf {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     return http
         .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement(s -> s.sessionCreationPolicy(STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(GET, "/ping", "/health/**").permitAll()
             .requestMatchers(GET, "/api/v1/books/**", "/api/v1/authors").permitAll()
