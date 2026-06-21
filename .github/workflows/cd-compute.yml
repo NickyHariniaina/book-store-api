@@ -102,45 +102,8 @@ jobs:
           echo "to_upload_filename=$(echo $response | jq -r '.filename')" >> $GITHUB_ENV
           curl -X GET -o template.yml "$(echo $response | jq -r '.build_template_file_uri')"
 
-      - name: Patch template.yml (fix malformed SAM parameters)
-        run: |
-          echo "=== SAM CLI version ==="
-          sam --version || true
-          echo "=== Template content BEFORE patch ==="
-          cat template.yml
-          echo "=== Patching template ==="
-          python3 -m pip install pyyaml -q
-          python3 << 'PYEOF'
-          import yaml
-          with open('template.yml') as f:
-              data = yaml.safe_load(f)
-          modified = False
-          if 'Parameters' in data:
-              for k, v in data['Parameters'].items():
-                  if isinstance(v, str):
-                      print(f'Fixing parameter {k}: was string, converting to object')
-                      data['Parameters'][k] = {'Type': 'String', 'Default': v}
-                      modified = True
-                  elif isinstance(v, dict):
-                      print(f'Parameter {k}: OK (dict with keys {list(v.keys())})')
-          if modified:
-              with open('template.yml', 'w') as f:
-                  yaml.dump(data, f, default_flow_style=False)
-              print('Template patched successfully')
-          else:
-              print('No malformed parameters found')
-          PYEOF
-          echo "=== Template content AFTER patch ==="
-          cat template.yml
-
-      - name: Upgrade SAM CLI
-        run: |
-          pip3 install --upgrade aws-sam-cli -q
-          echo "=== SAM CLI version after upgrade ==="
-          sam --version
-
       - name: Build project
-        run: sam build --template-file template.yml
+        run: sam build
 
       - name: Prepare Poja deployment
         run: |
