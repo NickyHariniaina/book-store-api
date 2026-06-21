@@ -50,8 +50,7 @@ public class BookStoreController {
   @PostMapping
   public ResponseEntity<BookStoreResponse> createStore(
       @Valid @RequestBody CreateBookStoreRequest request) {
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(bookStoreService.createStore(request));
+    return ResponseEntity.status(HttpStatus.CREATED).body(bookStoreService.createStore(request));
   }
 
   @PutMapping("/{id}")

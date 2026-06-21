@@ -156,8 +156,7 @@ class BookStoreServiceTest {
 
   @Test
   void update_store_when_found_should_modify_and_return() {
-    UpdateBookStoreRequest request =
-        UpdateBookStoreRequest.builder().name("Updated Store").build();
+    UpdateBookStoreRequest request = UpdateBookStoreRequest.builder().name("Updated Store").build();
 
     given(bookStoreRepository.findById(storeId)).willReturn(Optional.of(bookStore));
     given(bookStoreRepository.save(bookStore)).willReturn(bookStore);

@@ -67,8 +67,7 @@ class BookStoreControllerTest {
 
   @Test
   void get_store_by_id_should_return_store() throws Exception {
-    BookStoreResponse response =
-        BookStoreResponse.builder().id(storeId).name("Test Store").build();
+    BookStoreResponse response = BookStoreResponse.builder().id(storeId).name("Test Store").build();
 
     given(bookStoreService.getStoreById(storeId)).willReturn(response);
 
@@ -89,8 +88,7 @@ class BookStoreControllerTest {
             .email("new@store.com")
             .build();
 
-    BookStoreResponse response =
-        BookStoreResponse.builder().id(storeId).name("New Store").build();
+    BookStoreResponse response = BookStoreResponse.builder().id(storeId).name("New Store").build();
 
     given(bookStoreService.createStore(any())).willReturn(response);
 
@@ -117,8 +115,7 @@ class BookStoreControllerTest {
 
   @Test
   void update_store_should_return_ok() throws Exception {
-    UpdateBookStoreRequest request =
-        UpdateBookStoreRequest.builder().name("Updated Store").build();
+    UpdateBookStoreRequest request = UpdateBookStoreRequest.builder().name("Updated Store").build();
 
     BookStoreResponse response =
         BookStoreResponse.builder().id(storeId).name("Updated Store").build();
