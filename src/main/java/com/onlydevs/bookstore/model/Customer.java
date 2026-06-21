@@ -59,4 +59,7 @@ public class Customer {
 
   @JsonIgnore
   private String password;
+
+  @Builder.Default
+  private String role = "USER";
 }
