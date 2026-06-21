@@ -53,7 +53,7 @@ public class AuthorController {
 
   @PutMapping("/{id}")
   public ResponseEntity<AuthorResponse> update(
-      @PathVariable String id, @RequestBody UpdateAuthorRequest request) {
+      @PathVariable String id, @Valid @RequestBody UpdateAuthorRequest request) {
     return ResponseEntity.ok(authorService.update(id, request));
   }
 
