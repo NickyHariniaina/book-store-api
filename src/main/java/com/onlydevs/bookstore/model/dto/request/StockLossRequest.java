@@ -17,12 +17,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class StockLossRequest {
 
-  @NotNull
-  private UUID editionId;
+  @NotNull private UUID editionId;
 
-  @NotNull
-  @Positive
-  private Integer quantity;
+  @NotNull @Positive private Integer quantity;
 
   @Size(max = 500)
   private String reason;

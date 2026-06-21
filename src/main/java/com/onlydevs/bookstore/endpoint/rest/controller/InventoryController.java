@@ -1,5 +1,6 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
+import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.model.dto.request.AdjustStockRequest;
 import com.onlydevs.bookstore.model.dto.request.ArrivalRequest;
 import com.onlydevs.bookstore.model.dto.request.StockLossRequest;
@@ -7,7 +8,6 @@ import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.model.dto.response.InventoryMovementResponse;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
-import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.service.InventoryService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -80,8 +80,7 @@ public class InventoryController {
 
   @GetMapping("/editions/{editionId}/movements")
   public List<InventoryMovementResponse> getMovementsByEdition(@PathVariable UUID editionId) {
-    return inventoryMapper.toMovementRestList(
-        inventoryService.getMovementsByEdition(editionId));
+    return inventoryMapper.toMovementRestList(inventoryService.getMovementsByEdition(editionId));
   }
 
   @GetMapping("/stores/{storeId}/movements")
@@ -95,7 +94,6 @@ public class InventoryController {
         throw new BadRequestException("Unknown inventory movement type: " + type);
       }
     }
-    return inventoryMapper.toMovementRestList(
-        inventoryService.getMovements(storeId, jpaType));
+    return inventoryMapper.toMovementRestList(inventoryService.getMovements(storeId, jpaType));
   }
 }

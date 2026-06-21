@@ -40,8 +40,7 @@ public class InventoryService {
   @Transactional
   public InventoryItem recordArrival(
       UUID storeId, UUID editionId, Integer quantity, String reference) {
-    var optItem =
-        inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId);
+    var optItem = inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId);
 
     if (optItem.isPresent()) {
       InventoryItem item = optItem.get();

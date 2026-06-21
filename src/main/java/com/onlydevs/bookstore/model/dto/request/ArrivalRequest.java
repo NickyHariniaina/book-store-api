@@ -17,12 +17,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ArrivalRequest {
 
-  @NotNull
-  private UUID editionId;
+  @NotNull private UUID editionId;
 
-  @NotNull
-  @Positive
-  private Integer quantity;
+  @NotNull @Positive private Integer quantity;
 
   @Size(max = 255)
   private String reference;

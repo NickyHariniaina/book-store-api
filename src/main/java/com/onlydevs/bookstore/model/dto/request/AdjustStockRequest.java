@@ -16,11 +16,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AdjustStockRequest {
 
-  @NotNull
-  private UUID editionId;
+  @NotNull private UUID editionId;
 
-  @NotNull
-  private Integer quantity;
+  @NotNull private Integer quantity;
 
   @Size(max = 500)
   private String reason;

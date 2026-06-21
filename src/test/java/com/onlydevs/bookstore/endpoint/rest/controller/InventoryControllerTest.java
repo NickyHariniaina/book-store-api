@@ -10,13 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.model.InventoryItem;
-import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.dto.request.ArrivalRequest;
 import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.model.dto.response.InventoryMovementResponse;
-import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.service.InventoryService;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -73,13 +70,11 @@ class InventoryControllerTest {
             .quantityOnHand(10)
             .build();
 
-    given(inventoryService.getStockByEdition(storeId, editionId))
-        .willReturn(new InventoryItem());
+    given(inventoryService.getStockByEdition(storeId, editionId)).willReturn(new InventoryItem());
     given(inventoryMapper.toRest(any())).willReturn(response);
 
     mockMvc
-        .perform(
-            get("/api/v1/stores/{storeId}/inventory/{editionId}", storeId, editionId))
+        .perform(get("/api/v1/stores/{storeId}/inventory/{editionId}", storeId, editionId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.quantityOnHand").value(10));
   }
@@ -130,8 +125,7 @@ class InventoryControllerTest {
             .quantityOnHand(15)
             .build();
 
-    given(inventoryService.adjustStock(any(), any(), any(), any()))
-        .willReturn(new InventoryItem());
+    given(inventoryService.adjustStock(any(), any(), any(), any())).willReturn(new InventoryItem());
     given(inventoryMapper.toRest(any())).willReturn(response);
 
     mockMvc
@@ -196,8 +190,7 @@ class InventoryControllerTest {
             .quantityOnHand(9)
             .build();
 
-    given(inventoryService.recordLost(any(), any(), any(), any()))
-        .willReturn(new InventoryItem());
+    given(inventoryService.recordLost(any(), any(), any(), any())).willReturn(new InventoryItem());
     given(inventoryMapper.toRest(any())).willReturn(response);
 
     mockMvc
@@ -263,8 +256,7 @@ class InventoryControllerTest {
     given(inventoryMapper.toMovementRestList(any())).willReturn(List.of(response));
 
     mockMvc
-        .perform(
-            get("/api/v1/stores/{storeId}/movements?type=ARRIVAL", storeId))
+        .perform(get("/api/v1/stores/{storeId}/movements?type=ARRIVAL", storeId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].type").value("ARRIVAL"));
   }
@@ -272,8 +264,7 @@ class InventoryControllerTest {
   @Test
   void get_movements_with_invalid_type_should_return_bad_request() throws Exception {
     mockMvc
-        .perform(
-            get("/api/v1/stores/{storeId}/movements?type=INVALID", storeId))
+        .perform(get("/api/v1/stores/{storeId}/movements?type=INVALID", storeId))
         .andExpect(status().isBadRequest());
   }
 }

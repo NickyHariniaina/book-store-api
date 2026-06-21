@@ -112,8 +112,7 @@ class InventoryServiceTest {
         .willReturn(Optional.empty());
     given(bookStoreRepository.getReferenceById(storeId)).willReturn(store);
     given(bookEditionRepository.getReferenceById(editionId)).willReturn(edition);
-    given(inventoryItemRepository.save(any(InventoryItem.class)))
-        .willAnswer(i -> i.getArgument(0));
+    given(inventoryItemRepository.save(any(InventoryItem.class))).willAnswer(i -> i.getArgument(0));
 
     var result = inventoryService.recordArrival(storeId, editionId, 5, "REF-001");
 
@@ -151,8 +150,7 @@ class InventoryServiceTest {
     given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
         .willReturn(Optional.of(item));
 
-    assertThatThrownBy(
-            () -> inventoryService.adjustStock(storeId, editionId, -20, "Too much"))
+    assertThatThrownBy(() -> inventoryService.adjustStock(storeId, editionId, -20, "Too much"))
         .isInstanceOf(BadRequestException.class);
     then(inventoryMovementRepository).should(never()).save(any());
   }
@@ -162,8 +160,7 @@ class InventoryServiceTest {
     given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
         .willReturn(Optional.empty());
 
-    assertThatThrownBy(
-            () -> inventoryService.adjustStock(storeId, editionId, 5, "Not found"))
+    assertThatThrownBy(() -> inventoryService.adjustStock(storeId, editionId, 5, "Not found"))
         .isInstanceOf(NotFoundException.class);
   }
 
@@ -204,8 +201,7 @@ class InventoryServiceTest {
     given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
         .willReturn(Optional.of(item));
 
-    assertThatThrownBy(
-            () -> inventoryService.recordLost(storeId, editionId, 20, "Too many lost"))
+    assertThatThrownBy(() -> inventoryService.recordLost(storeId, editionId, 20, "Too many lost"))
         .isInstanceOf(BadRequestException.class);
   }
 
@@ -231,8 +227,9 @@ class InventoryServiceTest {
 
   @Test
   void get_movements_with_type_should_filter() {
-    given(inventoryMovementRepository.findByBookStoreIdAndInventoryMovementType(
-            storeId, InventoryMovementType.ARRIVAL))
+    given(
+            inventoryMovementRepository.findByBookStoreIdAndInventoryMovementType(
+                storeId, InventoryMovementType.ARRIVAL))
         .willReturn(List.of());
 
     var result = inventoryService.getMovements(storeId, InventoryMovementType.ARRIVAL);
