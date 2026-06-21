@@ -1,5 +1,6 @@
 package com.onlydevs.bookstore.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -54,4 +55,8 @@ public class Customer {
   @Builder.Default
   @OneToMany(mappedBy = "customer")
   private List<Sale> sales = new ArrayList<>();
+
+  @JsonIgnore private String password;
+
+  @Builder.Default private String role = "USER";
 }

@@ -12,6 +12,8 @@ import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -97,6 +99,18 @@ public class GlobalExceptionHandler {
     log.error("Internal error", e);
     return new ResponseEntity<>(
         toRest(e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(value = {AuthenticationException.class})
+  ResponseEntity<RestErrorResponse> handleAuthentication(AuthenticationException e) {
+    log.info("Authentication failed", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(value = {AccessDeniedException.class})
+  ResponseEntity<RestErrorResponse> handleAccessDenied(AccessDeniedException e) {
+    log.info("Access denied", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.FORBIDDEN), HttpStatus.FORBIDDEN);
   }
 
   private RestErrorResponse toRest(Exception e, HttpStatus status) {
