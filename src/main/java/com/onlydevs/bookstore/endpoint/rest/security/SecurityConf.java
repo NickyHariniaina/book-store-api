@@ -1,6 +1,5 @@
 package com.onlydevs.bookstore.endpoint.rest.security;
 
-import static org.springframework.http.HttpMethod.GET;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,16 +17,7 @@ public class SecurityConf {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     return http.csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(
-            auth ->
-                auth.requestMatchers(GET, "/ping", "/health/**")
-                    .permitAll()
-                    .requestMatchers(GET, "/api/v1/books/**", "/api/v1/authors")
-                    .permitAll()
-                    .requestMatchers("/api/v1/**")
-                    .hasRole("ADMIN")
-                    .anyRequest()
-                    .authenticated())
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
         .build();
   }
 

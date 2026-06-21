@@ -11,15 +11,14 @@ import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
 import com.onlydevs.bookstore.repository.CustomerRepository;
 import java.util.Base64;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-@RequiredArgsConstructor
 class AuthorIT extends FacadeIT {
 
   @LocalServerPort private int port;
@@ -28,8 +27,8 @@ class AuthorIT extends FacadeIT {
 
   private AuthorResponse createdAuthor;
 
-  private final PasswordEncoder passwordEncoder;
-  private final CustomerRepository customerRepository;
+  @Autowired private PasswordEncoder passwordEncoder;
+  @Autowired private CustomerRepository customerRepository;
 
   @BeforeEach
   void setUp() {
