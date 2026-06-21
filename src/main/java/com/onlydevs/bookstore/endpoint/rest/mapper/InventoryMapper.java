@@ -1,10 +1,9 @@
 package com.onlydevs.bookstore.endpoint.rest.mapper;
 
-import com.onlydevs.bookstore.endpoint.rest.model.InventoryItemResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.InventoryMovementResponse;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
-import com.onlydevs.bookstore.model.enums.InventoryMovementType;
+import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
+import com.onlydevs.bookstore.model.dto.response.InventoryMovementResponse;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -12,11 +11,14 @@ import org.springframework.stereotype.Component;
 public class InventoryMapper {
 
   public InventoryItemResponse toRest(InventoryItem item) {
+    if (item == null) {
+      return null;
+    }
     var edition = item.getBookEdition();
     var book = edition.getBook();
     var store = item.getBookStore();
 
-    return new InventoryItemResponse()
+    return InventoryItemResponse.builder()
         .id(item.getId())
         .storeId(store.getId())
         .storeName(store.getName())
@@ -26,7 +28,8 @@ public class InventoryMapper {
         .quantityOnHand(item.getQuantityOnHand())
         .reorderLevel(item.getReorderLevel())
         .lowStock(item.getQuantityOnHand() <= item.getReorderLevel())
-        .updatedAt(item.getUpdatedAt());
+        .updatedAt(item.getUpdatedAt())
+        .build();
   }
 
   public List<InventoryItemResponse> toRestList(List<InventoryItem> items) {
@@ -34,22 +37,26 @@ public class InventoryMapper {
   }
 
   public InventoryMovementResponse toMovementRest(InventoryMovement movement) {
+    if (movement == null) {
+      return null;
+    }
     var edition = movement.getBookEdition();
     var book = edition.getBook();
 
-    return new InventoryMovementResponse()
+    return InventoryMovementResponse.builder()
         .id(movement.getId())
         .storeId(movement.getBookStore().getId())
         .editionId(edition.getId())
         .bookTitle(book.getTitle())
         .isbn(edition.getIsbn())
-        .type(toDtoType(movement.getInventoryMovementType()))
+        .type(movement.getInventoryMovementType().name())
         .quantity(movement.getQuantity())
         .signedQuantity(computeSignedQuantity(movement))
         .reason(movement.getReason())
         .reference(movement.getReference())
         .movedAt(movement.getMovedAt())
-        .createdAt(movement.getMovedAt());
+        .createdAt(movement.getMovedAt())
+        .build();
   }
 
   public List<InventoryMovementResponse> toMovementRestList(List<InventoryMovement> movements) {
@@ -62,11 +69,5 @@ public class InventoryMapper {
       case SALE, DAMAGED, LOST -> -movement.getQuantity();
       case ADJUSTMENT -> movement.getQuantity();
     };
-  }
-
-  private com.onlydevs.bookstore.endpoint.rest.model.InventoryMovementType toDtoType(
-      InventoryMovementType jpaType) {
-    return com.onlydevs.bookstore.endpoint.rest.model.InventoryMovementType.fromValue(
-        jpaType.name());
   }
 }
