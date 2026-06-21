@@ -4,19 +4,14 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
-import com.onlydevs.bookstore.model.Customer;
 import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
-import com.onlydevs.bookstore.repository.CustomerRepository;
 import java.util.Base64;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 class AuthorIT extends FacadeIT {
@@ -27,25 +22,9 @@ class AuthorIT extends FacadeIT {
 
   private AuthorResponse createdAuthor;
 
-  @Autowired private PasswordEncoder passwordEncoder;
-  @Autowired private CustomerRepository customerRepository;
-
   @BeforeEach
   void setUp() {
-    customerRepository.save(
-        Customer.builder()
-            .firstName("Admin")
-            .lastName("User")
-            .email("admin@bookstore.com")
-            .password(passwordEncoder.encode("admin123"))
-            .role("ADMIN")
-            .build());
-
-    webTestClient =
-        WebTestClient.bindToServer()
-            .baseUrl("http://localhost:" + port)
-            .defaultHeader(HttpHeaders.AUTHORIZATION, basicAuth("admin@bookstore.com", "admin123"))
-            .build();
+    webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
     createdAuthor =
         webTestClient
             .post()
