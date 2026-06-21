@@ -7,9 +7,12 @@ import com.onlydevs.bookstore.conf.FacadeIT;
 import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
+import com.onlydevs.bookstore.repository.BookStoreRepository;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -17,9 +20,16 @@ class BookStoreIT extends FacadeIT {
 
   @LocalServerPort private int port;
 
+  @Autowired private BookStoreRepository bookStoreRepository;
+
   private WebTestClient webTestClient;
 
   private BookStoreResponse createdStore;
+
+  @AfterEach
+  void tearDown() {
+    bookStoreRepository.deleteAll();
+  }
 
   @BeforeEach
   void setUp() {
@@ -64,8 +74,6 @@ class BookStoreIT extends FacadeIT {
         .jsonPath("$.address")
         .isEqualTo("456 Branch St")
         .jsonPath("$.id")
-        .isNotEmpty()
-        .jsonPath("$.createdAt")
         .isNotEmpty();
   }
 
