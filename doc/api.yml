@@ -213,7 +213,6 @@ components:
         lastName: { type: string }
         fullName: { type: string }
         createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
     BookAuthorResponse:
       type: object
       properties:
@@ -642,7 +641,15 @@ paths:
     get:
       tags: [Authors]
       summary: Search authors by name
-      responses: { '200': { description: OK } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuthorResponse'
     post:
       tags: [Authors]
       summary: Create author
