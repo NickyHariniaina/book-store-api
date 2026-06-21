@@ -1,72 +1,143 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.onlydevs.bookstore.endpoint.rest.mapper.BookStoreMapper;
-import com.onlydevs.bookstore.endpoint.rest.model.BookStoreResponse;
-import com.onlydevs.bookstore.model.BookStore;
-import com.onlydevs.bookstore.model.exception.NotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
 import com.onlydevs.bookstore.service.BookStoreService;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
+@WebMvcTest(BookStoreController.class)
 class BookStoreControllerTest {
 
-  BookStoreService service = mock(BookStoreService.class);
-  BookStoreMapper mapper = mock(BookStoreMapper.class);
-  BookStoreController controller = new BookStoreController(service, mapper);
+  @Autowired private MockMvc mockMvc;
 
-  private static final UUID STORE_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+  @Autowired private ObjectMapper objectMapper;
 
-  private static BookStore store =
-      BookStore.builder()
-          .id(STORE_ID)
-          .name("Test Store")
-          .address("123 Test St")
-          .phone("0340000000")
-          .email("test@store.com")
-          .build();
+  @MockBean private BookStoreService bookStoreService;
 
-  private static BookStoreResponse response =
-      new BookStoreResponse()
-          .id(STORE_ID)
-          .name("Test Store")
-          .address("123 Test St")
-          .phone("0340000000")
-          .email("test@store.com")
-          .createdAt(Instant.now())
-          .updatedAt(Instant.now());
+  private final UUID storeId = UUID.randomUUID();
 
   @Test
-  void getStores_returnsList() {
-    when(service.findAll()).thenReturn(List.of(store));
-    when(mapper.toRestList(List.of(store))).thenReturn(List.of(response));
+  void get_all_stores_should_return_page_of_stores() throws Exception {
+    BookStoreResponse response =
+        BookStoreResponse.builder()
+            .id(storeId)
+            .name("Test Store")
+            .address("123 Test St")
+            .phone("0340000000")
+            .email("test@store.com")
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
 
-    List<BookStoreResponse> result = controller.getStores();
+    Page<BookStoreResponse> page = new PageImpl<>(List.of(response), PageRequest.of(0, 20), 1);
 
-    assertEquals(1, result.size());
-    assertEquals("Test Store", result.get(0).getName());
+    given(bookStoreService.getAllStores(any())).willReturn(page);
+
+    mockMvc
+        .perform(get("/api/v1/stores").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].id").value(storeId.toString()))
+        .andExpect(jsonPath("$.content[0].name").value("Test Store"))
+        .andExpect(jsonPath("$.totalElements").value(1))
+        .andExpect(jsonPath("$.totalPages").value(1));
   }
 
   @Test
-  void getStore_found_returnsStore() {
-    when(service.findById(STORE_ID)).thenReturn(store);
-    when(mapper.toRest(store)).thenReturn(response);
+  void get_store_by_id_should_return_store() throws Exception {
+    BookStoreResponse response =
+        BookStoreResponse.builder().id(storeId).name("Test Store").build();
 
-    BookStoreResponse result = controller.getStore(STORE_ID);
+    given(bookStoreService.getStoreById(storeId)).willReturn(response);
 
-    assertEquals("Test Store", result.getName());
+    mockMvc
+        .perform(get("/api/v1/stores/{id}", storeId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(storeId.toString()))
+        .andExpect(jsonPath("$.name").value("Test Store"));
   }
 
   @Test
-  void getStore_notFound_throws() {
-    when(service.findById(STORE_ID)).thenThrow(new NotFoundException("Not found"));
+  void create_store_should_return_created() throws Exception {
+    CreateBookStoreRequest request =
+        CreateBookStoreRequest.builder()
+            .name("New Store")
+            .address("456 New St")
+            .phone("0340000001")
+            .email("new@store.com")
+            .build();
 
-    assertThrows(NotFoundException.class, () -> controller.getStore(STORE_ID));
+    BookStoreResponse response =
+        BookStoreResponse.builder().id(storeId).name("New Store").build();
+
+    given(bookStoreService.createStore(any())).willReturn(response);
+
+    mockMvc
+        .perform(
+            post("/api/v1/stores")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.name").value("New Store"));
+  }
+
+  @Test
+  void create_store_with_invalid_body_should_return_bad_request() throws Exception {
+    CreateBookStoreRequest request = CreateBookStoreRequest.builder().build();
+
+    mockMvc
+        .perform(
+            post("/api/v1/stores")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void update_store_should_return_ok() throws Exception {
+    UpdateBookStoreRequest request =
+        UpdateBookStoreRequest.builder().name("Updated Store").build();
+
+    BookStoreResponse response =
+        BookStoreResponse.builder().id(storeId).name("Updated Store").build();
+
+    given(bookStoreService.updateStore(any(), any())).willReturn(response);
+
+    mockMvc
+        .perform(
+            put("/api/v1/stores/{id}", storeId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("Updated Store"));
+  }
+
+  @Test
+  void delete_store_should_return_no_content() throws Exception {
+    willDoNothing().given(bookStoreService).deleteStore(storeId);
+
+    mockMvc.perform(delete("/api/v1/stores/{id}", storeId)).andExpect(status().isNoContent());
   }
 }
