@@ -1,75 +1,208 @@
 package com.onlydevs.bookstore.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
+import com.onlydevs.bookstore.endpoint.rest.mapper.BookStoreMapper;
 import com.onlydevs.bookstore.model.BookStore;
+import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+@ExtendWith(MockitoExtension.class)
 class BookStoreServiceTest {
 
-  BookStoreRepository repository = mock(BookStoreRepository.class);
-  BookStoreService subject = new BookStoreService(repository);
+  @Mock private BookStoreRepository bookStoreRepository;
 
-  BookStore store =
-      BookStore.builder()
-          .id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-          .name("Test Store")
-          .address("123 Test St")
-          .phone("0340000000")
-          .email("test@store.com")
-          .build();
+  @Mock private BookStoreMapper bookStoreMapper;
 
-  @Test
-  void findAll_returnsList() {
-    when(repository.findAll()).thenReturn(List.of(store));
+  @InjectMocks private BookStoreService bookStoreService;
 
-    List<BookStore> result = subject.findAll();
+  private UUID storeId;
+  private BookStore bookStore;
+  private BookStoreResponse bookStoreResponse;
 
-    assertEquals(1, result.size());
-    assertEquals("Test Store", result.get(0).getName());
+  @BeforeEach
+  void setUp() {
+    storeId = UUID.randomUUID();
+    bookStore =
+        BookStore.builder()
+            .id(storeId)
+            .name("Test Store")
+            .address("123 Test St")
+            .phone("0340000000")
+            .email("test@store.com")
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
+
+    bookStoreResponse =
+        BookStoreResponse.builder()
+            .id(storeId)
+            .name("Test Store")
+            .address("123 Test St")
+            .phone("0340000000")
+            .email("test@store.com")
+            .createdAt(bookStore.getCreatedAt())
+            .updatedAt(bookStore.getUpdatedAt())
+            .build();
   }
 
   @Test
-  void findById_found_returnsStore() {
-    when(repository.findById(store.getId())).thenReturn(Optional.of(store));
+  void get_all_stores_should_return_page_of_stores() {
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<BookStore> storePage = new PageImpl<>(List.of(bookStore), pageable, 1);
 
-    BookStore result = subject.findById(store.getId());
+    given(bookStoreRepository.findAll(pageable)).willReturn(storePage);
+    given(bookStoreMapper.toRest(bookStore)).willReturn(bookStoreResponse);
 
-    assertEquals("Test Store", result.getName());
+    Page<BookStoreResponse> result = bookStoreService.getAllStores(pageable);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().get(0).getName()).isEqualTo("Test Store");
+    assertThat(result.getTotalElements()).isEqualTo(1);
+
+    then(bookStoreRepository).should().findAll(pageable);
+    then(bookStoreMapper).should().toRest(bookStore);
   }
 
   @Test
-  void findById_notFound_throws() {
-    when(repository.findById(store.getId())).thenReturn(Optional.empty());
+  void get_all_stores_when_empty_should_return_empty_page() {
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<BookStore> emptyPage = Page.empty(pageable);
 
-    assertThrows(NotFoundException.class, () -> subject.findById(store.getId()));
+    given(bookStoreRepository.findAll(pageable)).willReturn(emptyPage);
+
+    Page<BookStoreResponse> result = bookStoreService.getAllStores(pageable);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).isEmpty();
+
+    then(bookStoreRepository).should().findAll(pageable);
+    then(bookStoreMapper).should(never()).toRest(any());
   }
 
   @Test
-  void save_returnsSavedStore() {
-    when(repository.save(store)).thenReturn(store);
+  void get_store_by_id_when_found_should_return_store() {
+    given(bookStoreRepository.findById(storeId)).willReturn(Optional.of(bookStore));
+    given(bookStoreMapper.toRest(bookStore)).willReturn(bookStoreResponse);
 
-    BookStore result = subject.save(store);
+    BookStoreResponse result = bookStoreService.getStoreById(storeId);
 
-    assertEquals("Test Store", result.getName());
+    assertThat(result).isNotNull();
+    assertThat(result.getId()).isEqualTo(storeId);
+    assertThat(result.getName()).isEqualTo("Test Store");
+
+    then(bookStoreRepository).should().findById(storeId);
+    then(bookStoreMapper).should().toRest(bookStore);
   }
 
   @Test
-  void update_found_appliesFields() {
-    String newName = "Updated Store";
-    when(repository.findById(store.getId())).thenReturn(Optional.of(store));
-    when(repository.save(store)).thenReturn(store);
+  void get_store_by_id_when_not_found_should_throw() {
+    given(bookStoreRepository.findById(storeId)).willReturn(Optional.empty());
 
-    BookStore result = subject.update(store.getId(), newName, null, null, null);
+    assertThatThrownBy(() -> bookStoreService.getStoreById(storeId))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining("BookStore not found");
 
-    assertEquals(newName, result.getName());
+    then(bookStoreRepository).should().findById(storeId);
+    then(bookStoreMapper).should(never()).toRest(any());
+  }
+
+  @Test
+  void create_store_should_persist_and_return() {
+    CreateBookStoreRequest request =
+        CreateBookStoreRequest.builder()
+            .name("New Store")
+            .address("456 New St")
+            .phone("0340000001")
+            .email("new@store.com")
+            .build();
+
+    given(bookStoreMapper.toDomain(request)).willReturn(bookStore);
+    given(bookStoreRepository.save(bookStore)).willReturn(bookStore);
+    given(bookStoreMapper.toRest(bookStore)).willReturn(bookStoreResponse);
+
+    BookStoreResponse result = bookStoreService.createStore(request);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getName()).isEqualTo("Test Store");
+
+    then(bookStoreMapper).should().toDomain(request);
+    then(bookStoreRepository).should().save(bookStore);
+    then(bookStoreMapper).should().toRest(bookStore);
+  }
+
+  @Test
+  void update_store_when_found_should_modify_and_return() {
+    UpdateBookStoreRequest request =
+        UpdateBookStoreRequest.builder().name("Updated Store").build();
+
+    given(bookStoreRepository.findById(storeId)).willReturn(Optional.of(bookStore));
+    given(bookStoreRepository.save(bookStore)).willReturn(bookStore);
+    given(bookStoreMapper.toRest(bookStore)).willReturn(bookStoreResponse);
+
+    BookStoreResponse result = bookStoreService.updateStore(storeId, request);
+
+    assertThat(result).isNotNull();
+
+    then(bookStoreRepository).should().findById(storeId);
+    then(bookStoreRepository).should().save(bookStore);
+    then(bookStoreMapper).should().toRest(bookStore);
+  }
+
+  @Test
+  void update_store_when_not_found_should_throw() {
+    UpdateBookStoreRequest request = UpdateBookStoreRequest.builder().name("Updated").build();
+
+    given(bookStoreRepository.findById(storeId)).willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> bookStoreService.updateStore(storeId, request))
+        .isInstanceOf(NotFoundException.class);
+
+    then(bookStoreRepository).should().findById(storeId);
+    then(bookStoreRepository).should(never()).save(any());
+  }
+
+  @Test
+  void delete_store_when_found_should_remove() {
+    given(bookStoreRepository.existsById(storeId)).willReturn(true);
+
+    bookStoreService.deleteStore(storeId);
+
+    then(bookStoreRepository).should().existsById(storeId);
+    then(bookStoreRepository).should().deleteById(storeId);
+  }
+
+  @Test
+  void delete_store_when_not_found_should_throw() {
+    given(bookStoreRepository.existsById(storeId)).willReturn(false);
+
+    assertThatThrownBy(() -> bookStoreService.deleteStore(storeId))
+        .isInstanceOf(NotFoundException.class);
+
+    then(bookStoreRepository).should().existsById(storeId);
+    then(bookStoreRepository).should(never()).deleteById(any());
   }
 }
