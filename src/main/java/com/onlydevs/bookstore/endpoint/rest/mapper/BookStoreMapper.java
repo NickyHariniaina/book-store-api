@@ -1,8 +1,8 @@
 package com.onlydevs.bookstore.endpoint.rest.mapper;
 
-import com.onlydevs.bookstore.endpoint.rest.model.BookStoreResponse;
-import com.onlydevs.bookstore.endpoint.rest.model.CreateBookStoreRequest;
 import com.onlydevs.bookstore.model.BookStore;
+import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -19,14 +19,18 @@ public class BookStoreMapper {
   }
 
   public BookStoreResponse toRest(BookStore bookStore) {
-    return new BookStoreResponse()
+    if (bookStore == null) {
+      return null;
+    }
+    return BookStoreResponse.builder()
         .id(bookStore.getId())
         .name(bookStore.getName())
         .address(bookStore.getAddress())
         .phone(bookStore.getPhone())
         .email(bookStore.getEmail())
         .createdAt(bookStore.getCreatedAt())
-        .updatedAt(bookStore.getUpdatedAt());
+        .updatedAt(bookStore.getUpdatedAt())
+        .build();
   }
 
   public List<BookStoreResponse> toRestList(List<BookStore> bookStores) {
