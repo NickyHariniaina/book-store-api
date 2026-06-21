@@ -1,47 +1,74 @@
 package com.onlydevs.bookstore.service;
 
+import com.onlydevs.bookstore.endpoint.rest.mapper.BookStoreMapper;
 import com.onlydevs.bookstore.model.BookStore;
+import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
 public class BookStoreService {
 
-  private final BookStoreRepository repository;
+  private final BookStoreRepository bookStoreRepository;
+  private final BookStoreMapper bookStoreMapper;
 
-  public List<BookStore> findAll() {
-    return repository.findAll();
+  public Page<BookStoreResponse> getAllStores(Pageable pageable) {
+    return bookStoreRepository.findAll(pageable).map(bookStoreMapper::toRest);
   }
 
-  public BookStore findById(UUID id) {
-    return repository
-        .findById(id)
-        .orElseThrow(() -> new NotFoundException("BookStore not found: " + id));
+  public BookStoreResponse getStoreById(UUID id) {
+    BookStore bookStore =
+        bookStoreRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("BookStore not found with id: " + id));
+    return bookStoreMapper.toRest(bookStore);
   }
 
-  public BookStore save(BookStore bookStore) {
-    return repository.save(bookStore);
+  @Transactional
+  public BookStoreResponse createStore(CreateBookStoreRequest request) {
+    BookStore bookStore = bookStoreMapper.toDomain(request);
+    BookStore saved = bookStoreRepository.save(bookStore);
+    return bookStoreMapper.toRest(saved);
   }
 
-  public BookStore update(UUID id, String name, String address, String phone, String email) {
-    BookStore existing = findById(id);
-    if (name != null) {
-      existing.setName(name);
+  @Transactional
+  public BookStoreResponse updateStore(UUID id, UpdateBookStoreRequest request) {
+    BookStore bookStore =
+        bookStoreRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("BookStore not found with id: " + id));
+
+    if (request.getName() != null) {
+      bookStore.setName(request.getName());
     }
-    if (address != null) {
-      existing.setAddress(address);
+    if (request.getAddress() != null) {
+      bookStore.setAddress(request.getAddress());
     }
-    if (phone != null) {
-      existing.setPhone(phone);
+    if (request.getPhone() != null) {
+      bookStore.setPhone(request.getPhone());
     }
-    if (email != null) {
-      existing.setEmail(email);
+    if (request.getEmail() != null) {
+      bookStore.setEmail(request.getEmail());
     }
-    return repository.save(existing);
+
+    BookStore saved = bookStoreRepository.save(bookStore);
+    return bookStoreMapper.toRest(saved);
+  }
+
+  @Transactional
+  public void deleteStore(UUID id) {
+    if (!bookStoreRepository.existsById(id)) {
+      throw new NotFoundException("BookStore not found with id: " + id);
+    }
+    bookStoreRepository.deleteById(id);
   }
 }
