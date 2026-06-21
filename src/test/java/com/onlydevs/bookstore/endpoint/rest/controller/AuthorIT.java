@@ -4,15 +4,21 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
+import com.onlydevs.bookstore.model.Customer;
 import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
+import com.onlydevs.bookstore.repository.CustomerRepository;
+import java.util.Base64;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+@RequiredArgsConstructor
 class AuthorIT extends FacadeIT {
 
   @LocalServerPort private int port;
@@ -21,9 +27,25 @@ class AuthorIT extends FacadeIT {
 
   private AuthorResponse createdAuthor;
 
+  private final PasswordEncoder passwordEncoder;
+  private final CustomerRepository customerRepository;
+
   @BeforeEach
   void setUp() {
-    webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
+    customerRepository.save(
+        Customer.builder()
+            .firstName("Admin")
+            .lastName("User")
+            .email("admin@bookstore.com")
+            .password(passwordEncoder.encode("admin123"))
+            .role("ADMIN")
+            .build());
+
+    webTestClient =
+        WebTestClient.bindToServer()
+            .baseUrl("http://localhost:" + port)
+            .defaultHeader(HttpHeaders.AUTHORIZATION, basicAuth("admin@bookstore.com", "admin123"))
+            .build();
     createdAuthor =
         webTestClient
             .post()
@@ -228,5 +250,9 @@ class AuthorIT extends FacadeIT {
         .isEqualTo("Jane")
         .jsonPath("$.lastName")
         .isEqualTo("Austen");
+  }
+
+  private String basicAuth(String username, String password) {
+    return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
   }
 }
