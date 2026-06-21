@@ -1,12 +1,11 @@
 package com.onlydevs.bookstore.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.onlydevs.bookstore.model.BookEdition;
 import com.onlydevs.bookstore.model.BookStore;
@@ -24,31 +23,39 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class InventoryServiceTest {
 
-  private static final UUID STORE_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-  private static final UUID EDITION_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
-  private final InventoryItemRepository itemRepository = mock(InventoryItemRepository.class);
-  private final InventoryMovementRepository movementRepository =
-      mock(InventoryMovementRepository.class);
-  private final BookStoreRepository bookStoreRepository = mock(BookStoreRepository.class);
-  private final BookEditionRepository bookEditionRepository = mock(BookEditionRepository.class);
-  private final InventoryService subject =
-      new InventoryService(
-          itemRepository, movementRepository, bookStoreRepository, bookEditionRepository);
+  @Mock private InventoryItemRepository inventoryItemRepository;
 
+  @Mock private InventoryMovementRepository inventoryMovementRepository;
+
+  @Mock private BookStoreRepository bookStoreRepository;
+
+  @Mock private BookEditionRepository bookEditionRepository;
+
+  @InjectMocks private InventoryService inventoryService;
+
+  private UUID storeId;
+  private UUID editionId;
   private BookStore store;
   private BookEdition edition;
   private InventoryItem item;
 
   @BeforeEach
   void setUp() {
-    store = BookStore.builder().id(STORE_ID).name("Test Store").build();
-    edition = BookEdition.builder().id(EDITION_ID).isbn("1234567890").build();
+    storeId = UUID.randomUUID();
+    editionId = UUID.randomUUID();
+    store = BookStore.builder().id(storeId).name("Test Store").build();
+    edition = BookEdition.builder().id(editionId).isbn("1234567890").build();
     item =
         InventoryItem.builder()
-            .id(UUID.fromString("00000000-0000-0000-0000-000000000003"))
+            .id(UUID.randomUUID())
             .bookStore(store)
             .bookEdition(edition)
             .quantityOnHand(10)
@@ -57,176 +64,182 @@ class InventoryServiceTest {
   }
 
   @Test
-  void getInventoryByStore_returnsList() {
-    when(itemRepository.findByBookStoreId(STORE_ID)).thenReturn(List.of(item));
+  void get_inventory_by_store_should_return_list() {
+    given(inventoryItemRepository.findByBookStoreId(storeId)).willReturn(List.of(item));
 
-    var result = subject.getInventoryByStore(STORE_ID);
+    var result = inventoryService.getInventoryByStore(storeId);
 
-    assertEquals(1, result.size());
-    assertEquals(10, result.get(0).getQuantityOnHand());
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0).getQuantityOnHand()).isEqualTo(10);
+    then(inventoryItemRepository).should().findByBookStoreId(storeId);
   }
 
   @Test
-  void getStockByEdition_found_returnsItem() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.of(item));
+  void get_stock_by_edition_when_found_should_return_item() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
 
-    var result = subject.getStockByEdition(STORE_ID, EDITION_ID);
+    var result = inventoryService.getStockByEdition(storeId, editionId);
 
-    assertEquals(10, result.getQuantityOnHand());
+    assertThat(result).isNotNull();
+    assertThat(result.getQuantityOnHand()).isEqualTo(10);
   }
 
   @Test
-  void getStockByEdition_notFound_throws() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.empty());
+  void get_stock_by_edition_when_not_found_should_throw() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.empty());
 
-    assertThrows(NotFoundException.class, () -> subject.getStockByEdition(STORE_ID, EDITION_ID));
+    assertThatThrownBy(() -> inventoryService.getStockByEdition(storeId, editionId))
+        .isInstanceOf(NotFoundException.class);
   }
 
   @Test
-  void recordArrival_existingItem_incrementsStock() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.of(item));
+  void record_arrival_when_item_exists_should_increment_stock() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
 
-    var result = subject.recordArrival(STORE_ID, EDITION_ID, 5, "REF-001");
+    var result = inventoryService.recordArrival(storeId, editionId, 5, "REF-001");
 
-    assertEquals(15, result.getQuantityOnHand());
-    verify(itemRepository).save(item);
-    verify(movementRepository).save(any(InventoryMovement.class));
+    assertThat(result.getQuantityOnHand()).isEqualTo(15);
+    then(inventoryItemRepository).should().save(item);
+    then(inventoryMovementRepository).should().save(any(InventoryMovement.class));
   }
 
   @Test
-  void recordArrival_newItem_creates() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.empty());
-    when(bookStoreRepository.getReferenceById(STORE_ID)).thenReturn(new BookStore());
-    when(bookEditionRepository.getReferenceById(EDITION_ID)).thenReturn(new BookEdition());
-    when(itemRepository.save(any(InventoryItem.class))).thenAnswer(i -> i.getArgument(0));
+  void record_arrival_when_item_not_exists_should_create_new() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.empty());
+    given(bookStoreRepository.getReferenceById(storeId)).willReturn(store);
+    given(bookEditionRepository.getReferenceById(editionId)).willReturn(edition);
+    given(inventoryItemRepository.save(any(InventoryItem.class)))
+        .willAnswer(i -> i.getArgument(0));
 
-    var result = subject.recordArrival(STORE_ID, EDITION_ID, 5, "REF-001");
+    var result = inventoryService.recordArrival(storeId, editionId, 5, "REF-001");
 
-    assertEquals(5, result.getQuantityOnHand());
-    verify(itemRepository).save(any(InventoryItem.class));
-    verify(movementRepository).save(any(InventoryMovement.class));
+    assertThat(result.getQuantityOnHand()).isEqualTo(5);
+    then(inventoryItemRepository).should().save(any(InventoryItem.class));
+    then(inventoryMovementRepository).should().save(any(InventoryMovement.class));
   }
 
   @Test
-  void adjustStock_increments() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.of(item));
+  void adjust_stock_should_increment() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
 
-    var result = subject.adjustStock(STORE_ID, EDITION_ID, 3, "Add stock");
+    var result = inventoryService.adjustStock(storeId, editionId, 3, "Add stock");
 
-    assertEquals(13, result.getQuantityOnHand());
-    verify(itemRepository).save(item);
-    verify(movementRepository).save(any(InventoryMovement.class));
+    assertThat(result.getQuantityOnHand()).isEqualTo(13);
+    then(inventoryItemRepository).should().save(item);
+    then(inventoryMovementRepository).should().save(any(InventoryMovement.class));
   }
 
   @Test
-  void adjustStock_decrements() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.of(item));
+  void adjust_stock_should_decrement() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
 
-    var result = subject.adjustStock(STORE_ID, EDITION_ID, -3, "Remove stock");
+    var result = inventoryService.adjustStock(storeId, editionId, -3, "Remove stock");
 
-    assertEquals(7, result.getQuantityOnHand());
-    verify(itemRepository).save(item);
-    verify(movementRepository).save(any(InventoryMovement.class));
+    assertThat(result.getQuantityOnHand()).isEqualTo(7);
+    then(inventoryItemRepository).should().save(item);
+    then(inventoryMovementRepository).should().save(any(InventoryMovement.class));
   }
 
   @Test
-  void adjustStock_insufficientStock_throws() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.of(item));
+  void adjust_stock_when_insufficient_should_throw() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
 
-    assertThrows(
-        BadRequestException.class,
-        () -> subject.adjustStock(STORE_ID, EDITION_ID, -20, "Too much"));
-    verify(movementRepository, never()).save(any());
+    assertThatThrownBy(
+            () -> inventoryService.adjustStock(storeId, editionId, -20, "Too much"))
+        .isInstanceOf(BadRequestException.class);
+    then(inventoryMovementRepository).should(never()).save(any());
   }
 
   @Test
-  void adjustStock_itemNotFound_throws() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.empty());
+  void adjust_stock_when_item_not_found_should_throw() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.empty());
 
-    assertThrows(
-        NotFoundException.class, () -> subject.adjustStock(STORE_ID, EDITION_ID, 5, "Not found"));
+    assertThatThrownBy(
+            () -> inventoryService.adjustStock(storeId, editionId, 5, "Not found"))
+        .isInstanceOf(NotFoundException.class);
   }
 
   @Test
-  void recordDamaged_decrements() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.of(item));
+  void record_damaged_should_decrement() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
 
-    var result = subject.recordDamaged(STORE_ID, EDITION_ID, 3, "Torn cover");
+    var result = inventoryService.recordDamaged(storeId, editionId, 3, "Torn cover");
 
-    assertEquals(7, result.getQuantityOnHand());
-    verify(movementRepository).save(any(InventoryMovement.class));
+    assertThat(result.getQuantityOnHand()).isEqualTo(7);
+    then(inventoryMovementRepository).should().save(any(InventoryMovement.class));
   }
 
   @Test
-  void recordDamaged_insufficientStock_throws() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.of(item));
+  void record_damaged_when_insufficient_should_throw() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
 
-    assertThrows(
-        BadRequestException.class,
-        () -> subject.recordDamaged(STORE_ID, EDITION_ID, 20, "Too many damaged"));
+    assertThatThrownBy(
+            () -> inventoryService.recordDamaged(storeId, editionId, 20, "Too many damaged"))
+        .isInstanceOf(BadRequestException.class);
   }
 
   @Test
-  void recordLost_decrements() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.of(item));
+  void record_lost_should_decrement() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
 
-    var result = subject.recordLost(STORE_ID, EDITION_ID, 2, "Misplaced");
+    var result = inventoryService.recordLost(storeId, editionId, 2, "Misplaced");
 
-    assertEquals(8, result.getQuantityOnHand());
-    verify(movementRepository).save(any(InventoryMovement.class));
+    assertThat(result.getQuantityOnHand()).isEqualTo(8);
+    then(inventoryMovementRepository).should().save(any(InventoryMovement.class));
   }
 
   @Test
-  void recordLost_insufficientStock_throws() {
-    when(itemRepository.findByBookStoreIdAndBookEditionId(STORE_ID, EDITION_ID))
-        .thenReturn(Optional.of(item));
+  void record_lost_when_insufficient_should_throw() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
 
-    assertThrows(
-        BadRequestException.class,
-        () -> subject.recordLost(STORE_ID, EDITION_ID, 20, "Too many lost"));
+    assertThatThrownBy(
+            () -> inventoryService.recordLost(storeId, editionId, 20, "Too many lost"))
+        .isInstanceOf(BadRequestException.class);
   }
 
   @Test
-  void getMovementsByEdition_returnsList() {
-    when(movementRepository.findByBookEditionId(EDITION_ID)).thenReturn(List.of());
+  void get_movements_by_edition_should_return_list() {
+    given(inventoryMovementRepository.findByBookEditionId(editionId)).willReturn(List.of());
 
-    var result = subject.getMovementsByEdition(EDITION_ID);
+    var result = inventoryService.getMovementsByEdition(editionId);
 
-    assertEquals(0, result.size());
-    verify(movementRepository).findByBookEditionId(EDITION_ID);
+    assertThat(result).isEmpty();
+    then(inventoryMovementRepository).should().findByBookEditionId(editionId);
   }
 
   @Test
-  void getMovements_withoutType_returnsAll() {
-    when(movementRepository.findByBookStoreId(STORE_ID)).thenReturn(List.of());
+  void get_movements_without_type_should_return_all() {
+    given(inventoryMovementRepository.findByBookStoreId(storeId)).willReturn(List.of());
 
-    var result = subject.getMovements(STORE_ID, null);
+    var result = inventoryService.getMovements(storeId, null);
 
-    assertEquals(0, result.size());
-    verify(movementRepository).findByBookStoreId(STORE_ID);
+    assertThat(result).isEmpty();
+    then(inventoryMovementRepository).should().findByBookStoreId(storeId);
   }
 
   @Test
-  void getMovements_withType_filters() {
-    when(movementRepository.findByBookStoreIdAndInventoryMovementType(
-            STORE_ID, InventoryMovementType.ARRIVAL))
-        .thenReturn(List.of());
+  void get_movements_with_type_should_filter() {
+    given(inventoryMovementRepository.findByBookStoreIdAndInventoryMovementType(
+            storeId, InventoryMovementType.ARRIVAL))
+        .willReturn(List.of());
 
-    var result = subject.getMovements(STORE_ID, InventoryMovementType.ARRIVAL);
+    var result = inventoryService.getMovements(storeId, InventoryMovementType.ARRIVAL);
 
-    assertEquals(0, result.size());
-    verify(movementRepository)
-        .findByBookStoreIdAndInventoryMovementType(STORE_ID, InventoryMovementType.ARRIVAL);
+    assertThat(result).isEmpty();
+    then(inventoryMovementRepository)
+        .should()
+        .findByBookStoreIdAndInventoryMovementType(storeId, InventoryMovementType.ARRIVAL);
   }
 }
