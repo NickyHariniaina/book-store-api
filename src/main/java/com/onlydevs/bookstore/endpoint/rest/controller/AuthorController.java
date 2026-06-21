@@ -5,6 +5,7 @@ import com.onlydevs.bookstore.model.dto.request.UpdateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
 import com.onlydevs.bookstore.service.AuthorService;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,18 +48,18 @@ public class AuthorController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<AuthorResponse> getById(@PathVariable String id) {
+  public ResponseEntity<AuthorResponse> getById(@PathVariable UUID id) {
     return ResponseEntity.ok(authorService.getById(id));
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<AuthorResponse> update(
-      @PathVariable String id, @Valid @RequestBody UpdateAuthorRequest request) {
+      @PathVariable UUID id, @Valid @RequestBody UpdateAuthorRequest request) {
     return ResponseEntity.ok(authorService.update(id, request));
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@PathVariable String id) {
+  public ResponseEntity<Void> delete(@PathVariable UUID id) {
     authorService.deleteById(id);
     return ResponseEntity.noContent().build();
   }

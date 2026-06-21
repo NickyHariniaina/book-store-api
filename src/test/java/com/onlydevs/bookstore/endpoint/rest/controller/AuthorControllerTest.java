@@ -115,10 +115,10 @@ class AuthorControllerTest {
 
   @Test
   void getById_should_return_author() throws Exception {
-    var id = UUID.randomUUID().toString();
+    var id = UUID.randomUUID();
     var response =
         AuthorResponse.builder()
-            .id(UUID.fromString(id))
+            .id(id)
             .firstName("Jane")
             .lastName("Austen")
             .fullName("Jane Austen")
@@ -129,18 +129,18 @@ class AuthorControllerTest {
     mockMvc
         .perform(get("/api/v1/authors/{id}", id))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(id))
+        .andExpect(jsonPath("$.id").value(id.toString()))
         .andExpect(jsonPath("$.firstName").value("Jane"))
         .andExpect(jsonPath("$.lastName").value("Austen"));
   }
 
   @Test
   void update_should_return_updated_author() throws Exception {
-    var id = UUID.randomUUID().toString();
+    var id = UUID.randomUUID();
     var request = UpdateAuthorRequest.builder().firstName("Emily").lastName("Bronte").build();
     var response =
         AuthorResponse.builder()
-            .id(UUID.fromString(id))
+            .id(id)
             .firstName("Emily")
             .lastName("Bronte")
             .fullName("Emily Bronte")
@@ -160,7 +160,7 @@ class AuthorControllerTest {
 
   @Test
   void delete_should_return_no_content() throws Exception {
-    var id = UUID.randomUUID().toString();
+    var id = UUID.randomUUID();
     willDoNothing().given(authorService).deleteById(id);
 
     mockMvc.perform(delete("/api/v1/authors/{id}", id)).andExpect(status().isNoContent());
