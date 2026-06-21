@@ -12,6 +12,8 @@ import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "\"customer\"")
 @Getter
@@ -54,4 +56,7 @@ public class Customer {
   @Builder.Default
   @OneToMany(mappedBy = "customer")
   private List<Sale> sales = new ArrayList<>();
+
+  @JsonIgnore
+  private String password;
 }
