@@ -16,48 +16,49 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/api/v1")
 @AllArgsConstructor
 public class BookEditionController {
   private final BookEditionService bookEditionService;
 
-  @GetMapping("/api/v1/books/{bookId}/editions")
-  public ResponseEntity<List<BookEditionResponse>> getEditionsByBookId(
-      @PathVariable UUID bookId) {
+  @GetMapping("/books/{bookId}/editions")
+  public ResponseEntity<List<BookEditionResponse>> getEditionsByBookId(@PathVariable UUID bookId) {
     return ResponseEntity.ok(bookEditionService.getEditionsByBookId(bookId));
   }
 
-  @GetMapping("/api/v1/editions/{id}")
+  @GetMapping("/editions/{id}")
   public ResponseEntity<BookEditionResponse> getEditionById(@PathVariable UUID id) {
     return ResponseEntity.ok(bookEditionService.getEditionById(id));
   }
 
-  @GetMapping("/api/v1/editions/isbn/{isbn}")
+  @GetMapping("/editions/isbn/{isbn}")
   public ResponseEntity<BookEditionResponse> getEditionByIsbn(@PathVariable String isbn) {
     return ResponseEntity.ok(bookEditionService.getEditionByIsbn(isbn));
   }
 
-  @PostMapping("/api/v1/books/{bookId}/editions")
+  @PostMapping("/books/{bookId}/editions")
   public ResponseEntity<BookEditionResponse> createEdition(
       @PathVariable UUID bookId, @Valid @RequestBody CreateBookEditionRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(bookEditionService.createEdition(bookId, request));
   }
 
-  @PutMapping("/api/v1/editions/{id}")
+  @PutMapping("/editions/{id}")
   public ResponseEntity<BookEditionResponse> updateEdition(
       @PathVariable UUID id, @Valid @RequestBody UpdateBookEditionRequest request) {
     return ResponseEntity.ok(bookEditionService.updateEdition(id, request));
   }
 
-  @PatchMapping("/api/v1/editions/{id}/activate")
+  @PatchMapping("/editions/{id}/activate")
   public ResponseEntity<BookEditionResponse> activateEdition(@PathVariable UUID id) {
     return ResponseEntity.ok(bookEditionService.activateEdition(id));
   }
 
-  @PatchMapping("/api/v1/editions/{id}/deactivate")
+  @PatchMapping("/editions/{id}/deactivate")
   public ResponseEntity<BookEditionResponse> deactivateEdition(@PathVariable UUID id) {
     return ResponseEntity.ok(bookEditionService.deactivateEdition(id));
   }
