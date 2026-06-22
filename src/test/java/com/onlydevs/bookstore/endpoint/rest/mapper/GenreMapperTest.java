@@ -89,7 +89,7 @@ class GenreMapperTest {
             .author(author)
             .role(AuthorRole.AUTHOR)
             .build();
-    book.setBookAuthors(List.of(bookAuthor));
+    book.setBookAuthors(Set.of(bookAuthor));
 
     var response = mapper.toBookSummaryResponse(book);
 

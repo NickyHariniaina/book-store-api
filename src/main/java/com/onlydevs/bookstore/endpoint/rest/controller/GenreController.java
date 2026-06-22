@@ -49,12 +49,8 @@ public class GenreController {
   public ResponseEntity<Page<BookSummaryResponse>> getBooksByGenreId(
       @PathVariable UUID id,
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size,
-      @RequestParam(defaultValue = "createdAt") String sortBy,
-      @RequestParam(defaultValue = "desc") String sortDir) {
-    Sort.Direction direction = Sort.Direction.fromString(sortDir);
-    Sort sort = Sort.by(direction, sortBy);
-    Pageable pageable = PageRequest.of(page, size, sort);
+      @RequestParam(defaultValue = "20") int size) {
+    Pageable pageable = PageRequest.of(page, size);
     return ResponseEntity.ok(genreService.getBooksByGenreId(id, pageable));
   }
 
