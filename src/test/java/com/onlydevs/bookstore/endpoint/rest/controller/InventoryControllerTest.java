@@ -11,7 +11,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.model.InventoryItem;
+import com.onlydevs.bookstore.model.dto.request.AdjustStockRequest;
 import com.onlydevs.bookstore.model.dto.request.ArrivalRequest;
+import com.onlydevs.bookstore.model.dto.request.StockLossRequest;
 import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.model.dto.response.InventoryMovementResponse;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
@@ -109,15 +111,12 @@ class InventoryControllerTest {
 
   @Test
   void adjust_stock_should_return_created() throws Exception {
-    var request =
-        """
-        {
-          "editionId": "%s",
-          "quantity": 5,
-          "reason": "Add stock"
-        }
-        """
-            .formatted(editionId.toString());
+    AdjustStockRequest request =
+        AdjustStockRequest.builder()
+            .editionId(editionId)
+            .quantity(5)
+            .reason("Add stock")
+            .build();
 
     InventoryItemResponse response =
         InventoryItemResponse.builder()
@@ -134,22 +133,19 @@ class InventoryControllerTest {
         .perform(
             post("/api/v1/stores/{storeId}/inventory/adjustment", storeId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(request))
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.quantityOnHand").value(15));
   }
 
   @Test
   void record_damaged_should_return_created() throws Exception {
-    var request =
-        """
-        {
-          "editionId": "%s",
-          "quantity": 2,
-          "reason": "Torn cover"
-        }
-        """
-            .formatted(editionId.toString());
+    StockLossRequest request =
+        StockLossRequest.builder()
+            .editionId(editionId)
+            .quantity(2)
+            .reason("Torn cover")
+            .build();
 
     InventoryItemResponse response =
         InventoryItemResponse.builder()
@@ -167,22 +163,19 @@ class InventoryControllerTest {
         .perform(
             post("/api/v1/stores/{storeId}/inventory/damaged", storeId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(request))
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.quantityOnHand").value(8));
   }
 
   @Test
   void record_lost_should_return_created() throws Exception {
-    var request =
-        """
-        {
-          "editionId": "%s",
-          "quantity": 1,
-          "reason": "Misplaced"
-        }
-        """
-            .formatted(editionId.toString());
+    StockLossRequest request =
+        StockLossRequest.builder()
+            .editionId(editionId)
+            .quantity(1)
+            .reason("Misplaced")
+            .build();
 
     InventoryItemResponse response =
         InventoryItemResponse.builder()
@@ -199,7 +192,7 @@ class InventoryControllerTest {
         .perform(
             post("/api/v1/stores/{storeId}/inventory/lost", storeId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(request))
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.quantityOnHand").value(9));
   }
