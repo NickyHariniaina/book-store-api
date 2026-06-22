@@ -112,11 +112,7 @@ class InventoryControllerTest {
   @Test
   void adjust_stock_should_return_created() throws Exception {
     AdjustStockRequest request =
-        AdjustStockRequest.builder()
-            .editionId(editionId)
-            .quantity(5)
-            .reason("Add stock")
-            .build();
+        AdjustStockRequest.builder().editionId(editionId).quantity(5).reason("Add stock").build();
 
     InventoryItemResponse response =
         InventoryItemResponse.builder()
@@ -141,11 +137,7 @@ class InventoryControllerTest {
   @Test
   void record_damaged_should_return_created() throws Exception {
     StockLossRequest request =
-        StockLossRequest.builder()
-            .editionId(editionId)
-            .quantity(2)
-            .reason("Torn cover")
-            .build();
+        StockLossRequest.builder().editionId(editionId).quantity(2).reason("Torn cover").build();
 
     InventoryItemResponse response =
         InventoryItemResponse.builder()
@@ -171,11 +163,7 @@ class InventoryControllerTest {
   @Test
   void record_lost_should_return_created() throws Exception {
     StockLossRequest request =
-        StockLossRequest.builder()
-            .editionId(editionId)
-            .quantity(1)
-            .reason("Misplaced")
-            .build();
+        StockLossRequest.builder().editionId(editionId).quantity(1).reason("Misplaced").build();
 
     InventoryItemResponse response =
         InventoryItemResponse.builder()
