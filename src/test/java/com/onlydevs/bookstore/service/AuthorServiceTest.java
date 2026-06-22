@@ -106,7 +106,7 @@ class AuthorServiceTest {
     given(authorRepository.findById(id)).willReturn(Optional.of(author));
     given(authorMapper.toRest(author)).willReturn(authorResponse);
 
-    var actualResponse = authorService.getById(id.toString());
+    var actualResponse = authorService.getById(id);
 
     assertEquals(authorResponse, actualResponse);
     then(authorMapper).should().toRest(author);
@@ -119,7 +119,7 @@ class AuthorServiceTest {
 
     given(authorRepository.findById(id)).willReturn(Optional.empty());
 
-    assertThrows(NotFoundException.class, () -> authorService.getById(id.toString()));
+    assertThrows(NotFoundException.class, () -> authorService.getById(id));
     then(authorRepository).should().findById(id);
   }
 
@@ -186,7 +186,7 @@ class AuthorServiceTest {
     given(authorRepository.save(existingAuthor)).willReturn(updatedAuthor);
     given(authorMapper.toRest(updatedAuthor)).willReturn(response);
 
-    var result = authorService.update(id.toString(), request);
+    var result = authorService.update(id, request);
 
     assertEquals(response, result);
     then(authorRepository).should().findById(id);
@@ -201,7 +201,7 @@ class AuthorServiceTest {
 
     given(authorRepository.findById(id)).willReturn(Optional.of(author));
 
-    authorService.deleteById(id.toString());
+    authorService.deleteById(id);
 
     then(authorRepository).should().findById(id);
     then(authorRepository).should().delete(author);
@@ -213,7 +213,7 @@ class AuthorServiceTest {
 
     given(authorRepository.findById(id)).willReturn(Optional.empty());
 
-    assertThrows(NotFoundException.class, () -> authorService.deleteById(id.toString()));
+    assertThrows(NotFoundException.class, () -> authorService.deleteById(id));
     then(authorRepository).should().findById(id);
   }
 }
