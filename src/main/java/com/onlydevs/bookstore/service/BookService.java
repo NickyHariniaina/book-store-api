@@ -4,7 +4,9 @@ import com.onlydevs.bookstore.endpoint.rest.mapper.BookMapper;
 import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookAuthor;
+import com.onlydevs.bookstore.model.BookEdition;
 import com.onlydevs.bookstore.model.Genre;
+import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
@@ -15,8 +17,10 @@ import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.AuthorRepository;
 import com.onlydevs.bookstore.repository.BookAuthorRepository;
+import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.GenreRepository;
+import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +36,8 @@ public class BookService {
   private final AuthorRepository authorRepository;
   private final GenreRepository genreRepository;
   private final BookAuthorRepository bookAuthorRepository;
+  private final BookEditionRepository bookEditionRepository;
+  private final InventoryItemRepository inventoryItemRepository;
 
   public Page<BookSummaryResponse> getAllBooks(Pageable pageable) {
     return bookRepository.findAll(pageable).map(bookMapper::toBookSummaryResponse);
@@ -86,6 +92,21 @@ public class BookService {
       throw new NotFoundException("Book not found with id: " + id);
     }
     bookRepository.deleteById(id);
+  }
+
+  public Integer getEditionStock(UUID bookId, UUID editionId) {
+    BookEdition edition =
+        bookEditionRepository
+            .findById(editionId)
+            .orElseThrow(() -> new NotFoundException("Edition not found with id: " + editionId));
+
+    if (!edition.getBook().getId().equals(bookId)) {
+      throw new BadRequestException("Edition does not belong to book " + bookId);
+    }
+
+    return inventoryItemRepository.findByBookEditionId(editionId).stream()
+        .mapToInt(InventoryItem::getQuantityOnHand)
+        .sum();
   }
 
   @Transactional
