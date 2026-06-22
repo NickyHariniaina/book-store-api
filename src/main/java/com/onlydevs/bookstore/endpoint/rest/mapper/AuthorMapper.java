@@ -6,13 +6,11 @@ import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.dto.request.CreateAuthorRequest;
 import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
 import com.onlydevs.bookstore.model.dto.response.AuthorResponse;
-
-import java.math.BigDecimal;
-import java.util.List;
-
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
 import com.onlydevs.bookstore.model.dto.response.GenreResponse;
 import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
+import java.math.BigDecimal;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -72,7 +70,9 @@ public class AuthorMapper {
       return RevenuePerGenreResponse.builder()
           .genreName((String) row[0])
           .revenue(
-              row[1] != null ? BigDecimal.valueOf(((Number) row[1]).doubleValue()) : BigDecimal.ZERO)
+              row[1] != null
+                  ? BigDecimal.valueOf(((Number) row[1]).doubleValue())
+                  : BigDecimal.ZERO)
           .build();
     }
   }

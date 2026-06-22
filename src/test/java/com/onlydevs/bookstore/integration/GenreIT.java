@@ -178,4 +178,37 @@ class GenreIT extends FacadeIT {
   void should_get_revenue_per_genre_ok() {
     webTestClient.get().uri("/api/v1/genres/revenue").exchange().expectStatus().isOk();
   }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_get_books() {
+    webTestClient
+        .get()
+        .uri("/api/v1/genres/{id}/books", "invalid-uuid")
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_rename() {
+    var request = RenameGenreRequest.builder().name("Science").build();
+
+    webTestClient
+        .patch()
+        .uri("/api/v1/genres/{id}/rename", "invalid-uuid")
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_delete() {
+    webTestClient
+        .delete()
+        .uri("/api/v1/genres/{id}", "invalid-uuid")
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+  }
 }

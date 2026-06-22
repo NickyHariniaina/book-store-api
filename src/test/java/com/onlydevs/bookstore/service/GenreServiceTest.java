@@ -239,4 +239,27 @@ class GenreServiceTest {
     assertTrue(result.isEmpty());
     then(genreRepository).should().revenueByGenre();
   }
+
+  @Test
+  void get_all_genres_should_use_correct_pageable_parameters() {
+    var customPageable = PageRequest.of(2, 15);
+
+    given(genreRepository.findAll(customPageable)).willReturn(Page.empty());
+
+    genreService.getAllGenres(customPageable);
+
+    then(genreRepository).should().findAll(customPageable);
+  }
+
+  @Test
+  void get_all_genres_when_repository_throws_exception_should_propagate() {
+    var pageable = PageRequest.of(0, 10);
+    var exception = new RuntimeException("Database error");
+
+    given(genreRepository.findAll(pageable)).willThrow(exception);
+
+    assertThrows(RuntimeException.class, () -> genreService.getAllGenres(pageable));
+    then(genreRepository).should().findAll(pageable);
+    then(genreMapper).shouldHaveNoInteractions();
+  }
 }

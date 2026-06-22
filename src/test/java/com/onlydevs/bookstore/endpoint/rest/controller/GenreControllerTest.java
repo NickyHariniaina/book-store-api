@@ -170,4 +170,42 @@ class GenreControllerTest {
         .andExpect(jsonPath("$[0].genreName").value("Fiction"))
         .andExpect(jsonPath("$[0].revenue").value(500.0));
   }
+
+  @Test
+  void should_fail_when_create_genre_with_empty_body() throws Exception {
+    var request = CreateGenreRequest.builder().build();
+
+    mockMvc
+        .perform(
+            post("/api/v1/genres")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_rename() throws Exception {
+    var request = RenameGenreRequest.builder().name("Science").build();
+
+    mockMvc
+        .perform(
+            patch("/api/v1/genres/{id}/rename", "invalid-uuid")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_delete() throws Exception {
+    mockMvc
+        .perform(delete("/api/v1/genres/{id}", "invalid-uuid"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_get_books() throws Exception {
+    mockMvc
+        .perform(get("/api/v1/genres/{id}/books", "invalid-uuid"))
+        .andExpect(status().isBadRequest());
+  }
 }
