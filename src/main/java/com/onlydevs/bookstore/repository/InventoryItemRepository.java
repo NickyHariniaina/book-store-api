@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface InventoryItemRepository extends JpaRepository<InventoryItem, UUID> {
 
+  List<InventoryItem> findByBookEditionId(UUID editionId);
+
   @EntityGraph(attributePaths = {"bookEdition.book", "bookStore"})
   List<InventoryItem> findByBookStoreId(UUID storeId);
 
