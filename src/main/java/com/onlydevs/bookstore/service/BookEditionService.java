@@ -32,8 +32,7 @@ public class BookEditionService {
     if (!bookRepository.existsById(bookId)) {
       throw new NotFoundException("Book not found with id: " + bookId);
     }
-    return bookEditionMapper.toBookEditionResponseList(
-        bookEditionRepository.findByBookId(bookId));
+    return bookEditionMapper.toBookEditionResponseList(bookEditionRepository.findByBookId(bookId));
   }
 
   public BookEditionResponse getEditionById(UUID id) {

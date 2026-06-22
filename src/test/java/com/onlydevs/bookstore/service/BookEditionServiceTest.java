@@ -236,10 +236,7 @@ class BookEditionServiceTest {
   @Test
   void createEdition_WhenIsbnAlreadyExists_ShouldThrow() {
     CreateBookEditionRequest request =
-        CreateBookEditionRequest.builder()
-            .publisherId(publisherId)
-            .isbn("9783161484100")
-            .build();
+        CreateBookEditionRequest.builder().publisherId(publisherId).isbn("9783161484100").build();
 
     given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
     given(publisherRepository.findById(publisherId)).willReturn(Optional.of(publisher));

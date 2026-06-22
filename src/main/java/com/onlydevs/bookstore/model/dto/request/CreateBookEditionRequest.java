@@ -16,8 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateBookEditionRequest {
-  @NotNull
-  private UUID publisherId;
+  @NotNull private UUID publisherId;
 
   @NotBlank
   @Size(min = 10, max = 13)
@@ -26,6 +25,5 @@ public class CreateBookEditionRequest {
   @Size(max = 50)
   private String edition;
 
-  @NotBlank
-  private String format;
+  @NotBlank private String format;
 }

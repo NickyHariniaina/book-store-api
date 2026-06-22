@@ -110,7 +110,8 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(value = {DataIntegrityViolationException.class})
-  ResponseEntity<RestErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+  ResponseEntity<RestErrorResponse> handleDataIntegrityViolation(
+      DataIntegrityViolationException e) {
     log.info("Data integrity violation", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
   }

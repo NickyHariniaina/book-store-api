@@ -43,10 +43,7 @@ class BookEditionControllerTest {
 
   private BookEditionResponse createResponse() {
     PublisherResponse publisher =
-        PublisherResponse.builder()
-            .id(publisherId)
-            .name("Test Publisher")
-            .build();
+        PublisherResponse.builder().id(publisherId).name("Test Publisher").build();
 
     return BookEditionResponse.builder()
         .id(editionId)
@@ -91,9 +88,7 @@ class BookEditionControllerTest {
     given(bookEditionService.getEditionById(editionId))
         .willThrow(new NotFoundException("Edition not found"));
 
-    mockMvc
-        .perform(get("/api/v1/editions/{id}", editionId))
-        .andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/v1/editions/{id}", editionId)).andExpect(status().isNotFound());
   }
 
   @Test
