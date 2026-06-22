@@ -6,13 +6,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
+import com.onlydevs.bookstore.endpoint.rest.mapper.PublisherMapper;
 import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
-import com.onlydevs.bookstore.endpoint.rest.mapper.PublisherMapper;
 import com.onlydevs.bookstore.repository.PublisherRepository;
 import java.util.Optional;
 import java.util.UUID;
@@ -209,5 +209,75 @@ class PublisherServiceTest {
 
     assertThrows(NotFoundException.class, () -> publisherService.getPublisherById(publisherId));
     then(publisherRepository).should().findById(publisherId);
+  }
+
+  @Test
+  void get_all_publishers_should_use_correct_pageable_parameters() {
+    var customPageable = PageRequest.of(2, 15);
+
+    given(publisherRepository.findAll(customPageable)).willReturn(Page.empty());
+
+    publisherService.getAllPublishers(customPageable);
+
+    then(publisherRepository).should().findAll(customPageable);
+  }
+
+  @Test
+  void get_all_publishers_when_repository_throws_exception_should_propagate() {
+    var pageable = PageRequest.of(0, 10);
+    var exception = new RuntimeException("Database error");
+
+    given(publisherRepository.findAll(pageable)).willThrow(exception);
+
+    assertThrows(RuntimeException.class, () -> publisherService.getAllPublishers(pageable));
+    then(publisherRepository).should().findAll(pageable);
+    then(publisherMapper).shouldHaveNoInteractions();
+  }
+
+  @Test
+  void create_publisher_ok_when_email_is_null() {
+    var request =
+        CreatePublisherRequest.builder().name("Test Publisher").phone("1234567890").build();
+
+    given(publisherMapper.toDomain(request)).willReturn(publisher);
+    given(publisherRepository.save(publisher)).willReturn(publisher);
+    given(publisherMapper.toRest(publisher)).willReturn(publisherResponse);
+
+    var actual = publisherService.createPublisher(request);
+
+    assertEquals(publisherResponse.getName(), actual.getName());
+    then(publisherRepository).should(never()).existsByEmailIgnoreCase(any());
+    then(publisherMapper).should().toDomain(request);
+    then(publisherRepository).should().save(publisher);
+    then(publisherMapper).should().toRest(publisher);
+  }
+
+  @Test
+  void update_publisher_ok_when_email_unchanged() {
+    publisher.setEmail("same@example.com");
+    var request = UpdatePublisherRequest.builder().email("same@example.com").build();
+    var updatedPublisher =
+        Publisher.builder()
+            .id(publisherId)
+            .name("Test Publisher")
+            .email("same@example.com")
+            .build();
+    var updatedResponse =
+        PublisherResponse.builder()
+            .id(publisherId)
+            .name("Test Publisher")
+            .email("same@example.com")
+            .build();
+
+    given(publisherRepository.findById(publisherId)).willReturn(Optional.of(publisher));
+    given(publisherRepository.save(publisher)).willReturn(updatedPublisher);
+    given(publisherMapper.toRest(updatedPublisher)).willReturn(updatedResponse);
+
+    var actual = publisherService.updatePublisher(publisherId, request);
+
+    assertEquals(updatedResponse.getName(), actual.getName());
+    then(publisherRepository).should().findById(publisherId);
+    then(publisherRepository).should(never()).existsByEmailIgnoreCase(any());
+    then(publisherRepository).should().save(publisher);
   }
 }

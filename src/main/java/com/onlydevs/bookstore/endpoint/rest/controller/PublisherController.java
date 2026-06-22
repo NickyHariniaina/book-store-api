@@ -4,6 +4,7 @@ import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
 import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
 import com.onlydevs.bookstore.service.PublisherService;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,14 +39,14 @@ public class PublisherController {
 
   @PostMapping
   public ResponseEntity<PublisherResponse> createPublisher(
-      @RequestBody CreatePublisherRequest request) {
+      @Valid @RequestBody CreatePublisherRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(publisherService.createPublisher(request));
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<PublisherResponse> updatePublisher(
-      @PathVariable UUID id, @RequestBody UpdatePublisherRequest request) {
+      @PathVariable UUID id, @Valid @RequestBody UpdatePublisherRequest request) {
     return ResponseEntity.ok(publisherService.updatePublisher(id, request));
   }
 

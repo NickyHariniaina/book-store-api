@@ -152,4 +152,42 @@ class PublisherControllerTest {
 
     mockMvc.perform(delete("/api/v1/publishers/{id}", id)).andExpect(status().isNotFound());
   }
+
+  @Test
+  void should_fail_when_create_publisher_with_empty_body() throws Exception {
+    var request = CreatePublisherRequest.builder().build();
+
+    mockMvc
+        .perform(
+            post("/api/v1/publishers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_get() throws Exception {
+    mockMvc
+        .perform(get("/api/v1/publishers/{id}", "invalid-uuid"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_update() throws Exception {
+    var request = UpdatePublisherRequest.builder().name("Updated").build();
+
+    mockMvc
+        .perform(
+            put("/api/v1/publishers/{id}", "invalid-uuid")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_delete() throws Exception {
+    mockMvc
+        .perform(delete("/api/v1/publishers/{id}", "invalid-uuid"))
+        .andExpect(status().isBadRequest());
+  }
 }

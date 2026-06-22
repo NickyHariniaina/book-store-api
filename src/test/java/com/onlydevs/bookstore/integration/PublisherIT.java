@@ -186,4 +186,37 @@ class PublisherIT extends FacadeIT {
         .expectStatus()
         .isNotFound();
   }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_get() {
+    webTestClient
+        .get()
+        .uri("/api/v1/publishers/{id}", "invalid-uuid")
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_update() {
+    var request = UpdatePublisherRequest.builder().name("Updated").build();
+
+    webTestClient
+        .put()
+        .uri("/api/v1/publishers/{id}", "invalid-uuid")
+        .bodyValue(request)
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+  }
+
+  @Test
+  void should_fail_when_invalid_uuid_for_delete() {
+    webTestClient
+        .delete()
+        .uri("/api/v1/publishers/{id}", "invalid-uuid")
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+  }
 }
