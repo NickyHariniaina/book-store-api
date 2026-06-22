@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.endpoint.rest;
 
 import com.onlydevs.bookstore.endpoint.rest.model.RestErrorResponse;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
+import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.exception.NotImplementedException;
 import com.onlydevs.bookstore.model.exception.TooManyRequestsException;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -99,6 +101,18 @@ public class GlobalExceptionHandler {
     log.error("Internal error", e);
     return new ResponseEntity<>(
         toRest(e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(value = {ConflictException.class})
+  ResponseEntity<RestErrorResponse> handleConflict(ConflictException e) {
+    log.info("Conflict", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(value = {DataIntegrityViolationException.class})
+  ResponseEntity<RestErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+    log.info("Data integrity violation", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(value = {AuthenticationException.class})
