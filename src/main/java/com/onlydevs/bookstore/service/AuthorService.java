@@ -24,10 +24,10 @@ public class AuthorService {
     return authorMapper.toRest(authorCreated);
   }
 
-  public AuthorResponse getById(String id) {
+  public AuthorResponse getById(UUID id) {
     var author =
         authorRepository
-            .findById(UUID.fromString(id))
+            .findById(id)
             .orElseThrow(() -> new NotFoundException("Author with id " + id + " doesn't exist."));
     return authorMapper.toRest(author);
   }
@@ -36,10 +36,10 @@ public class AuthorService {
     return authorRepository.findAll(pageable).map(authorMapper::toRest);
   }
 
-  public AuthorResponse update(String id, UpdateAuthorRequest request) {
+  public AuthorResponse update(UUID id, UpdateAuthorRequest request) {
     var author =
         authorRepository
-            .findById(UUID.fromString(id))
+            .findById(id)
             .orElseThrow(() -> new NotFoundException("Author with id " + id + " doesn't exist."));
     if (request.getFirstName() != null) {
       author.setFirstName(request.getFirstName());
@@ -50,10 +50,10 @@ public class AuthorService {
     return authorMapper.toRest(authorRepository.save(author));
   }
 
-  public void deleteById(String id) {
+  public void deleteById(UUID id) {
     var author =
         authorRepository
-            .findById(UUID.fromString(id))
+            .findById(id)
             .orElseThrow(() -> new NotFoundException("Author with id " + id + " doesn't exist."));
     authorRepository.delete(author);
   }
