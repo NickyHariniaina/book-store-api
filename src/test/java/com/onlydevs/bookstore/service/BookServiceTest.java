@@ -600,8 +600,7 @@ class BookServiceTest {
     InventoryItem item2 = InventoryItem.builder().quantityOnHand(3).build();
 
     given(bookEditionRepository.findById(editionId)).willReturn(Optional.of(edition));
-    given(inventoryItemRepository.findByBookEditionId(editionId))
-        .willReturn(List.of(item1, item2));
+    given(inventoryItemRepository.findByBookEditionId(editionId)).willReturn(List.of(item1, item2));
 
     Integer stock = bookService.getEditionStock(bookId, editionId);
 
