@@ -38,7 +38,11 @@ class PublisherControllerTest {
   @Test
   void should_create_publisher_ok() throws Exception {
     var request =
-        CreatePublisherRequest.builder().name("New Publisher").email("new@example.com").build();
+        CreatePublisherRequest.builder()
+            .name("New Publisher")
+            .email("new@example.com")
+            .phone("1234567890")
+            .build();
     var response = PublisherResponse.builder().id(UUID.randomUUID()).name("New Publisher").build();
 
     given(publisherService.createPublisher(any(CreatePublisherRequest.class))).willReturn(response);
@@ -55,7 +59,11 @@ class PublisherControllerTest {
   @Test
   void should_fail_when_duplicate_email() throws Exception {
     var request =
-        CreatePublisherRequest.builder().name("Test").email("duplicate@example.com").build();
+        CreatePublisherRequest.builder()
+            .name("Test")
+            .email("duplicate@example.com")
+            .phone("1234567890")
+            .build();
 
     given(publisherService.createPublisher(any(CreatePublisherRequest.class)))
         .willThrow(new ConflictException("Email already exists"));
