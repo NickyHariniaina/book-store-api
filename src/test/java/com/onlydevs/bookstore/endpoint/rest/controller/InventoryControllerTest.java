@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -13,6 +14,7 @@ import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.dto.request.ArrivalRequest;
 import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.model.dto.response.InventoryMovementResponse;
+import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.service.InventoryService;
 import java.util.List;
 import java.util.UUID;
@@ -233,7 +235,7 @@ class InventoryControllerTest {
             .type("ARRIVAL")
             .build();
 
-    given(inventoryService.getMovements(any(), any())).willReturn(List.of());
+    given(inventoryService.getMovements(any(), anyString())).willReturn(List.of());
     given(inventoryMapper.toMovementRestList(any())).willReturn(List.of(response));
 
     mockMvc
@@ -252,7 +254,7 @@ class InventoryControllerTest {
             .type("ARRIVAL")
             .build();
 
-    given(inventoryService.getMovements(any(), any())).willReturn(List.of());
+    given(inventoryService.getMovements(any(), anyString())).willReturn(List.of());
     given(inventoryMapper.toMovementRestList(any())).willReturn(List.of(response));
 
     mockMvc
@@ -263,6 +265,9 @@ class InventoryControllerTest {
 
   @Test
   void get_movements_with_invalid_type_should_return_bad_request() throws Exception {
+    given(inventoryService.getMovements(any(), anyString()))
+        .willThrow(new BadRequestException("Unknown inventory movement type: INVALID"));
+
     mockMvc
         .perform(get("/api/v1/stores/{storeId}/movements?type=INVALID", storeId))
         .andExpect(status().isBadRequest());

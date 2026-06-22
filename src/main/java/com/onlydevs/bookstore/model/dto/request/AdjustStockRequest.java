@@ -1,6 +1,7 @@
 package com.onlydevs.bookstore.model.dto.request;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ public class AdjustStockRequest {
 
   @NotNull private UUID editionId;
 
-  @NotNull private Integer quantity;
+  @NotNull @Positive private Integer quantity;
 
   @Size(max = 500)
   private String reason;

@@ -6,13 +6,11 @@ import com.onlydevs.bookstore.model.dto.request.ArrivalRequest;
 import com.onlydevs.bookstore.model.dto.request.StockLossRequest;
 import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.model.dto.response.InventoryMovementResponse;
-import com.onlydevs.bookstore.model.enums.InventoryMovementType;
-import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.service.InventoryService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,21 +23,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class InventoryController {
 
   private final InventoryService inventoryService;
   private final InventoryMapper inventoryMapper;
 
   @GetMapping("/stores/{storeId}/inventory")
-  public List<InventoryItemResponse> getInventory(@PathVariable UUID storeId) {
-    return inventoryMapper.toRestList(inventoryService.getInventoryByStore(storeId));
+  public ResponseEntity<List<InventoryItemResponse>> getInventory(@PathVariable UUID storeId) {
+    return ResponseEntity.ok(
+        inventoryMapper.toRestList(inventoryService.getInventoryByStore(storeId)));
   }
 
   @GetMapping("/stores/{storeId}/inventory/{editionId}")
-  public InventoryItemResponse getStockByEdition(
+  public ResponseEntity<InventoryItemResponse> getStockByEdition(
       @PathVariable UUID storeId, @PathVariable UUID editionId) {
-    return inventoryMapper.toRest(inventoryService.getStockByEdition(storeId, editionId));
+    return ResponseEntity.ok(
+        inventoryMapper.toRest(inventoryService.getStockByEdition(storeId, editionId)));
   }
 
   @PostMapping("/stores/{storeId}/inventory/arrival")
@@ -79,21 +79,16 @@ public class InventoryController {
   }
 
   @GetMapping("/editions/{editionId}/movements")
-  public List<InventoryMovementResponse> getMovementsByEdition(@PathVariable UUID editionId) {
-    return inventoryMapper.toMovementRestList(inventoryService.getMovementsByEdition(editionId));
+  public ResponseEntity<List<InventoryMovementResponse>> getMovementsByEdition(
+      @PathVariable UUID editionId) {
+    return ResponseEntity.ok(
+        inventoryMapper.toMovementRestList(inventoryService.getMovementsByEdition(editionId)));
   }
 
   @GetMapping("/stores/{storeId}/movements")
-  public List<InventoryMovementResponse> getMovements(
+  public ResponseEntity<List<InventoryMovementResponse>> getMovements(
       @PathVariable UUID storeId, @RequestParam(name = "type", required = false) String type) {
-    InventoryMovementType jpaType = null;
-    if (type != null) {
-      try {
-        jpaType = InventoryMovementType.valueOf(type);
-      } catch (IllegalArgumentException e) {
-        throw new BadRequestException("Unknown inventory movement type: " + type);
-      }
-    }
-    return inventoryMapper.toMovementRestList(inventoryService.getMovements(storeId, jpaType));
+    return ResponseEntity.ok(
+        inventoryMapper.toMovementRestList(inventoryService.getMovements(storeId, type)));
   }
 }

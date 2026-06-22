@@ -219,7 +219,7 @@ class InventoryServiceTest {
   void get_movements_without_type_should_return_all() {
     given(inventoryMovementRepository.findByBookStoreId(storeId)).willReturn(List.of());
 
-    var result = inventoryService.getMovements(storeId, null);
+    var result = inventoryService.getMovements(storeId, (String) null);
 
     assertThat(result).isEmpty();
     then(inventoryMovementRepository).should().findByBookStoreId(storeId);

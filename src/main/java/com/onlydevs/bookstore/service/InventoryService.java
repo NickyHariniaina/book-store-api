@@ -11,12 +11,12 @@ import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class InventoryService {
 
   private final InventoryItemRepository inventoryItemRepository;
@@ -94,9 +94,9 @@ public class InventoryService {
         item.getBookStore(),
         item.getBookEdition(),
         InventoryMovementType.ADJUSTMENT,
-        Math.abs(quantity),
+        quantity,
         movementReason,
-        null);
+        "ADJ-" + UUID.randomUUID());
 
     return item;
   }
@@ -114,7 +114,7 @@ public class InventoryService {
         InventoryMovementType.DAMAGED,
         quantity,
         movementReason,
-        null);
+        "DAM-" + UUID.randomUUID());
 
     return item;
   }
@@ -131,7 +131,7 @@ public class InventoryService {
         InventoryMovementType.LOST,
         quantity,
         movementReason,
-        null);
+        "LOST-" + UUID.randomUUID());
 
     return item;
   }
@@ -145,6 +145,18 @@ public class InventoryService {
       return inventoryMovementRepository.findByBookStoreId(storeId);
     }
     return inventoryMovementRepository.findByBookStoreIdAndInventoryMovementType(storeId, type);
+  }
+
+  public List<InventoryMovement> getMovements(UUID storeId, String type) {
+    InventoryMovementType jpaType = null;
+    if (type != null) {
+      try {
+        jpaType = InventoryMovementType.valueOf(type);
+      } catch (IllegalArgumentException e) {
+        throw new BadRequestException("Unknown inventory movement type: " + type);
+      }
+    }
+    return getMovements(storeId, jpaType);
   }
 
   private void applyStockDecrement(InventoryItem item, Integer quantity) {
