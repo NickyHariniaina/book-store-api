@@ -9,6 +9,7 @@ import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
+import com.onlydevs.bookstore.repository.GenreRepository.GenreRevenue;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -129,7 +130,18 @@ class GenreMapperTest {
 
   @Test
   void toRevenuePerGenreResponse_maps_row() {
-    var row = new Object[] {"Fiction", 500.0};
+    var row =
+        new GenreRevenue() {
+          @Override
+          public String getName() {
+            return "Fiction";
+          }
+
+          @Override
+          public BigDecimal getRevenue() {
+            return BigDecimal.valueOf(500.0);
+          }
+        };
 
     var response = mapper.toRevenuePerGenreResponse(row);
 
@@ -139,7 +151,18 @@ class GenreMapperTest {
 
   @Test
   void toRevenuePerGenreResponse_handles_null_revenue() {
-    var row = new Object[] {"New Genre", null};
+    var row =
+        new GenreRevenue() {
+          @Override
+          public String getName() {
+            return "New Genre";
+          }
+
+          @Override
+          public BigDecimal getRevenue() {
+            return null;
+          }
+        };
 
     var response = mapper.toRevenuePerGenreResponse(row);
 

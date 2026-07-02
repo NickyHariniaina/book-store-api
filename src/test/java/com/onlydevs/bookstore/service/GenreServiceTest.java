@@ -18,6 +18,7 @@ import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.GenreRepository;
+import com.onlydevs.bookstore.repository.GenreRepository.GenreRevenue;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -211,14 +212,16 @@ class GenreServiceTest {
 
   @Test
   void get_revenue_per_genre_ok_when_data_exists() {
-    var row = new Object[] {"Fiction", 500.0};
+    var row = mock(GenreRevenue.class);
+    given(row.getName()).willReturn("Fiction");
+    given(row.getRevenue()).willReturn(BigDecimal.valueOf(500.0));
     var revenueResponse =
         RevenuePerGenreResponse.builder()
             .genreName("Fiction")
             .revenue(BigDecimal.valueOf(500.0))
             .build();
 
-    given(genreRepository.revenueByGenre()).willReturn(List.<Object[]>of(row));
+    given(genreRepository.revenueByGenre()).willReturn(List.of(row));
     given(genreMapper.toRevenuePerGenreResponse(row)).willReturn(revenueResponse);
 
     var result = genreService.getRevenuePerGenre();

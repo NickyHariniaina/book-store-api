@@ -6,6 +6,7 @@ import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
 import com.onlydevs.bookstore.model.dto.response.GenreResponse;
 import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
+import com.onlydevs.bookstore.repository.GenreRepository.GenreRevenue;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 
@@ -39,11 +40,10 @@ public class GenreMapper {
         .build();
   }
 
-  public RevenuePerGenreResponse toRevenuePerGenreResponse(Object[] row) {
+  public RevenuePerGenreResponse toRevenuePerGenreResponse(GenreRevenue row) {
     return RevenuePerGenreResponse.builder()
-        .genreName((String) row[0])
-        .revenue(
-            row[1] != null ? BigDecimal.valueOf(((Number) row[1]).doubleValue()) : BigDecimal.ZERO)
+        .genreName(row.getName())
+        .revenue(row.getRevenue() != null ? row.getRevenue() : BigDecimal.ZERO)
         .build();
   }
 }
