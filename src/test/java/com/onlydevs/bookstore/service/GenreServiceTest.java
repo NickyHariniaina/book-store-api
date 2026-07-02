@@ -18,7 +18,7 @@ import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.GenreRepository;
-import com.onlydevs.bookstore.repository.GenreRepository.GenreRevenue;
+import com.onlydevs.bookstore.repository.GenreRevenue;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;

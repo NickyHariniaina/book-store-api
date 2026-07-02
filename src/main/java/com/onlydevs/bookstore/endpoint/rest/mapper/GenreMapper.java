@@ -6,7 +6,7 @@ import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
 import com.onlydevs.bookstore.model.dto.response.GenreResponse;
 import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
-import com.onlydevs.bookstore.repository.GenreRepository.GenreRevenue;
+import com.onlydevs.bookstore.repository.GenreRevenue;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 

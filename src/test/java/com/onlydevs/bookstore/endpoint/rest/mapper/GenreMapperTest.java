@@ -9,7 +9,7 @@ import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
-import com.onlydevs.bookstore.repository.GenreRepository.GenreRevenue;
+import com.onlydevs.bookstore.repository.GenreRevenue;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
