@@ -7,7 +7,7 @@ import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
-import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
+import com.onlydevs.bookstore.endpoint.rest.mapper.GenreMapper;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
@@ -37,7 +37,7 @@ class GenreServiceTest {
 
   @Mock private GenreRepository genreRepository;
 
-  @Mock private AuthorMapper.GenreMapper genreMapper;
+  @Mock private GenreMapper genreMapper;
 
   @InjectMocks private GenreService genreService;
 
