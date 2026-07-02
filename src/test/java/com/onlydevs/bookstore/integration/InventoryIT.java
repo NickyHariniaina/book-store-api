@@ -1,4 +1,4 @@
-package com.onlydevs.bookstore.endpoint.rest.controller;
+package com.onlydevs.bookstore.integration;
 
 import static org.hamcrest.Matchers.containsString;
 
