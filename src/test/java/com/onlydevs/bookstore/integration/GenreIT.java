@@ -189,8 +189,6 @@ class GenreIT extends FacadeIT {
         .isNotFound();
   }
 
-  // --- Revenue per genre tests ---
-
   private record TestData(
       Genre fiction, Genre science, BookEdition editionA, BookEdition editionB, BookStore store) {
 
