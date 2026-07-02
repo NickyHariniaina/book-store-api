@@ -11,12 +11,7 @@ import com.onlydevs.bookstore.model.dto.response.RevenuePerGenreResponse;
 import com.onlydevs.bookstore.model.enums.BookFormat;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import com.onlydevs.bookstore.model.enums.SaleStatus;
-import com.onlydevs.bookstore.repository.BookEditionRepository;
-import com.onlydevs.bookstore.repository.BookRepository;
-import com.onlydevs.bookstore.repository.BookStoreRepository;
-import com.onlydevs.bookstore.repository.GenreRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.onlydevs.bookstore.repository.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
@@ -38,15 +33,60 @@ class GenreIT extends FacadeIT {
   @Autowired private BookRepository bookRepository;
   @Autowired private BookEditionRepository bookEditionRepository;
   @Autowired private BookStoreRepository bookStoreRepository;
-  @PersistenceContext private EntityManager entityManager;
+  @Autowired private SaleRepository saleRepository;
+
+  private Genre fiction;
+  private Genre science;
+  private BookEdition editionA;
+  private BookEdition editionB;
+  private BookStore store;
 
   @BeforeEach
   void setup() {
     webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
-    genreRepository.deleteAll();
+    saleRepository.deleteAll();
     bookEditionRepository.deleteAll();
     bookRepository.deleteAll();
     bookStoreRepository.deleteAll();
+    genreRepository.deleteAll();
+
+    fiction = genreRepository.save(Genre.builder().name("Fiction").build());
+    science = genreRepository.save(Genre.builder().name("Science").build());
+    var bookA =
+        bookRepository.save(
+            Book.builder()
+                .title("Fiction Book")
+                .language(BookLanguage.ENGLISH)
+                .genres(Set.of(fiction))
+                .build());
+    var bookB =
+        bookRepository.save(
+            Book.builder()
+                .title("Science Book")
+                .language(BookLanguage.ENGLISH)
+                .genres(Set.of(science))
+                .build());
+    editionA =
+        bookEditionRepository.save(
+            BookEdition.builder()
+                .isbn("9780000000001")
+                .format(BookFormat.PAPERBACK)
+                .book(bookA)
+                .build());
+    editionB =
+        bookEditionRepository.save(
+            BookEdition.builder()
+                .isbn("9780000000002")
+                .format(BookFormat.PAPERBACK)
+                .book(bookB)
+                .build());
+    store =
+        bookStoreRepository.save(
+            BookStore.builder()
+                .name("Main Store")
+                .phone("+261000000001")
+                .email("store@test.com")
+                .build());
   }
 
   @Test
@@ -194,65 +234,23 @@ class GenreIT extends FacadeIT {
   }
 
   @Test
-  void should_get_revenue_per_genre_ok() {
-    var fiction = genreRepository.save(Genre.builder().name("Fiction").build());
-    var science = genreRepository.save(Genre.builder().name("Science").build());
-
-    var bookA =
-        bookRepository.save(
-            Book.builder()
-                .title("Fiction Book")
-                .language(BookLanguage.ENGLISH)
-                .genres(Set.of(fiction))
-                .build());
-    var bookB =
-        bookRepository.save(
-            Book.builder()
-                .title("Science Book")
-                .language(BookLanguage.ENGLISH)
-                .genres(Set.of(science))
-                .build());
-
-    var editionA =
-        bookEditionRepository.save(
-            BookEdition.builder()
-                .isbn("9780000000001")
-                .format(BookFormat.PAPERBACK)
-                .book(bookA)
-                .build());
-    var editionB =
-        bookEditionRepository.save(
-            BookEdition.builder()
-                .isbn("9780000000002")
-                .format(BookFormat.PAPERBACK)
-                .book(bookB)
-                .build());
-
-    var store =
-        bookStoreRepository.save(
-            BookStore.builder()
-                .name("Main Store")
-                .phone("+261000000001")
-                .email("store@test.com")
-                .build());
-
+  void should_get_revenue_per_genre_with_paid_sales_only() {
     var sale = Sale.builder().status(SaleStatus.PAID).bookStore(store).build();
-    var itemA =
-        SaleItem.builder()
-            .bookEdition(editionA)
-            .quantity(2)
-            .unitPrice(BigDecimal.valueOf(10.00))
-            .sale(sale)
-            .build();
-    var itemB =
-        SaleItem.builder()
-            .bookEdition(editionB)
-            .quantity(3)
-            .unitPrice(BigDecimal.valueOf(15.00))
-            .sale(sale)
-            .build();
-    sale.setSaleItems(List.of(itemA, itemB));
-    entityManager.persist(sale);
+    sale.setSaleItems(
+        List.of(
+            SaleItem.builder()
+                .bookEdition(editionA)
+                .quantity(2)
+                .unitPrice(BigDecimal.valueOf(10.00))
+                .sale(sale)
+                .build(),
+            SaleItem.builder()
+                .bookEdition(editionB)
+                .quantity(3)
+                .unitPrice(BigDecimal.valueOf(15.00))
+                .sale(sale)
+                .build()));
+    saleRepository.save(sale);
 
     webTestClient
         .get()
@@ -284,9 +282,7 @@ class GenreIT extends FacadeIT {
   }
 
   @Test
-  void should_get_revenue_per_genre_when_no_sales() {
-    genreRepository.save(Genre.builder().name("Fiction").build());
-
+  void should_get_revenue_per_genre_empty_when_no_sales() {
     webTestClient
         .get()
         .uri("/api/v1/genres/revenue")
@@ -294,54 +290,21 @@ class GenreIT extends FacadeIT {
         .expectStatus()
         .isOk()
         .expectBodyList(RevenuePerGenreResponse.class)
-        .hasSize(1)
-        .consumeWith(
-            result -> {
-              var revenues = result.getResponseBody();
-              assertNotNull(revenues);
-              assertEquals("Fiction", revenues.getFirst().getGenreName());
-              assertEquals(BigDecimal.ZERO.setScale(2), revenues.getFirst().getRevenue());
-            });
+        .hasSize(0);
   }
 
   @Test
-  void should_get_revenue_per_genre_exclude_pending_sales() {
-    var fiction = genreRepository.save(Genre.builder().name("Fiction").build());
-
-    var book =
-        bookRepository.save(
-            Book.builder()
-                .title("Fiction Book")
-                .language(BookLanguage.ENGLISH)
-                .genres(Set.of(fiction))
-                .build());
-
-    var edition =
-        bookEditionRepository.save(
-            BookEdition.builder()
-                .isbn("9780000000003")
-                .format(BookFormat.PAPERBACK)
-                .book(book)
-                .build());
-
-    var store =
-        bookStoreRepository.save(
-            BookStore.builder()
-                .name("Main Store")
-                .phone("+261000000002")
-                .email("store2@test.com")
-                .build());
-
+  void should_get_revenue_per_genre_empty_when_only_pending_sales() {
     var pendingSale = Sale.builder().status(SaleStatus.PENDING).bookStore(store).build();
-    var pendingItem =
-        SaleItem.builder()
-            .bookEdition(edition)
-            .quantity(5)
-            .unitPrice(BigDecimal.valueOf(100.00))
-            .sale(pendingSale)
-            .build();
-    pendingSale.setSaleItems(List.of(pendingItem));
-    entityManager.persist(pendingSale);
+    pendingSale.setSaleItems(
+        List.of(
+            SaleItem.builder()
+                .bookEdition(editionA)
+                .quantity(5)
+                .unitPrice(BigDecimal.valueOf(100.00))
+                .sale(pendingSale)
+                .build()));
+    saleRepository.save(pendingSale);
 
     webTestClient
         .get()
@@ -350,13 +313,52 @@ class GenreIT extends FacadeIT {
         .expectStatus()
         .isOk()
         .expectBodyList(RevenuePerGenreResponse.class)
-        .hasSize(1)
+        .hasSize(0);
+  }
+
+  @Test
+  void should_get_revenue_per_genre_aggregates_multiple_sales() {
+    var sale1 = Sale.builder().status(SaleStatus.PAID).bookStore(store).build();
+    sale1.setSaleItems(
+        List.of(
+            SaleItem.builder()
+                .bookEdition(editionA)
+                .quantity(1)
+                .unitPrice(BigDecimal.valueOf(5.00))
+                .sale(sale1)
+                .build()));
+    saleRepository.save(sale1);
+
+    var sale2 = Sale.builder().status(SaleStatus.PAID).bookStore(store).build();
+    sale2.setSaleItems(
+        List.of(
+            SaleItem.builder()
+                .bookEdition(editionA)
+                .quantity(3)
+                .unitPrice(BigDecimal.valueOf(5.00))
+                .sale(sale2)
+                .build()));
+    saleRepository.save(sale2);
+
+    webTestClient
+        .get()
+        .uri("/api/v1/genres/revenue")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBodyList(RevenuePerGenreResponse.class)
+        .hasSize(2)
         .consumeWith(
             result -> {
               var revenues = result.getResponseBody();
               assertNotNull(revenues);
-              assertEquals("Fiction", revenues.getFirst().getGenreName());
-              assertEquals(BigDecimal.ZERO.setScale(2), revenues.getFirst().getRevenue());
+              var fictionRev =
+                  revenues.stream()
+                      .filter(r -> r.getGenreName().equals("Fiction"))
+                      .findFirst()
+                      .orElseThrow();
+              assertEquals(
+                  BigDecimal.valueOf(20.00).setScale(2), fictionRev.getRevenue().setScale(2));
             });
   }
 
