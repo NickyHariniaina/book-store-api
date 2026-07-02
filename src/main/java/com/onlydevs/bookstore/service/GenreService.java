@@ -1,6 +1,6 @@
 package com.onlydevs.bookstore.service;
 
-import com.onlydevs.bookstore.endpoint.rest.mapper.AuthorMapper;
+import com.onlydevs.bookstore.endpoint.rest.mapper.GenreMapper;
 import com.onlydevs.bookstore.model.dto.request.CreateGenreRequest;
 import com.onlydevs.bookstore.model.dto.request.RenameGenreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GenreService {
 
   private final GenreRepository genreRepository;
-  private final AuthorMapper.GenreMapper genreMapper;
+  private final GenreMapper genreMapper;
 
   public Page<GenreResponse> getAllGenres(Pageable pageable) {
     return genreRepository.findAll(pageable).map(genreMapper::toRest);
