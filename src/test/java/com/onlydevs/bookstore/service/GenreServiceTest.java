@@ -213,8 +213,6 @@ class GenreServiceTest {
   @Test
   void get_revenue_per_genre_ok_when_data_exists() {
     var row = mock(GenreRevenue.class);
-    given(row.getName()).willReturn("Fiction");
-    given(row.getRevenue()).willReturn(BigDecimal.valueOf(500.0));
     var revenueResponse =
         RevenuePerGenreResponse.builder()
             .genreName("Fiction")
