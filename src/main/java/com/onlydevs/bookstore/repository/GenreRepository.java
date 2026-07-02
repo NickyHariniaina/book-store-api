@@ -2,7 +2,6 @@ package com.onlydevs.bookstore.repository;
 
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.Genre;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -12,12 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface GenreRepository extends JpaRepository<Genre, UUID> {
-
-  interface GenreRevenue {
-    String getName();
-
-    BigDecimal getRevenue();
-  }
 
   boolean existsByNameIgnoreCase(String name);
 
