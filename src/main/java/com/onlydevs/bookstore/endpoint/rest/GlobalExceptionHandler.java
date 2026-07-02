@@ -109,12 +109,6 @@ public class GlobalExceptionHandler {
         toRest(e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  @ExceptionHandler(value = {ConflictException.class})
-  ResponseEntity<RestErrorResponse> handleConflict(ConflictException e) {
-    log.info("Conflict", e);
-    return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
-  }
-
   @ExceptionHandler(value = {DataIntegrityViolationException.class})
   ResponseEntity<RestErrorResponse> handleDataIntegrityViolation(
       DataIntegrityViolationException e) {
