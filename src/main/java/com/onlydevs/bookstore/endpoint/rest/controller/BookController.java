@@ -8,7 +8,7 @@ import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
 import com.onlydevs.bookstore.service.BookService;
 import jakarta.validation.Valid;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/books")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BookController {
   private final BookService bookService;
 
