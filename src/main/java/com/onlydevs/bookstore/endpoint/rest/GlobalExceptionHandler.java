@@ -84,6 +84,12 @@ public class GlobalExceptionHandler {
     return handleTooManyRequests(new TooManyRequestsException(e));
   }
 
+  @ExceptionHandler(value = {ConflictException.class})
+  ResponseEntity<RestErrorResponse> handleConflict(ConflictException e) {
+    log.info("Conflict", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
+  }
+
   @ExceptionHandler(value = {NotFoundException.class})
   ResponseEntity<RestErrorResponse> handleNotFound(NotFoundException e) {
     log.info("Not found", e);
@@ -101,12 +107,6 @@ public class GlobalExceptionHandler {
     log.error("Internal error", e);
     return new ResponseEntity<>(
         toRest(e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-
-  @ExceptionHandler(value = {ConflictException.class})
-  ResponseEntity<RestErrorResponse> handleConflict(ConflictException e) {
-    log.info("Conflict", e);
-    return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(value = {DataIntegrityViolationException.class})

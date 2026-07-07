@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.validator.constraints.URL;
 
 @Entity
 @Table(name = "\"publisher\"")
@@ -40,14 +41,14 @@ public class Publisher {
 
   @Email
   @Size(max = 255, message = "email must not exceed 255 characters")
-  @Column
+  @Column(unique = true)
   private String email;
 
   @Size(max = 100, message = "country must not exceed 100 characters")
   @Column
   private String country;
 
-  @Column private String website;
+  @Column @URL private String website;
 
   @Column(name = "\"created_at\"")
   @CreationTimestamp
