@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.validator.constraints.URL;
 
 @Entity
 @Table(name = "\"publisher\"")
@@ -47,7 +48,7 @@ public class Publisher {
   @Column
   private String country;
 
-  @Column private String website;
+  @Column @URL private String website;
 
   @Column(name = "\"created_at\"")
   @CreationTimestamp

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.URL;
 
 @Getter
 @Setter
@@ -19,6 +20,7 @@ public class UpdatePublisherRequest {
   private String name;
 
   @Size(max = 500)
+  @URL
   private String website;
 
   @Email
