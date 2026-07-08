@@ -6,7 +6,7 @@ import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
 import com.onlydevs.bookstore.service.BookStoreService;
 import jakarta.validation.Valid;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/stores")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BookStoreController {
 
   private final BookStoreService bookStoreService;

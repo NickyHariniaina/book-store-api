@@ -101,7 +101,7 @@ jobs:
           echo "upload_build_file_uri=$(echo $response | jq -r '.uri')" >> $GITHUB_ENV
           echo "to_upload_filename=$(echo $response | jq -r '.filename')" >> $GITHUB_ENV
           curl -X GET -o template.yml "$(echo $response | jq -r '.build_template_file_uri')"
-
+          
       - name: Build project
         run: sam build
 
