@@ -1,12 +1,12 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
-import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
-import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
-import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
-import com.onlydevs.bookstore.service.BookStoreService;
+import com.onlydevs.bookstore.model.dto.request.CreatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.request.UpdatePublisherRequest;
+import com.onlydevs.bookstore.model.dto.response.PublisherResponse;
+import com.onlydevs.bookstore.service.PublisherService;
 import jakarta.validation.Valid;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,14 +25,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/stores")
-@AllArgsConstructor
-public class BookStoreController {
+@RequestMapping("/api/v1/publishers")
+@RequiredArgsConstructor
+public class PublisherController {
 
-  private final BookStoreService bookStoreService;
+  private final PublisherService publisherService;
 
   @GetMapping
-  public ResponseEntity<Page<BookStoreResponse>> getAllStores(
+  public ResponseEntity<Page<PublisherResponse>> getAllPublishers(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size,
       @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -40,29 +40,30 @@ public class BookStoreController {
     Direction direction = Direction.fromString(sortDir);
     Sort sort = Sort.by(direction, sortBy);
     Pageable pageable = PageRequest.of(page, size, sort);
-    return ResponseEntity.status(HttpStatus.OK).body(bookStoreService.getAllStores(pageable));
+    return ResponseEntity.ok(publisherService.getAllPublishers(pageable));
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<BookStoreResponse> getStoreById(@PathVariable UUID id) {
-    return ResponseEntity.status(HttpStatus.OK).body(bookStoreService.getStoreById(id));
+  public ResponseEntity<PublisherResponse> getPublisherById(@PathVariable UUID id) {
+    return ResponseEntity.ok(publisherService.getPublisherById(id));
   }
 
   @PostMapping
-  public ResponseEntity<BookStoreResponse> createStore(
-      @Valid @RequestBody CreateBookStoreRequest request) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(bookStoreService.createStore(request));
+  public ResponseEntity<PublisherResponse> createPublisher(
+      @Valid @RequestBody CreatePublisherRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(publisherService.createPublisher(request));
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<BookStoreResponse> updateStore(
-      @PathVariable UUID id, @Valid @RequestBody UpdateBookStoreRequest request) {
-    return ResponseEntity.status(HttpStatus.OK).body(bookStoreService.updateStore(id, request));
+  public ResponseEntity<PublisherResponse> updatePublisher(
+      @PathVariable UUID id, @Valid @RequestBody UpdatePublisherRequest request) {
+    return ResponseEntity.ok(publisherService.updatePublisher(id, request));
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteStore(@PathVariable UUID id) {
-    bookStoreService.deleteStore(id);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  public ResponseEntity<Void> deletePublisher(@PathVariable UUID id) {
+    publisherService.deletePublisher(id);
+    return ResponseEntity.noContent().build();
   }
 }

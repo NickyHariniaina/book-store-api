@@ -1,5 +1,7 @@
 package com.onlydevs.bookstore.service;
 
+import com.onlydevs.bookstore.model.BookEdition;
+import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
@@ -173,8 +175,8 @@ public class InventoryService {
   }
 
   private void createMovement(
-      com.onlydevs.bookstore.model.BookStore bookStore,
-      com.onlydevs.bookstore.model.BookEdition bookEdition,
+      BookStore bookStore,
+      BookEdition bookEdition,
       InventoryMovementType type,
       Integer quantity,
       String reason,
