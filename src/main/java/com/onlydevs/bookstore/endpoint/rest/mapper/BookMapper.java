@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class BookMapper {
+  private final GenreMapper genreMapper;
+
   public BookSummaryResponse toBookSummaryResponse(Book book) {
     if (book == null) {
       return null;
@@ -80,15 +82,7 @@ public class BookMapper {
     if (book.getGenres() == null || book.getGenres().isEmpty()) {
       return List.of();
     }
-    return book.getGenres().stream().map(this::toGenreResponse).collect(Collectors.toList());
-  }
-
-  public GenreResponse toGenreResponse(Genre genre) {
-    return GenreResponse.builder()
-        .id(genre.getId())
-        .name(genre.getName())
-        .description(genre.getDescription())
-        .build();
+    return book.getGenres().stream().map(genreMapper::toRest).collect(Collectors.toList());
   }
 
   private List<String> extractAuthorNames(Book book) {

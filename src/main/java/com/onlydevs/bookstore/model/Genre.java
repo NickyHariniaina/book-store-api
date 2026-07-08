@@ -37,4 +37,12 @@ public class Genre {
   @ManyToMany(mappedBy = "genres")
   @Builder.Default
   private Set<Book> books = new HashSet<>();
+
+  public void rename(String newName) {
+    if (newName == null || newName.isBlank()) {
+      throw new IllegalArgumentException("Genre name cannot be blank");
+    }
+
+    this.name = newName.trim();
+  }
 }
