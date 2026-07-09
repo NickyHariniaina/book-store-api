@@ -44,7 +44,6 @@ public class InventoryService {
         InventoryItem.builder()
             .bookEdition(editionRef)
             .quantityOnHand(quantity)
-            .reorderLevel(3)
             .build();
 
     inventoryItemRepository.save(newItem);
@@ -61,7 +60,7 @@ public class InventoryService {
   }
 
   @Transactional
-  public InventoryItem adjustStock(UUID editionId, Integer quantity, String reason) {
+public InventoryItem adjustStock(UUID editionId, Integer quantity, String reason) {
     var item = findItem(editionId);
 
     int newQuantity = item.getQuantityOnHand() + quantity;
@@ -72,7 +71,7 @@ public class InventoryService {
     item.setQuantityOnHand(newQuantity);
     inventoryItemRepository.save(item);
 
-    String movementReason = (reason != null) ? reason : "Stock adjustment";
+    String movementReason = (reason != null && !reason.isBlank()) ? reason : "Stock adjustment";
     createMovement(
         item.getBookEdition(),
         InventoryMovementType.ADJUSTMENT,
@@ -84,7 +83,7 @@ public class InventoryService {
   }
 
   @Transactional
-  public InventoryItem recordDamaged(UUID editionId, Integer quantity, String reason) {
+public InventoryItem recordDamaged(UUID editionId, Integer quantity, String reason) {
     var item = findItem(editionId);
     applyStockDecrement(item, quantity);
 
@@ -100,7 +99,7 @@ public class InventoryService {
   }
 
   @Transactional
-  public InventoryItem recordLost(UUID editionId, Integer quantity, String reason) {
+public InventoryItem recordLost(UUID editionId, Integer quantity, String reason) {
     var item = findItem(editionId);
     applyStockDecrement(item, quantity);
 

@@ -36,7 +36,7 @@ class SaleControllerTest {
 
   @MockBean private SaleService saleService;
 
-  private final UUID saleId = UUID.randomUUID();
+private final UUID saleId = UUID.randomUUID();
 
   @Test
   void createSale_ShouldReturnCreated() throws Exception {
@@ -58,7 +58,7 @@ class SaleControllerTest {
   }
 
   @Test
-  void getAllSales_ShouldReturnPage() throws Exception {
+void getAllSales_ShouldReturnPage() throws Exception {
     SaleResponse response =
         SaleResponse.builder()
             .id(saleId)
@@ -68,7 +68,7 @@ class SaleControllerTest {
             .build();
 
     Page<SaleResponse> page = new PageImpl<>(List.of(response), PageRequest.of(0, 20), 1);
-    given(saleService.getAllSales(any())).willReturn(page);
+given(saleService.getAllSales(any())).willReturn(page);
 
     mockMvc
         .perform(get("/sales"))
@@ -79,7 +79,7 @@ class SaleControllerTest {
 
   @Test
   void getSale_ShouldReturnSale() throws Exception {
-    SaleResponse response = SaleResponse.builder().id(saleId).status(SaleStatus.PENDING).build();
+SaleResponse response = SaleResponse.builder().id(saleId).status(SaleStatus.PENDING).build();
 
     given(saleService.getSale(saleId)).willReturn(response);
 
@@ -110,7 +110,7 @@ class SaleControllerTest {
 
   @Test
   void cancelSale_ShouldReturnOk() throws Exception {
-    SaleResponse response = SaleResponse.builder().id(saleId).status(SaleStatus.CANCELLED).build();
+SaleResponse response = SaleResponse.builder().id(saleId).status(SaleStatus.CANCELLED).build();
 
     given(saleService.cancelSale(saleId)).willReturn(response);
 
@@ -122,7 +122,7 @@ class SaleControllerTest {
 
   @Test
   void refundSale_ShouldReturnOk() throws Exception {
-    SaleResponse response = SaleResponse.builder().id(saleId).status(SaleStatus.REFUNDED).build();
+SaleResponse response = SaleResponse.builder().id(saleId).status(SaleStatus.REFUNDED).build();
 
     given(saleService.refundSale(saleId)).willReturn(response);
 

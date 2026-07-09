@@ -22,5 +22,5 @@ public class SaleItemResponse {
   private String format;
   private Integer quantity;
   private BigDecimal unitPrice;
-  private BigDecimal lineTotal;
+private BigDecimal lineTotal;
 }

@@ -28,13 +28,13 @@ class SaleIT extends FacadeIT {
 
   @LocalServerPort int port;
 
-  @Autowired private BookRepository bookRepository;
+@Autowired private BookRepository bookRepository;
   @Autowired private BookEditionRepository bookEditionRepository;
   @Autowired private PublisherRepository publisherRepository;
   @Autowired private InventoryItemRepository inventoryItemRepository;
   @Autowired private SaleRepository saleRepository;
 
-  private UUID editionId;
+private UUID editionId;
 
   @BeforeEach
   void setup() {
@@ -124,6 +124,7 @@ class SaleIT extends FacadeIT {
         .value(
             response -> {
               assertEquals(saleId, response.getId());
+
             });
   }
 

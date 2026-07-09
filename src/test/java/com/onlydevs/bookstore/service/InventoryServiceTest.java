@@ -163,7 +163,7 @@ class InventoryServiceTest {
   }
 
   @Test
-  void getEditionStock_shouldReturnQuantity() {
+void getEditionStock_shouldReturnQuantity() {
     given(inventoryItemRepository.findByBookEditionId(editionId)).willReturn(Optional.of(item));
 
     Integer stock = inventoryService.getEditionStock(editionId);

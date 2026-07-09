@@ -1,5 +1,6 @@
 package com.onlydevs.bookstore.endpoint.rest.mapper;
 
+
 import com.onlydevs.bookstore.model.Sale;
 import com.onlydevs.bookstore.model.SaleItem;
 import com.onlydevs.bookstore.model.dto.response.SaleItemResponse;
@@ -41,7 +42,7 @@ public class SaleMapper {
     if (item == null) {
       return null;
     }
-    var edition = item.getBookEdition();
+var edition = item.getBookEdition();
     var quantity = BigDecimal.valueOf(item.getQuantity());
     var lineTotal = item.getUnitPrice().multiply(quantity);
 
@@ -52,7 +53,7 @@ public class SaleMapper {
         .bookTitle(edition.getBook().getTitle())
         .format(String.valueOf(edition.getFormat()))
         .quantity(item.getQuantity())
-        .unitPrice(item.getUnitPrice())
+.unitPrice(item.getUnitPrice())
         .lineTotal(lineTotal)
         .build();
   }
@@ -68,7 +69,6 @@ public class SaleMapper {
     return sale.getSaleItems().stream()
         .map(
             item -> {
-              var quantity = BigDecimal.valueOf(item.getQuantity());
               return item.getUnitPrice().multiply(quantity);
             })
         .filter(Objects::nonNull)

@@ -27,7 +27,7 @@ public class SaleController {
 
   private final SaleService saleService;
 
-  @PostMapping("/sales")
+@PostMapping("/sales")
   public ResponseEntity<SaleResponse> createSale(@RequestParam(required = false) UUID customerId) {
     return ResponseEntity.status(HttpStatus.CREATED).body(saleService.createSale(customerId));
   }
@@ -41,7 +41,7 @@ public class SaleController {
     var direction = Direction.fromString(sortDir);
     var sort = Sort.by(direction, sortBy);
     Pageable pageable = PageRequest.of(page, size, sort);
-    return ResponseEntity.ok(saleService.getAllSales(pageable));
+return ResponseEntity.ok(saleService.getAllSales(pageable));
   }
 
   @GetMapping("/sales/{id}")

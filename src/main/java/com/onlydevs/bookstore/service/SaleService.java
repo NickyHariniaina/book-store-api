@@ -44,7 +44,7 @@ public class SaleService {
                   () -> new NotFoundException("Customer not found with id: " + customerId));
     }
 
-    var sale = Sale.builder().customer(customer).status(SaleStatus.PENDING).build();
+var sale = Sale.builder().customer(customer).status(SaleStatus.PENDING).build();
 
     var saved = saleRepository.save(sale);
     return saleMapper.toRest(saved);
@@ -108,7 +108,7 @@ public class SaleService {
     return saleMapper.toRest(sale);
   }
 
-  public Page<SaleResponse> getAllSales(Pageable pageable) {
+public Page<SaleResponse> getAllSales(Pageable pageable) {
     return saleRepository.findAll(pageable).map(saleMapper::toRest);
   }
 
@@ -124,7 +124,7 @@ public class SaleService {
     return sale;
   }
 
-  private void decrementStock(UUID editionId, Integer quantity) {
+private void decrementStock(UUID editionId, Integer quantity) {
     var item =
         inventoryItemRepository
             .findByBookEditionId(editionId)
@@ -144,7 +144,7 @@ public class SaleService {
     item.setQuantityOnHand(newQuantity);
     inventoryItemRepository.save(item);
 
-    createMovement(editionId, InventoryMovementType.SALE, quantity, "Sale confirmation");
+createMovement(editionId, InventoryMovementType.SALE, quantity, "Sale confirmation");
   }
 
   private void reincrementStock(UUID editionId, Integer quantity) {
@@ -156,7 +156,7 @@ public class SaleService {
     item.setQuantityOnHand(item.getQuantityOnHand() + quantity);
     inventoryItemRepository.save(item);
 
-    createMovement(editionId, InventoryMovementType.ADJUSTMENT, quantity, "Sale refund");
+createMovement(editionId, InventoryMovementType.ADJUSTMENT, quantity, "Sale refund");
   }
 
   private void createMovement(
