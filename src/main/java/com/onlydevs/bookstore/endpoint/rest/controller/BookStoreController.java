@@ -4,6 +4,7 @@ import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.model.dto.request.AdjustStockRequest;
 import com.onlydevs.bookstore.model.dto.request.ArrivalRequest;
 import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.request.ReorderLevelRequest;
 import com.onlydevs.bookstore.model.dto.request.StockLossRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
@@ -24,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -128,6 +130,15 @@ public class BookStoreController {
   public ResponseEntity<List<InventoryItemResponse>> getLowStock(@PathVariable UUID id) {
     var items = bookStoreService.getLowStockItems(id);
     return ResponseEntity.ok(inventoryMapper.toRestList(items));
+  }
+
+  @PatchMapping("/{storeId}/inventory/{editionId}/reorder-level")
+  public ResponseEntity<InventoryItemResponse> updateReorderLevel(
+      @PathVariable UUID storeId,
+      @PathVariable UUID editionId,
+      @Valid @RequestBody ReorderLevelRequest request) {
+    var item = bookStoreService.updateReorderLevel(storeId, editionId, request.getReorderLevel());
+    return ResponseEntity.ok(inventoryMapper.toRest(item));
   }
 
   @GetMapping("/{storeId}/movements")

@@ -265,4 +265,28 @@ class BookStoreServiceTest {
         .isInstanceOf(NotFoundException.class)
         .hasMessageContaining("BookStore not found");
   }
+
+  @Test
+  void update_reorder_level_when_item_found_should_update() {
+    var item = InventoryItem.builder().id(UUID.randomUUID()).reorderLevel(3).build();
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
+    given(inventoryItemRepository.save(item)).willReturn(item);
+
+    var result = bookStoreService.updateReorderLevel(storeId, editionId, 10);
+
+    assertThat(result.getReorderLevel()).isEqualTo(10);
+    then(inventoryItemRepository).should().findByBookStoreIdAndBookEditionId(storeId, editionId);
+    then(inventoryItemRepository).should().save(item);
+  }
+
+  @Test
+  void update_reorder_level_when_item_not_found_should_throw() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> bookStoreService.updateReorderLevel(storeId, editionId, 5))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining("Stock not found");
+  }
 }
