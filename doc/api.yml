@@ -978,7 +978,7 @@ paths:
   /sales:
     post:
       tags: [Sales]
-      summary: Create a new sale with items
+summary: Create a new sale with items
       requestBody:
         required: true
         content:
