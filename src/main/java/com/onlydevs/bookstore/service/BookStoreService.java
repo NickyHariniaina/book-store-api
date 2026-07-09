@@ -96,4 +96,17 @@ public class BookStoreService {
     }
     return inventoryItemRepository.findLowStockByStoreId(storeId);
   }
+
+  @Transactional
+  public InventoryItem updateReorderLevel(UUID storeId, UUID editionId, Integer reorderLevel) {
+    var item =
+        inventoryItemRepository
+            .findByBookStoreIdAndBookEditionId(storeId, editionId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        "Stock not found for store " + storeId + " and edition " + editionId));
+    item.setReorderLevel(reorderLevel);
+    return inventoryItemRepository.save(item);
+  }
 }

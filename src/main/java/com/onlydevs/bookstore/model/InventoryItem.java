@@ -31,8 +31,9 @@ public class InventoryItem {
 
   @NotNull
   @PositiveOrZero
+  @Builder.Default
   @Column(name = "\"reorder_level\"", nullable = false)
-  private Integer reorderLevel;
+  private Integer reorderLevel = 3;
 
   @CreationTimestamp
   @Column(name = "\"created_at\"", updatable = false)

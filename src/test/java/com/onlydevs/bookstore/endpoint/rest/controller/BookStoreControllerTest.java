@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -18,6 +19,7 @@ import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.dto.request.AdjustStockRequest;
 import com.onlydevs.bookstore.model.dto.request.ArrivalRequest;
 import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.request.ReorderLevelRequest;
 import com.onlydevs.bookstore.model.dto.request.StockLossRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
@@ -316,5 +318,29 @@ class BookStoreControllerTest {
         .perform(get("/stores/{storeId}/movements", storeId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].type").value("ARRIVAL"));
+  }
+
+  @Test
+  void update_reorder_level_should_return_ok() throws Exception {
+    ReorderLevelRequest request = ReorderLevelRequest.builder().reorderLevel(10).build();
+
+    InventoryItemResponse response =
+        InventoryItemResponse.builder()
+            .id(UUID.randomUUID())
+            .storeId(storeId)
+            .editionId(editionId)
+            .reorderLevel(10)
+            .build();
+
+    given(bookStoreService.updateReorderLevel(any(), any(), any())).willReturn(new InventoryItem());
+    given(inventoryMapper.toRest(any())).willReturn(response);
+
+    mockMvc
+        .perform(
+            patch("/stores/{storeId}/inventory/{editionId}/reorder-level", storeId, editionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.reorderLevel").value(10));
   }
 }

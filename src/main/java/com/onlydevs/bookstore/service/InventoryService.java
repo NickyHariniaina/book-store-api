@@ -55,7 +55,6 @@ public class InventoryService {
             .bookStore(storeRef)
             .bookEdition(editionRef)
             .quantityOnHand(quantity)
-            .reorderLevel(3)
             .build();
 
     inventoryItemRepository.save(newItem);
