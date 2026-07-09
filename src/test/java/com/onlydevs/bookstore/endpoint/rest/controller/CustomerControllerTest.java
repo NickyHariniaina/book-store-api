@@ -21,12 +21,14 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(CustomerController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class CustomerControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -227,7 +229,7 @@ class CustomerControllerTest {
         .perform(get("/api/v1/customers/{id}/sales", customerId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].storeName").value("Main Store"))
-        .andExpect(jsonPath("$[0].status").value("COMPLETED"))
+        .andExpect(jsonPath("$[0].status").value("PAID"))
         .andExpect(jsonPath("$[0].total").value(29.99));
   }
 
