@@ -98,12 +98,6 @@ public class BookController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @GetMapping("/{bookId}/editions/{editionId}/stock")
-  public ResponseEntity<Integer> getEditionStock(
-      @PathVariable UUID bookId, @PathVariable UUID editionId) {
-    return ResponseEntity.ok(bookService.getEditionStock(bookId, editionId));
-  }
-
   @GetMapping("/{bookId}/stock")
   public ResponseEntity<Integer> getBookTotalStock(@PathVariable UUID bookId) {
     return ResponseEntity.ok(bookService.getBookTotalStock(bookId));

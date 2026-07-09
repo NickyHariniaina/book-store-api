@@ -345,15 +345,11 @@ paths:
       responses:
         '204': { description: Deleted }
         '404': { description: Not found }
-  /books/{bookId}/editions/{editionId}/stock:
+  /editions/{editionId}/stock:
     get:
-      tags: [Books]
-      summary: Get total stock of a specific edition across all stores
+      tags: [Inventory]
+      summary: Get total stock of an edition across all stores
       parameters:
-        - in: path
-          name: bookId
-          required: true
-          schema: { type: string, format: uuid }
         - in: path
           name: editionId
           required: true

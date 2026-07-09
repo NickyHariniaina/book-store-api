@@ -134,6 +134,12 @@ public class InventoryService {
     return item;
   }
 
+  public Integer getEditionStock(UUID editionId) {
+    return inventoryItemRepository.findByBookEditionId(editionId).stream()
+        .mapToInt(InventoryItem::getQuantityOnHand)
+        .sum();
+  }
+
   public List<InventoryMovement> getMovementsByEdition(UUID editionId) {
     return inventoryMovementRepository.findByBookEditionId(editionId);
   }

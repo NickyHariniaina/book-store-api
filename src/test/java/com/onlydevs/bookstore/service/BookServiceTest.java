@@ -594,41 +594,6 @@ class BookServiceTest {
   }
 
   @Test
-  void getEditionStock_withValidBookAndEdition_shouldReturnCorrectStock() {
-    BookEdition edition = BookEdition.builder().id(editionId).book(book).build();
-    InventoryItem item1 = InventoryItem.builder().quantityOnHand(5).build();
-    InventoryItem item2 = InventoryItem.builder().quantityOnHand(3).build();
-
-    given(bookEditionRepository.findById(editionId)).willReturn(Optional.of(edition));
-    given(inventoryItemRepository.findByBookEditionId(editionId)).willReturn(List.of(item1, item2));
-
-    Integer stock = bookService.getEditionStock(bookId, editionId);
-
-    assertThat(stock).isEqualTo(8);
-  }
-
-  @Test
-  void getEditionStock_withNonExistingEdition_shouldThrow404() {
-    given(bookEditionRepository.findById(editionId)).willReturn(Optional.empty());
-
-    assertThatThrownBy(() -> bookService.getEditionStock(bookId, editionId))
-        .isInstanceOf(NotFoundException.class)
-        .hasMessageContaining("Edition not found");
-  }
-
-  @Test
-  void getEditionStock_withEditionBelongingToAnotherBook_shouldThrow404() {
-    Book otherBook = Book.builder().id(UUID.randomUUID()).title("Other Book").build();
-    BookEdition edition = BookEdition.builder().id(editionId).book(otherBook).build();
-
-    given(bookEditionRepository.findById(editionId)).willReturn(Optional.of(edition));
-
-    assertThatThrownBy(() -> bookService.getEditionStock(bookId, editionId))
-        .isInstanceOf(BadRequestException.class)
-        .hasMessageContaining("Edition does not belong to book");
-  }
-
-  @Test
   void getBookTotalStock_whenBookExists_shouldReturnSum() {
     given(bookRepository.existsById(bookId)).willReturn(true);
     given(inventoryItemRepository.sumQuantityByBookId(bookId)).willReturn(25);

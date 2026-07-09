@@ -95,21 +95,6 @@ public class BookService {
     bookRepository.deleteById(id);
   }
 
-  public Integer getEditionStock(UUID bookId, UUID editionId) {
-    BookEdition edition =
-        bookEditionRepository
-            .findById(editionId)
-            .orElseThrow(() -> new NotFoundException("Edition not found with id: " + editionId));
-
-    if (!edition.getBook().getId().equals(bookId)) {
-      throw new BadRequestException("Edition does not belong to book " + bookId);
-    }
-
-    return inventoryItemRepository.findByBookEditionId(editionId).stream()
-        .mapToInt(InventoryItem::getQuantityOnHand)
-        .sum();
-  }
-
   public Integer getBookTotalStock(UUID bookId) {
     if (!bookRepository.existsById(bookId)) {
       throw new NotFoundException("Book not found with id: " + bookId);

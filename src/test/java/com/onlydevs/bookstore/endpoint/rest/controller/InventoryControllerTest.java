@@ -3,6 +3,7 @@ package com.onlydevs.bookstore.endpoint.rest.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,6 +31,16 @@ class InventoryControllerTest {
 
   private final UUID storeId = UUID.randomUUID();
   private final UUID editionId = UUID.randomUUID();
+
+  @Test
+  void get_edition_stock_should_return_stock() throws Exception {
+    given(inventoryService.getEditionStock(editionId)).willReturn(42);
+
+    mockMvc
+        .perform(get("/editions/{editionId}/stock", editionId))
+        .andExpect(status().isOk())
+        .andExpect(content().string("42"));
+  }
 
   @Test
   void get_movements_by_edition_should_return_list() throws Exception {

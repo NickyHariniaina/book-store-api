@@ -208,4 +208,26 @@ class InventoryServiceTest {
         .should()
         .findByBookStoreIdAndInventoryMovementType(storeId, InventoryMovementType.ARRIVAL);
   }
+
+  @Test
+  void getEditionStock_shouldSumAcrossAllStores() {
+    InventoryItem item1 = InventoryItem.builder().quantityOnHand(5).build();
+    InventoryItem item2 = InventoryItem.builder().quantityOnHand(3).build();
+    given(inventoryItemRepository.findByBookEditionId(editionId)).willReturn(List.of(item1, item2));
+
+    Integer stock = inventoryService.getEditionStock(editionId);
+
+    assertThat(stock).isEqualTo(8);
+    then(inventoryItemRepository).should().findByBookEditionId(editionId);
+  }
+
+  @Test
+  void getEditionStock_withNoInventory_shouldReturnZero() {
+    given(inventoryItemRepository.findByBookEditionId(editionId)).willReturn(List.of());
+
+    Integer stock = inventoryService.getEditionStock(editionId);
+
+    assertThat(stock).isEqualTo(0);
+    then(inventoryItemRepository).should().findByBookEditionId(editionId);
+  }
 }

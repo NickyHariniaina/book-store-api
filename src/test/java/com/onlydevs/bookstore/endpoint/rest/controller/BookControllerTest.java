@@ -194,16 +194,6 @@ class BookControllerTest {
   }
 
   @Test
-  void getEditionStock_ShouldReturnStock() throws Exception {
-    given(bookService.getEditionStock(bookId, editionId)).willReturn(42);
-
-    mockMvc
-        .perform(get("/books/{bookId}/editions/{editionId}/stock", bookId, editionId))
-        .andExpect(status().isOk())
-        .andExpect(content().string("42"));
-  }
-
-  @Test
   void getBookTotalStock_ShouldReturnStock() throws Exception {
     given(bookService.getBookTotalStock(bookId)).willReturn(100);
 

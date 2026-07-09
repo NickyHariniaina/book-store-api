@@ -18,6 +18,11 @@ public class InventoryController {
   private final InventoryService inventoryService;
   private final InventoryMapper inventoryMapper;
 
+  @GetMapping("/editions/{editionId}/stock")
+  public ResponseEntity<Integer> getEditionStock(@PathVariable UUID editionId) {
+    return ResponseEntity.ok(inventoryService.getEditionStock(editionId));
+  }
+
   @GetMapping("/editions/{editionId}/movements")
   public ResponseEntity<List<InventoryMovementResponse>> getMovementsByEdition(
       @PathVariable UUID editionId) {
