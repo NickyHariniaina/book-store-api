@@ -51,7 +51,7 @@ class InventoryServiceTest {
   void setUp() {
     storeId = UUID.randomUUID();
     editionId = UUID.randomUUID();
-    store = BookStore.builder().id(storeId).name("Test Store").build();
+    store = BookStore.builder().id(storeId).name("My Store").build();
     edition = BookEdition.builder().id(editionId).isbn("1234567890").build();
     item =
         InventoryItem.builder()
