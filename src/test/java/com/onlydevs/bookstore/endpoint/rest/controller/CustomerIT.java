@@ -20,7 +20,7 @@ class CustomerIT extends FacadeIT {
 
   @Autowired private TestRestTemplate restTemplate;
 
-  private final String baseUri = "/api/v1/customers";
+  private final String baseUri = "/customers";
 
   @Test
   void customerCrud_ShouldWorkEndToEnd() {

@@ -55,7 +55,7 @@ class CustomerControllerTest {
     given(customerService.getAllCustomers()).willReturn(List.of(response));
 
     mockMvc
-        .perform(get("/api/v1/customers"))
+        .perform(get("/customers"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value(customerId.toString()))
         .andExpect(jsonPath("$[0].firstName").value("John"))
@@ -69,7 +69,7 @@ class CustomerControllerTest {
     given(customerService.getAllCustomers()).willReturn(List.of());
 
     mockMvc
-        .perform(get("/api/v1/customers"))
+        .perform(get("/customers"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isEmpty());
   }
@@ -90,7 +90,7 @@ class CustomerControllerTest {
     given(customerService.getCustomerById(customerId)).willReturn(response);
 
     mockMvc
-        .perform(get("/api/v1/customers/{id}", customerId))
+        .perform(get("/customers/{id}", customerId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(customerId.toString()))
         .andExpect(jsonPath("$.fullName").value("John Doe"));
@@ -120,7 +120,7 @@ class CustomerControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/customers")
+            post("/customers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -134,7 +134,7 @@ class CustomerControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/customers")
+            post("/customers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -147,7 +147,7 @@ class CustomerControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/customers")
+            post("/customers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -160,7 +160,7 @@ class CustomerControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/customers")
+            post("/customers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -177,7 +177,7 @@ class CustomerControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/customers")
+            post("/customers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -202,7 +202,7 @@ class CustomerControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/customers/{id}", customerId)
+            put("/customers/{id}", customerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -226,7 +226,7 @@ class CustomerControllerTest {
     given(customerService.getCustomerSales(customerId)).willReturn(List.of(saleResponse));
 
     mockMvc
-        .perform(get("/api/v1/customers/{id}/sales", customerId))
+        .perform(get("/customers/{id}/sales", customerId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].storeName").value("Main Store"))
         .andExpect(jsonPath("$[0].status").value("PAID"))
@@ -238,7 +238,7 @@ class CustomerControllerTest {
     given(customerService.getCustomerSales(customerId)).willReturn(List.of());
 
     mockMvc
-        .perform(get("/api/v1/customers/{id}/sales", customerId))
+        .perform(get("/customers/{id}/sales", customerId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isEmpty());
   }
