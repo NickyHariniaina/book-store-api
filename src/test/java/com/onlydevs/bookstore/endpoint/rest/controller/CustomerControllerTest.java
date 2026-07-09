@@ -217,7 +217,7 @@ class CustomerControllerTest {
             .storeName("Main Store")
             .customerId(customerId)
             .customerName("John Doe")
-            .status(SaleStatus.COMPLETED)
+            .status(SaleStatus.PAID)
             .total(new BigDecimal("29.99"))
             .build();
 

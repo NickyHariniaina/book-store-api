@@ -200,7 +200,8 @@ class CustomerMapperTest {
 
   @Test
   void toSaleSummary_WhenSaleIsNull_ShouldReturnNull() {
-    assertThat(customerMapper.toSaleSummary(null)).isNull();
+    Sale sale = null;
+    assertThat(customerMapper.toSaleSummary(sale)).isNull();
   }
 
   @Test
@@ -226,7 +227,7 @@ class CustomerMapperTest {
     List<SaleSummaryResponse> result = customerMapper.toSaleSummary(List.of(sale, sale2));
 
     assertThat(result).hasSize(2);
-    assertThat(result.get(0).getStatus()).isEqualTo(SaleStatus.COMPLETED);
+    assertThat(result.get(0).getStatus()).isEqualTo(SaleStatus.PAID);
     assertThat(result.get(1).getStatus()).isEqualTo(SaleStatus.PENDING);
   }
 

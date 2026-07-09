@@ -169,10 +169,10 @@ class CustomerServiceTest {
 
   @Test
   void getCustomerSales_WhenCustomerExists_ShouldReturnSales() {
-    Sale sale = Sale.builder().id(UUID.randomUUID()).status(SaleStatus.COMPLETED).build();
+    Sale sale = Sale.builder().id(UUID.randomUUID()).status(SaleStatus.PAID).build();
 
     SaleSummaryResponse saleResponse =
-        SaleSummaryResponse.builder().id(sale.getId()).status(SaleStatus.COMPLETED).build();
+        SaleSummaryResponse.builder().id(sale.getId()).status(SaleStatus.PAID).build();
 
     given(customerRepository.existsById(customerId)).willReturn(true);
     given(saleRepository.findByCustomerIdOrderByCreatedAtDesc(customerId))
@@ -182,7 +182,7 @@ class CustomerServiceTest {
     List<SaleSummaryResponse> result = customerService.getCustomerSales(customerId);
 
     assertThat(result).hasSize(1);
-    assertThat(result.getFirst().getStatus()).isEqualTo(SaleStatus.COMPLETED);
+    assertThat(result.getFirst().getStatus()).isEqualTo(SaleStatus.PAID);
     then(customerRepository).should().existsById(customerId);
     then(saleRepository).should().findByCustomerIdOrderByCreatedAtDesc(customerId);
   }
