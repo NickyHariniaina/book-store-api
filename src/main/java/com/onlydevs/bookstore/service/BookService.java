@@ -120,7 +120,7 @@ public class BookService {
       throw new BadRequestException("Author already linked to this book");
     }
 
-    BookAuthor bookAuthor = BookAuthor.builder().book(book).author(author).build();
+    var bookAuthor = BookAuthor.builder().book(book).author(author).build();
     BookAuthor saved = bookAuthorRepository.save(bookAuthor);
     return bookMapper.toBookAuthorResponse(saved);
   }

@@ -92,8 +92,8 @@ public class CustomerMapper {
     return sale.getSaleItems().stream()
         .map(
             item -> {
-              BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-              BigDecimal lineTotal = item.getUnitPrice().multiply(qty);
+              var quantity = BigDecimal.valueOf(item.getQuantity());
+              BigDecimal lineTotal = item.getUnitPrice().multiply(quantity);
               if (item.getDiscountPercent() != null
                   && item.getDiscountPercent().compareTo(BigDecimal.ZERO) > 0) {
                 BigDecimal discount =

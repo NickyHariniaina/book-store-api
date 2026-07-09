@@ -42,7 +42,7 @@ class CustomerMapperTest {
             .updatedAt(Instant.now())
             .build();
 
-    BookStore bookStore = BookStore.builder().id(UUID.randomUUID()).name("Main Store").build();
+    var bookStore = BookStore.builder().id(UUID.randomUUID()).name("Main Store").build();
 
     sale =
         Sale.builder()
@@ -114,7 +114,7 @@ class CustomerMapperTest {
 
   @Test
   void updateDomain_WhenAllFieldsNull_ShouldNotChange() {
-    UpdateCustomerRequest request = UpdateCustomerRequest.builder().build();
+    var request = UpdateCustomerRequest.builder().build();
 
     customerMapper.updateDomain(customer, request);
 
@@ -154,7 +154,7 @@ class CustomerMapperTest {
 
   @Test
   void toRest_List_ShouldMapListOfCustomers() {
-    Customer customer2 =
+    var customer2 =
         Customer.builder()
             .id(UUID.randomUUID())
             .firstName("Jane")
@@ -216,7 +216,7 @@ class CustomerMapperTest {
 
   @Test
   void toSaleSummary_List_ShouldMapListOfSales() {
-    Sale sale2 =
+    var sale2 =
         Sale.builder()
             .id(UUID.randomUUID())
             .bookStore(sale.getBookStore())

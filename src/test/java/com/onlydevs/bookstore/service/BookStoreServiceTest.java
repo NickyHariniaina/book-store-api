@@ -29,7 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class BookStoreServiceTest {
@@ -78,7 +77,7 @@ class BookStoreServiceTest {
 
   @Test
   void get_all_stores_should_return_page_of_stores() {
-    Pageable pageable = PageRequest.of(0, 20);
+    var pageable = PageRequest.of(0, 20);
     Page<BookStore> storePage = new PageImpl<>(List.of(bookStore), pageable, 1);
 
     given(bookStoreRepository.findAll(pageable)).willReturn(storePage);
@@ -97,7 +96,7 @@ class BookStoreServiceTest {
 
   @Test
   void get_all_stores_when_empty_should_return_empty_page() {
-    Pageable pageable = PageRequest.of(0, 20);
+    var pageable = PageRequest.of(0, 20);
     Page<BookStore> emptyPage = Page.empty(pageable);
 
     given(bookStoreRepository.findAll(pageable)).willReturn(emptyPage);
@@ -164,7 +163,7 @@ class BookStoreServiceTest {
 
   @Test
   void update_store_when_found_should_modify_and_return() {
-    UpdateBookStoreRequest request = UpdateBookStoreRequest.builder().name("Updated Store").build();
+    var request = UpdateBookStoreRequest.builder().name("Updated Store").build();
 
     given(bookStoreRepository.findById(storeId)).willReturn(Optional.of(bookStore));
     given(bookStoreRepository.save(bookStore)).willReturn(bookStore);
@@ -181,7 +180,7 @@ class BookStoreServiceTest {
 
   @Test
   void update_store_when_not_found_should_throw() {
-    UpdateBookStoreRequest request = UpdateBookStoreRequest.builder().name("Updated").build();
+    var request = UpdateBookStoreRequest.builder().name("Updated").build();
 
     given(bookStoreRepository.findById(storeId)).willReturn(Optional.empty());
 

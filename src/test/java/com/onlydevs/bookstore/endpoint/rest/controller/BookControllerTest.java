@@ -109,7 +109,7 @@ class BookControllerTest {
 
   @Test
   void createBook_WithInvalidBody_ShouldReturnBadRequest() throws Exception {
-    CreateBookRequest request = CreateBookRequest.builder().build();
+    var request = CreateBookRequest.builder().build();
 
     mockMvc
         .perform(
@@ -121,10 +121,9 @@ class BookControllerTest {
 
   @Test
   void updateBook_ShouldReturnOk() throws Exception {
-    UpdateBookRequest request = UpdateBookRequest.builder().title("Updated Title").build();
+    var request = UpdateBookRequest.builder().title("Updated Title").build();
 
-    BookDetailResponse response =
-        BookDetailResponse.builder().id(bookId).title("Updated Title").build();
+    var response = BookDetailResponse.builder().id(bookId).title("Updated Title").build();
 
     given(bookService.updateBook(any(), any())).willReturn(response);
 
@@ -146,8 +145,8 @@ class BookControllerTest {
 
   @Test
   void addAuthorToBook_ShouldReturnCreated() throws Exception {
-    UUID authorId = UUID.randomUUID();
-    BookAuthorResponse response =
+    var authorId = UUID.randomUUID();
+    var response =
         BookAuthorResponse.builder()
             .id(UUID.randomUUID())
             .bookId(bookId)
@@ -165,7 +164,7 @@ class BookControllerTest {
 
   @Test
   void removeAuthorFromBook_ShouldReturnNoContent() throws Exception {
-    UUID authorId = UUID.randomUUID();
+    var authorId = UUID.randomUUID();
     willDoNothing().given(bookService).removeAuthorFromBook(bookId, authorId);
 
     mockMvc
@@ -175,7 +174,7 @@ class BookControllerTest {
 
   @Test
   void addGenreToBook_ShouldReturnNoContent() throws Exception {
-    UUID genreId = UUID.randomUUID();
+    var genreId = UUID.randomUUID();
     willDoNothing().given(bookService).addGenreToBook(bookId, genreId);
 
     mockMvc
@@ -185,7 +184,7 @@ class BookControllerTest {
 
   @Test
   void removeGenreFromBook_ShouldReturnNoContent() throws Exception {
-    UUID genreId = UUID.randomUUID();
+    var genreId = UUID.randomUUID();
     willDoNothing().given(bookService).removeGenreFromBook(bookId, genreId);
 
     mockMvc

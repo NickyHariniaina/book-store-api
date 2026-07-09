@@ -169,7 +169,7 @@ class CustomerServiceTest {
 
   @Test
   void getCustomerSales_WhenCustomerExists_ShouldReturnSales() {
-    Sale sale = Sale.builder().id(UUID.randomUUID()).status(SaleStatus.PAID).build();
+    var sale = Sale.builder().id(UUID.randomUUID()).status(SaleStatus.PAID).build();
 
     SaleSummaryResponse saleResponse =
         SaleSummaryResponse.builder().id(sale.getId()).status(SaleStatus.PAID).build();

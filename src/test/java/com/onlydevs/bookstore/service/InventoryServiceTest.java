@@ -211,8 +211,8 @@ class InventoryServiceTest {
 
   @Test
   void getEditionStock_shouldSumAcrossAllStores() {
-    InventoryItem item1 = InventoryItem.builder().quantityOnHand(5).build();
-    InventoryItem item2 = InventoryItem.builder().quantityOnHand(3).build();
+    var item1 = InventoryItem.builder().quantityOnHand(5).build();
+    var item2 = InventoryItem.builder().quantityOnHand(3).build();
     given(inventoryItemRepository.findByBookEditionId(editionId)).willReturn(List.of(item1, item2));
 
     Integer stock = inventoryService.getEditionStock(editionId);

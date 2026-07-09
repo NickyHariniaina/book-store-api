@@ -41,7 +41,7 @@ class CustomerControllerTest {
 
   @Test
   void getAllCustomers_ShouldReturnList() throws Exception {
-    CustomerResponse response =
+    var response =
         CustomerResponse.builder()
             .id(customerId)
             .firstName("John")
@@ -76,7 +76,7 @@ class CustomerControllerTest {
 
   @Test
   void getCustomerById_ShouldReturnCustomer() throws Exception {
-    CustomerResponse response =
+    var response =
         CustomerResponse.builder()
             .id(customerId)
             .firstName("John")
@@ -105,7 +105,7 @@ class CustomerControllerTest {
             .email("john@example.com")
             .build();
 
-    CustomerResponse response =
+    var response =
         CustomerResponse.builder()
             .id(customerId)
             .firstName("John")
@@ -185,9 +185,9 @@ class CustomerControllerTest {
 
   @Test
   void updateCustomer_ShouldReturnOk() throws Exception {
-    UpdateCustomerRequest request = UpdateCustomerRequest.builder().firstName("Jane").build();
+    var request = UpdateCustomerRequest.builder().firstName("Jane").build();
 
-    CustomerResponse response =
+    var response =
         CustomerResponse.builder()
             .id(customerId)
             .firstName("Jane")
@@ -212,7 +212,7 @@ class CustomerControllerTest {
 
   @Test
   void getCustomerSales_ShouldReturnList() throws Exception {
-    SaleSummaryResponse saleResponse =
+    var saleResponse =
         SaleSummaryResponse.builder()
             .id(UUID.randomUUID())
             .storeId(UUID.randomUUID())

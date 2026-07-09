@@ -59,7 +59,7 @@ class BookStoreControllerTest {
 
   @Test
   void get_all_stores_should_return_page_of_stores() throws Exception {
-    BookStoreResponse response =
+    var response =
         BookStoreResponse.builder()
             .id(storeId)
             .name("Test Store")
@@ -85,7 +85,7 @@ class BookStoreControllerTest {
 
   @Test
   void get_store_by_id_should_return_store() throws Exception {
-    BookStoreResponse response = BookStoreResponse.builder().id(storeId).name("Test Store").build();
+    var response = BookStoreResponse.builder().id(storeId).name("Test Store").build();
 
     given(bookStoreService.getStoreById(storeId)).willReturn(response);
 
@@ -98,7 +98,7 @@ class BookStoreControllerTest {
 
   @Test
   void create_store_should_return_created() throws Exception {
-    CreateBookStoreRequest request =
+    var request =
         CreateBookStoreRequest.builder()
             .name("New Store")
             .address("456 New St")
@@ -106,7 +106,7 @@ class BookStoreControllerTest {
             .email("new@store.com")
             .build();
 
-    BookStoreResponse response = BookStoreResponse.builder().id(storeId).name("New Store").build();
+    var response = BookStoreResponse.builder().id(storeId).name("New Store").build();
 
     given(bookStoreService.createStore(any())).willReturn(response);
 
@@ -121,7 +121,7 @@ class BookStoreControllerTest {
 
   @Test
   void create_store_with_invalid_body_should_return_bad_request() throws Exception {
-    CreateBookStoreRequest request = CreateBookStoreRequest.builder().build();
+    var request = CreateBookStoreRequest.builder().build();
 
     mockMvc
         .perform(
@@ -133,10 +133,9 @@ class BookStoreControllerTest {
 
   @Test
   void update_store_should_return_ok() throws Exception {
-    UpdateBookStoreRequest request = UpdateBookStoreRequest.builder().name("Updated Store").build();
+    var request = UpdateBookStoreRequest.builder().name("Updated Store").build();
 
-    BookStoreResponse response =
-        BookStoreResponse.builder().id(storeId).name("Updated Store").build();
+    var response = BookStoreResponse.builder().id(storeId).name("Updated Store").build();
 
     given(bookStoreService.updateStore(any(), any())).willReturn(response);
 
@@ -178,7 +177,7 @@ class BookStoreControllerTest {
 
   @Test
   void get_low_stock_should_return_list() throws Exception {
-    InventoryItemResponse response =
+    var response =
         InventoryItemResponse.builder()
             .id(UUID.randomUUID())
             .storeId(storeId)
@@ -199,10 +198,10 @@ class BookStoreControllerTest {
 
   @Test
   void record_arrival_should_return_created() throws Exception {
-    ArrivalRequest request =
+    var request =
         ArrivalRequest.builder().editionId(editionId).quantity(5).reference("REF-001").build();
 
-    InventoryItemResponse response =
+    var response =
         InventoryItemResponse.builder()
             .id(UUID.randomUUID())
             .storeId(storeId)
@@ -225,10 +224,10 @@ class BookStoreControllerTest {
 
   @Test
   void adjust_stock_should_return_created() throws Exception {
-    AdjustStockRequest request =
+    var request =
         AdjustStockRequest.builder().editionId(editionId).quantity(5).reason("Add stock").build();
 
-    InventoryItemResponse response =
+    var response =
         InventoryItemResponse.builder()
             .id(UUID.randomUUID())
             .storeId(storeId)
@@ -250,10 +249,10 @@ class BookStoreControllerTest {
 
   @Test
   void record_damaged_should_return_created() throws Exception {
-    StockLossRequest request =
+    var request =
         StockLossRequest.builder().editionId(editionId).quantity(2).reason("Torn cover").build();
 
-    InventoryItemResponse response =
+    var response =
         InventoryItemResponse.builder()
             .id(UUID.randomUUID())
             .storeId(storeId)
@@ -276,10 +275,10 @@ class BookStoreControllerTest {
 
   @Test
   void record_lost_should_return_created() throws Exception {
-    StockLossRequest request =
+    var request =
         StockLossRequest.builder().editionId(editionId).quantity(1).reason("Misplaced").build();
 
-    InventoryItemResponse response =
+    var response =
         InventoryItemResponse.builder()
             .id(UUID.randomUUID())
             .storeId(storeId)
@@ -301,7 +300,7 @@ class BookStoreControllerTest {
 
   @Test
   void get_movements_should_return_list() throws Exception {
-    InventoryMovementResponse response =
+    var response =
         InventoryMovementResponse.builder()
             .id(UUID.randomUUID())
             .storeId(storeId)
