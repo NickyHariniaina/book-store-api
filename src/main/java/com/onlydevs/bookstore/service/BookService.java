@@ -21,6 +21,7 @@ import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.GenreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -107,6 +108,20 @@ public class BookService {
     return inventoryItemRepository.findByBookEditionId(editionId).stream()
         .mapToInt(InventoryItem::getQuantityOnHand)
         .sum();
+  }
+
+  public Integer getBookTotalStock(UUID bookId) {
+    if (!bookRepository.existsById(bookId)) {
+      throw new NotFoundException("Book not found with id: " + bookId);
+    }
+    return inventoryItemRepository.sumQuantityByBookId(bookId);
+  }
+
+  public List<InventoryItem> getBookLowStock(UUID bookId) {
+    if (!bookRepository.existsById(bookId)) {
+      throw new NotFoundException("Book not found with id: " + bookId);
+    }
+    return inventoryItemRepository.findLowStockByBookId(bookId);
   }
 
   @Transactional
