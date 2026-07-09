@@ -1,12 +1,15 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
+import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
 import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.service.BookService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class BookController {
   private final BookService bookService;
+  private final InventoryMapper inventoryMapper;
 
   @GetMapping
   public ResponseEntity<Page<BookSummaryResponse>> getAllBooks(
@@ -92,5 +96,22 @@ public class BookController {
       @PathVariable UUID id, @PathVariable UUID genreId) {
     bookService.removeGenreFromBook(id, genreId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @GetMapping("/{bookId}/editions/{editionId}/stock")
+  public ResponseEntity<Integer> getEditionStock(
+      @PathVariable UUID bookId, @PathVariable UUID editionId) {
+    return ResponseEntity.ok(bookService.getEditionStock(bookId, editionId));
+  }
+
+  @GetMapping("/{bookId}/stock")
+  public ResponseEntity<Integer> getBookTotalStock(@PathVariable UUID bookId) {
+    return ResponseEntity.ok(bookService.getBookTotalStock(bookId));
+  }
+
+  @GetMapping("/{bookId}/low-stock")
+  public ResponseEntity<List<InventoryItemResponse>> getBookLowStock(@PathVariable UUID bookId) {
+    var items = bookService.getBookLowStock(bookId);
+    return ResponseEntity.ok(inventoryMapper.toRestList(items));
   }
 }

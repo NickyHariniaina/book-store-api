@@ -1,10 +1,13 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
+import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
+import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.service.BookStoreService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookStoreController {
 
   private final BookStoreService bookStoreService;
+  private final InventoryMapper inventoryMapper;
 
   @GetMapping
   public ResponseEntity<Page<BookStoreResponse>> getAllStores(
@@ -64,5 +68,24 @@ public class BookStoreController {
   public ResponseEntity<Void> deleteStore(@PathVariable UUID id) {
     bookStoreService.deleteStore(id);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @GetMapping("/{id}/inventory")
+  public ResponseEntity<List<InventoryItemResponse>> getInventory(@PathVariable UUID id) {
+    var items = bookStoreService.getInventoryByStore(id);
+    return ResponseEntity.ok(inventoryMapper.toRestList(items));
+  }
+
+  @GetMapping("/{id}/inventory/{editionId}")
+  public ResponseEntity<InventoryItemResponse> getStockByEdition(
+      @PathVariable UUID id, @PathVariable UUID editionId) {
+    var item = bookStoreService.getStockByEdition(id, editionId);
+    return ResponseEntity.ok(inventoryMapper.toRest(item));
+  }
+
+  @GetMapping("/{id}/books/{bookId}/stock")
+  public ResponseEntity<Integer> getBookStockByStore(
+      @PathVariable UUID id, @PathVariable UUID bookId) {
+    return ResponseEntity.ok(bookStoreService.getBookStockByStore(id, bookId));
   }
 }

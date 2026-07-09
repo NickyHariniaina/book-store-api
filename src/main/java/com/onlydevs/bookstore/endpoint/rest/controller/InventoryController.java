@@ -29,19 +29,6 @@ public class InventoryController {
   private final InventoryService inventoryService;
   private final InventoryMapper inventoryMapper;
 
-  @GetMapping("/stores/{storeId}/inventory")
-  public ResponseEntity<List<InventoryItemResponse>> getInventory(@PathVariable UUID storeId) {
-    return ResponseEntity.ok(
-        inventoryMapper.toRestList(inventoryService.getInventoryByStore(storeId)));
-  }
-
-  @GetMapping("/stores/{storeId}/inventory/{editionId}")
-  public ResponseEntity<InventoryItemResponse> getStockByEdition(
-      @PathVariable UUID storeId, @PathVariable UUID editionId) {
-    return ResponseEntity.ok(
-        inventoryMapper.toRest(inventoryService.getStockByEdition(storeId, editionId)));
-  }
-
   @PostMapping("/stores/{storeId}/inventory/arrival")
   public ResponseEntity<InventoryItemResponse> recordArrival(
       @PathVariable UUID storeId, @Valid @RequestBody ArrivalRequest request) {
