@@ -207,6 +207,27 @@ class BookStoreControllerTest {
   }
 
   @Test
+  void get_low_stock_should_return_list() throws Exception {
+    InventoryItemResponse response =
+        InventoryItemResponse.builder()
+            .id(UUID.randomUUID())
+            .storeId(storeId)
+            .editionId(editionId)
+            .quantityOnHand(2)
+            .reorderLevel(5)
+            .lowStock(true)
+            .build();
+
+    given(bookStoreService.getLowStockItems(storeId)).willReturn(List.of());
+    given(inventoryMapper.toRestList(any())).willReturn(List.of(response));
+
+    mockMvc
+        .perform(get("/stores/{id}/low-stock", storeId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].lowStock").value(true));
+  }
+
+  @Test
   void record_arrival_should_return_created() throws Exception {
     ArrivalRequest request =
         ArrivalRequest.builder().editionId(editionId).quantity(5).reference("REF-001").build();

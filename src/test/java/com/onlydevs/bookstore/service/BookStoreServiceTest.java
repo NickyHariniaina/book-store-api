@@ -254,4 +254,26 @@ class BookStoreServiceTest {
     assertThat(result).isEqualTo(15);
     then(inventoryItemRepository).should().sumQuantityByStoreIdAndBookId(storeId, bookId);
   }
+
+  @Test
+  void get_low_stock_items_when_store_exists_should_return_items() {
+    var lowItem = InventoryItem.builder().quantityOnHand(2).reorderLevel(5).build();
+    given(bookStoreRepository.existsById(storeId)).willReturn(true);
+    given(inventoryItemRepository.findLowStockByStoreId(storeId)).willReturn(List.of(lowItem));
+
+    var result = bookStoreService.getLowStockItems(storeId);
+
+    assertThat(result).hasSize(1);
+    then(bookStoreRepository).should().existsById(storeId);
+    then(inventoryItemRepository).should().findLowStockByStoreId(storeId);
+  }
+
+  @Test
+  void get_low_stock_items_when_store_not_found_should_throw() {
+    given(bookStoreRepository.existsById(storeId)).willReturn(false);
+
+    assertThatThrownBy(() -> bookStoreService.getLowStockItems(storeId))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining("BookStore not found");
+  }
 }

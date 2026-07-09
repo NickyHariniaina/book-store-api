@@ -650,27 +650,25 @@ class BookServiceTest {
   }
 
   @Test
-  void getBookLowStock_whenBookExists_shouldReturnItems() {
+  void getAllLowStock_shouldReturnItems() {
     var lowItem1 = InventoryItem.builder().quantityOnHand(2).reorderLevel(5).build();
     var lowItem2 = InventoryItem.builder().quantityOnHand(0).reorderLevel(3).build();
 
-    given(bookRepository.existsById(bookId)).willReturn(true);
-    given(inventoryItemRepository.findLowStockByBookId(bookId))
-        .willReturn(List.of(lowItem1, lowItem2));
+    given(inventoryItemRepository.findAllLowStock()).willReturn(List.of(lowItem1, lowItem2));
 
-    var result = bookService.getBookLowStock(bookId);
+    var result = bookService.getAllLowStock();
 
     assertThat(result).hasSize(2);
-    then(bookRepository).should().existsById(bookId);
-    then(inventoryItemRepository).should().findLowStockByBookId(bookId);
+    then(inventoryItemRepository).should().findAllLowStock();
   }
 
   @Test
-  void getBookLowStock_whenBookNotFound_shouldThrow() {
-    given(bookRepository.existsById(bookId)).willReturn(false);
+  void getAllLowStock_whenEmpty_shouldReturnEmptyList() {
+    given(inventoryItemRepository.findAllLowStock()).willReturn(List.of());
 
-    assertThatThrownBy(() -> bookService.getBookLowStock(bookId))
-        .isInstanceOf(NotFoundException.class)
-        .hasMessageContaining("Book not found");
+    var result = bookService.getAllLowStock();
+
+    assertThat(result).isEmpty();
+    then(inventoryItemRepository).should().findAllLowStock();
   }
 }

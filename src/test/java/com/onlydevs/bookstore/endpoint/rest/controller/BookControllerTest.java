@@ -214,7 +214,7 @@ class BookControllerTest {
   }
 
   @Test
-  void getBookLowStock_ShouldReturnItems() throws Exception {
+  void getAllLowStock_ShouldReturnItems() throws Exception {
     InventoryItemResponse response =
         InventoryItemResponse.builder()
             .id(UUID.randomUUID())
@@ -224,11 +224,11 @@ class BookControllerTest {
             .lowStock(true)
             .build();
 
-    given(bookService.getBookLowStock(bookId)).willReturn(List.of());
+    given(bookService.getAllLowStock()).willReturn(List.of());
     given(inventoryMapper.toRestList(any())).willReturn(List.of(response));
 
     mockMvc
-        .perform(get("/books/{bookId}/low-stock", bookId))
+        .perform(get("/books/low-stock"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].lowStock").value(true));
   }
