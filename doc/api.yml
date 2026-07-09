@@ -133,8 +133,6 @@ components:
       type: object
       properties:
         id: { type: string, format: uuid }
-        bookId: { type: string, format: uuid }
-        bookTitle: { type: string }
         authorId: { type: string, format: uuid }
         authorFullName: { type: string }
         role: { type: string, nullable: true }
@@ -993,7 +991,7 @@ summary: Create a new sale with items
                   minItems: 1
                   items:
                     type: object
-                    required: [editionId, quantity, unitPrice]
+                    required: [editionId, quantity]
                     properties:
                       editionId:
                         type: string
@@ -1001,9 +999,6 @@ summary: Create a new sale with items
                       quantity:
                         type: integer
                         minimum: 1
-                      unitPrice:
-                        type: number
-                        minimum: 0
       responses:
         '201':
           content:

@@ -69,8 +69,6 @@ public class BookMapper {
   public BookAuthorResponse toBookAuthorResponse(BookAuthor bookAuthor) {
     return BookAuthorResponse.builder()
         .id(bookAuthor.getId())
-        .bookId(bookAuthor.getBook().getId())
-        .bookTitle(bookAuthor.getBook().getTitle())
         .authorId(bookAuthor.getAuthor().getId())
         .authorFullName(bookAuthor.getAuthor().getFullName())
         .role(bookAuthor.getRole())

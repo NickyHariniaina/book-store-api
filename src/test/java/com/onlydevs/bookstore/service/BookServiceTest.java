@@ -515,7 +515,6 @@ class BookServiceTest {
     BookAuthorResponse authorResponse =
         BookAuthorResponse.builder()
             .id(bookAuthor.getId())
-            .bookId(bookId)
             .authorId(author1.getId())
             .authorFullName("Scott Fitzgerald")
             .build();

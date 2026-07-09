@@ -15,8 +15,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BookAuthorResponse {
   private UUID id;
-  private UUID bookId;
-  private String bookTitle;
   private UUID authorId;
   private String authorFullName;
   private AuthorRole role;

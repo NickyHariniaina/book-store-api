@@ -43,11 +43,7 @@ class SaleControllerTest {
   @Test
   void createSale_ShouldReturnCreated() throws Exception {
     var itemRequest =
-        CreateSaleItemRequest.builder()
-            .editionId(UUID.randomUUID())
-            .quantity(2)
-            .unitPrice(new BigDecimal("10.00"))
-            .build();
+        CreateSaleItemRequest.builder().editionId(UUID.randomUUID()).quantity(2).build();
     var request = CreateSaleRequest.builder().customerId(null).items(List.of(itemRequest)).build();
 
     SaleResponse response =
