@@ -77,8 +77,7 @@ class BookPriceHistoryServiceTest {
     given(bookEditionRepository.existsById(editionId)).willReturn(true);
     given(bookPriceHistoryRepository.findByBookEditionIdOrderByEffectiveFromDesc(editionId))
         .willReturn(List.of(price));
-    given(bookPriceHistoryMapper.toResponseList(List.of(price)))
-        .willReturn(List.of(priceResponse));
+    given(bookPriceHistoryMapper.toResponseList(List.of(price))).willReturn(List.of(priceResponse));
 
     List<BookPriceResponse> result = bookPriceHistoryService.getPrices(editionId);
 
@@ -95,14 +94,17 @@ class BookPriceHistoryServiceTest {
         .isInstanceOf(NotFoundException.class)
         .hasMessageContaining("Edition not found");
 
-    then(bookPriceHistoryRepository).should(never()).findByBookEditionIdOrderByEffectiveFromDesc(any());
+    then(bookPriceHistoryRepository)
+        .should(never())
+        .findByBookEditionIdOrderByEffectiveFromDesc(any());
   }
 
   @Test
   void getCurrentPrice_WhenPriceExists_ShouldReturnPrice() {
     given(bookEditionRepository.existsById(editionId)).willReturn(true);
-    given(bookPriceHistoryRepository
-        .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId))
+    given(
+            bookPriceHistoryRepository
+                .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId))
         .willReturn(Optional.of(price));
     given(bookPriceHistoryMapper.toResponse(price)).willReturn(priceResponse);
 
@@ -125,8 +127,9 @@ class BookPriceHistoryServiceTest {
   @Test
   void getCurrentPrice_WhenNoPrice_ShouldThrow() {
     given(bookEditionRepository.existsById(editionId)).willReturn(true);
-    given(bookPriceHistoryRepository
-        .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId))
+    given(
+            bookPriceHistoryRepository
+                .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId))
         .willReturn(Optional.empty());
 
     assertThatThrownBy(() -> bookPriceHistoryService.getCurrentPrice(editionId))
@@ -137,8 +140,9 @@ class BookPriceHistoryServiceTest {
   @Test
   void createPrice_WhenValid_ShouldReturnCreated() {
     given(bookEditionRepository.findById(editionId)).willReturn(Optional.of(edition));
-    given(bookPriceHistoryRepository
-        .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId))
+    given(
+            bookPriceHistoryRepository
+                .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId))
         .willReturn(Optional.empty());
     given(bookPriceHistoryRepository.save(any(BookPriceHistory.class))).willReturn(price);
     given(bookPriceHistoryMapper.toResponse(price)).willReturn(priceResponse);
@@ -172,8 +176,9 @@ class BookPriceHistoryServiceTest {
             .build();
 
     given(bookEditionRepository.findById(editionId)).willReturn(Optional.of(edition));
-    given(bookPriceHistoryRepository
-        .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId))
+    given(
+            bookPriceHistoryRepository
+                .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId))
         .willReturn(Optional.of(previousPrice));
     given(bookPriceHistoryRepository.save(any(BookPriceHistory.class))).willReturn(price);
     given(bookPriceHistoryMapper.toResponse(price)).willReturn(priceResponse);

@@ -36,7 +36,8 @@ public class BookPriceHistoryService {
     BookPriceHistory price =
         bookPriceHistoryRepository
             .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId)
-            .orElseThrow(() -> new NotFoundException("No price found for edition id: " + editionId));
+            .orElseThrow(
+                () -> new NotFoundException("No price found for edition id: " + editionId));
     return bookPriceHistoryMapper.toResponse(price);
   }
 
