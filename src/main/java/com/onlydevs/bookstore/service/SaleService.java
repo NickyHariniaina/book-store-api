@@ -4,6 +4,8 @@ import com.onlydevs.bookstore.endpoint.rest.mapper.SaleMapper;
 import com.onlydevs.bookstore.model.Customer;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.Sale;
+import com.onlydevs.bookstore.model.SaleItem;
+import com.onlydevs.bookstore.model.dto.request.CreateSaleItemRequest;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.enums.PaymentMethod;
@@ -16,6 +18,7 @@ import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import com.onlydevs.bookstore.repository.SaleRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,7 +37,7 @@ public class SaleService {
   private final SaleMapper saleMapper;
 
   @Transactional
-  public SaleResponse createSale(UUID customerId) {
+  public SaleResponse createSale(UUID customerId, List<CreateSaleItemRequest> items) {
     Customer customer = null;
     if (customerId != null) {
       customer =
@@ -44,7 +47,31 @@ public class SaleService {
                   () -> new NotFoundException("Customer not found with id: " + customerId));
     }
 
+    if (items == null || items.isEmpty()) {
+      throw new BadRequestException("Sale must have at least one item");
+    }
+
     var sale = Sale.builder().customer(customer).status(SaleStatus.PENDING).build();
+
+    for (var itemRequest : items) {
+      var edition =
+          bookEditionRepository
+              .findById(itemRequest.getEditionId())
+              .orElseThrow(
+                  () ->
+                      new NotFoundException(
+                          "Edition not found with id: " + itemRequest.getEditionId()));
+
+      var saleItem =
+          SaleItem.builder()
+              .sale(sale)
+              .bookEdition(edition)
+              .quantity(itemRequest.getQuantity())
+              .unitPrice(itemRequest.getUnitPrice())
+              .build();
+
+      sale.getSaleItems().add(saleItem);
+    }
 
     var saved = saleRepository.save(sale);
     return saleMapper.toRest(saved);

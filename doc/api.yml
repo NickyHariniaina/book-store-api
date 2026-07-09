@@ -978,12 +978,34 @@ paths:
   /sales:
     post:
       tags: [Sales]
-      summary: Create a new sale
-      parameters:
-        - in: query
-          name: customerId
-          required: false
-          schema: { type: string, format: uuid }
+      summary: Create a new sale with items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                customerId:
+                  type: string
+                  format: uuid
+                items:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    required: [editionId, quantity, unitPrice]
+                    properties:
+                      editionId:
+                        type: string
+                        format: uuid
+                      quantity:
+                        type: integer
+                        minimum: 1
+                      unitPrice:
+                        type: number
+                        minimum: 0
       responses:
         '201':
           content:
