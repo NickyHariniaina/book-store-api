@@ -223,8 +223,6 @@ class BookMapperTest {
     BookAuthorResponse result = bookMapper.toBookAuthorResponse(bookAuthor);
 
     assertEquals(bookAuthor.getId(), result.getId());
-    assertEquals(book.getId(), result.getBookId());
-    assertEquals("cute book", result.getBookTitle());
     assertEquals(author.getId(), result.getAuthorId());
     assertEquals("Tafita Mata", result.getAuthorFullName());
     assertEquals(AuthorRole.AUTHOR, result.getRole());

@@ -146,19 +146,13 @@ class BookControllerTest {
   @Test
   void addAuthorToBook_ShouldReturnCreated() throws Exception {
     var authorId = UUID.randomUUID();
-    var response =
-        BookAuthorResponse.builder()
-            .id(UUID.randomUUID())
-            .bookId(bookId)
-            .authorId(authorId)
-            .build();
+    var response = BookAuthorResponse.builder().id(UUID.randomUUID()).authorId(authorId).build();
 
     given(bookService.addAuthorToBook(bookId, authorId)).willReturn(response);
 
     mockMvc
         .perform(post("/books/{id}/authors/{authorId}", bookId, authorId))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.bookId").value(bookId.toString()))
         .andExpect(jsonPath("$.authorId").value(authorId.toString()));
   }
 
