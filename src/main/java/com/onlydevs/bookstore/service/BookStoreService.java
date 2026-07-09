@@ -2,11 +2,14 @@ package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookStoreMapper;
 import com.onlydevs.bookstore.model.BookStore;
+import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
+import com.onlydevs.bookstore.repository.InventoryItemRepository;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +23,7 @@ public class BookStoreService {
 
   private final BookStoreRepository bookStoreRepository;
   private final BookStoreMapper bookStoreMapper;
+  private final InventoryItemRepository inventoryItemRepository;
 
   public Page<BookStoreResponse> getAllStores(Pageable pageable) {
     return bookStoreRepository.findAll(pageable).map(bookStoreMapper::toRest);
@@ -70,5 +74,22 @@ public class BookStoreService {
       throw new NotFoundException("BookStore not found with id: " + id);
     }
     bookStoreRepository.deleteById(id);
+  }
+
+  public List<InventoryItem> getInventoryByStore(UUID storeId) {
+    return inventoryItemRepository.findByBookStoreId(storeId);
+  }
+
+  public InventoryItem getStockByEdition(UUID storeId, UUID editionId) {
+    return inventoryItemRepository
+        .findByBookStoreIdAndBookEditionId(storeId, editionId)
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    "Stock not found for store " + storeId + " and edition " + editionId));
+  }
+
+  public Integer getBookStockByStore(UUID storeId, UUID bookId) {
+    return inventoryItemRepository.sumQuantityByStoreIdAndBookId(storeId, bookId);
   }
 }
