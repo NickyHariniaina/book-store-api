@@ -1,9 +1,7 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookEditionMapper;
-import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookEdition;
-import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.request.CreateBookEditionRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookEditionRequest;
 import com.onlydevs.bookstore.model.dto.response.BookEditionResponse;
@@ -36,7 +34,7 @@ public class BookEditionService {
   }
 
   public BookEditionResponse getEditionById(UUID id) {
-    BookEdition edition =
+    var edition =
         bookEditionRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Edition not found with id: " + id));
@@ -44,7 +42,7 @@ public class BookEditionService {
   }
 
   public BookEditionResponse getEditionByIsbn(String isbn) {
-    BookEdition edition =
+    var edition =
         bookEditionRepository
             .findByIsbn(isbn)
             .orElseThrow(() -> new NotFoundException("Edition not found with isbn: " + isbn));
@@ -53,12 +51,12 @@ public class BookEditionService {
 
   @Transactional
   public BookEditionResponse createEdition(UUID bookId, CreateBookEditionRequest request) {
-    Book book =
+    var book =
         bookRepository
             .findById(bookId)
             .orElseThrow(() -> new NotFoundException("Book not found with id: " + bookId));
 
-    Publisher publisher =
+    var publisher =
         publisherRepository
             .findById(request.getPublisherId())
             .orElseThrow(
@@ -70,7 +68,7 @@ public class BookEditionService {
       throw new ConflictException("ISBN already exists: " + request.getIsbn());
     }
 
-    BookEdition edition =
+    var edition =
         BookEdition.builder()
             .isbn(request.getIsbn())
             .edition(request.getEdition())
@@ -79,13 +77,13 @@ public class BookEditionService {
             .publisher(publisher)
             .build();
 
-    BookEdition saved = bookEditionRepository.save(edition);
+    var saved = bookEditionRepository.save(edition);
     return bookEditionMapper.toBookEditionResponse(saved);
   }
 
   @Transactional
   public BookEditionResponse updateEdition(UUID id, UpdateBookEditionRequest request) {
-    BookEdition edition =
+    var edition =
         bookEditionRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Edition not found with id: " + id));
@@ -104,29 +102,29 @@ public class BookEditionService {
       edition.setFormat(parseFormat(request.getFormat()));
     }
 
-    BookEdition saved = bookEditionRepository.save(edition);
+    var saved = bookEditionRepository.save(edition);
     return bookEditionMapper.toBookEditionResponse(saved);
   }
 
   @Transactional
   public BookEditionResponse activateEdition(UUID id) {
-    BookEdition edition =
+    var edition =
         bookEditionRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Edition not found with id: " + id));
     edition.setActive(true);
-    BookEdition saved = bookEditionRepository.save(edition);
+    var saved = bookEditionRepository.save(edition);
     return bookEditionMapper.toBookEditionResponse(saved);
   }
 
   @Transactional
   public BookEditionResponse deactivateEdition(UUID id) {
-    BookEdition edition =
+    var edition =
         bookEditionRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Edition not found with id: " + id));
     edition.setActive(false);
-    BookEdition saved = bookEditionRepository.save(edition);
+    var saved = bookEditionRepository.save(edition);
     return bookEditionMapper.toBookEditionResponse(saved);
   }
 

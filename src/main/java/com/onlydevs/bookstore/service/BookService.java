@@ -1,10 +1,8 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookMapper;
-import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookAuthor;
-import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
@@ -44,7 +42,7 @@ public class BookService {
   }
 
   public BookDetailResponse getBookById(UUID id) {
-    Book book =
+    var book =
         bookRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Book not found with id: " + id));
@@ -53,20 +51,20 @@ public class BookService {
 
   @Transactional
   public BookDetailResponse createBook(CreateBookRequest request) {
-    Book book =
+    var book =
         Book.builder()
             .title(request.getTitle())
             .summary(request.getSummary())
             .language(parseLanguage(request.getLanguage()))
             .coverUrl(request.getCoverUrl())
             .build();
-    Book saved = bookRepository.save(book);
+    var saved = bookRepository.save(book);
     return bookMapper.toBookDetailResponse(saved);
   }
 
   @Transactional
   public BookDetailResponse updateBook(UUID id, UpdateBookRequest request) {
-    Book book =
+    var book =
         bookRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Book not found with id: " + id));
@@ -82,7 +80,7 @@ public class BookService {
     if (request.getCoverUrl() != null) {
       book.setCoverUrl(request.getCoverUrl());
     }
-    Book saved = bookRepository.save(book);
+    var saved = bookRepository.save(book);
     return bookMapper.toBookDetailResponse(saved);
   }
 
@@ -107,11 +105,11 @@ public class BookService {
 
   @Transactional
   public BookAuthorResponse addAuthorToBook(UUID bookId, UUID authorId) {
-    Book book =
+    var book =
         bookRepository
             .findById(bookId)
             .orElseThrow(() -> new NotFoundException("Book not found with id: " + bookId));
-    Author author =
+    var author =
         authorRepository
             .findById(authorId)
             .orElseThrow(() -> new NotFoundException("Author not found with id: " + authorId));
@@ -120,14 +118,14 @@ public class BookService {
       throw new BadRequestException("Author already linked to this book");
     }
 
-    BookAuthor bookAuthor = BookAuthor.builder().book(book).author(author).build();
-    BookAuthor saved = bookAuthorRepository.save(bookAuthor);
+    var bookAuthor = BookAuthor.builder().book(book).author(author).build();
+    var saved = bookAuthorRepository.save(bookAuthor);
     return bookMapper.toBookAuthorResponse(saved);
   }
 
   @Transactional
   public void removeAuthorFromBook(UUID bookId, UUID authorId) {
-    BookAuthor bookAuthor =
+    var bookAuthor =
         bookAuthorRepository
             .findByBookIdAndAuthorId(bookId, authorId)
             .orElseThrow(() -> new NotFoundException("Author not linked to this book"));
@@ -136,11 +134,11 @@ public class BookService {
 
   @Transactional
   public void addGenreToBook(UUID bookId, UUID genreId) {
-    Book book =
+    var book =
         bookRepository
             .findById(bookId)
             .orElseThrow(() -> new NotFoundException("Book not found with id: " + bookId));
-    Genre genre =
+    var genre =
         genreRepository
             .findById(genreId)
             .orElseThrow(() -> new NotFoundException("Genre not found with id: " + genreId));
@@ -150,11 +148,11 @@ public class BookService {
 
   @Transactional
   public void removeGenreFromBook(UUID bookId, UUID genreId) {
-    Book book =
+    var book =
         bookRepository
             .findById(bookId)
             .orElseThrow(() -> new NotFoundException("Book not found with id: " + bookId));
-    Genre genre =
+    var genre =
         genreRepository
             .findById(genreId)
             .orElseThrow(() -> new NotFoundException("Genre not found with id: " + genreId));

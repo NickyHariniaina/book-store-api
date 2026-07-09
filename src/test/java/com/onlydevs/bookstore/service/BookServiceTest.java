@@ -93,7 +93,7 @@ class BookServiceTest {
 
     genre = Genre.builder().id(genreId).name("Fiction").build();
 
-    BookAuthor bookAuthor =
+    var bookAuthor =
         BookAuthor.builder()
             .id(UUID.randomUUID())
             .author(author1)
@@ -386,7 +386,7 @@ class BookServiceTest {
 
   @Test
   void getAllBooks_ShouldUseCorrectPageableParameters() {
-    Pageable customPageable = PageRequest.of(2, 15);
+    var customPageable = PageRequest.of(2, 15);
     Page<Book> emptyPage = new PageImpl<>(List.of(), customPageable, 0);
     given(bookRepository.findAll(customPageable)).willReturn(emptyPage);
 
@@ -397,7 +397,7 @@ class BookServiceTest {
 
   @Test
   void getAllBooks_WhenRepositoryThrowsException_ShouldPropagateException() {
-    RuntimeException exception = new RuntimeException("Database connection failed");
+    var exception = new RuntimeException("Database connection failed");
     given(bookRepository.findAll(pageable)).willThrow(exception);
 
     assertThatThrownBy(() -> bookService.getAllBooks(pageable))
@@ -478,7 +478,7 @@ class BookServiceTest {
 
   @Test
   void updateBook_WhenBookNotFound_ShouldThrow() {
-    UpdateBookRequest request = UpdateBookRequest.builder().title("Updated").build();
+    var request = UpdateBookRequest.builder().title("Updated").build();
     given(bookRepository.findById(bookId)).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> bookService.updateBook(bookId, request))

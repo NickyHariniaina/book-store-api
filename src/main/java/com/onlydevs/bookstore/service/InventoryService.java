@@ -32,7 +32,7 @@ public class InventoryService {
     var optItem = inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId);
 
     if (optItem.isPresent()) {
-      InventoryItem item = optItem.get();
+      var item = optItem.get();
       item.setQuantityOnHand(item.getQuantityOnHand() + quantity);
       inventoryItemRepository.save(item);
 
@@ -50,7 +50,7 @@ public class InventoryService {
     var storeRef = bookStoreRepository.getReferenceById(storeId);
     var editionRef = bookEditionRepository.getReferenceById(editionId);
 
-    InventoryItem newItem =
+    var newItem =
         InventoryItem.builder()
             .bookStore(storeRef)
             .bookEdition(editionRef)
@@ -76,7 +76,7 @@ public class InventoryService {
 
   @Transactional
   public InventoryItem adjustStock(UUID storeId, UUID editionId, Integer quantity, String reason) {
-    InventoryItem item = findItem(storeId, editionId);
+    var item = findItem(storeId, editionId);
 
     int newQuantity = item.getQuantityOnHand() + quantity;
     if (newQuantity < 0) {
@@ -101,7 +101,7 @@ public class InventoryService {
   @Transactional
   public InventoryItem recordDamaged(
       UUID storeId, UUID editionId, Integer quantity, String reason) {
-    InventoryItem item = findItem(storeId, editionId);
+    var item = findItem(storeId, editionId);
     applyStockDecrement(item, quantity);
 
     String movementReason = (reason != null) ? reason : "Marked as damaged";
@@ -118,7 +118,7 @@ public class InventoryService {
 
   @Transactional
   public InventoryItem recordLost(UUID storeId, UUID editionId, Integer quantity, String reason) {
-    InventoryItem item = findItem(storeId, editionId);
+    var item = findItem(storeId, editionId);
     applyStockDecrement(item, quantity);
 
     String movementReason = (reason != null) ? reason : "Marked as lost";
@@ -182,7 +182,7 @@ public class InventoryService {
       Integer quantity,
       String reason,
       String reference) {
-    InventoryMovement movement =
+    var movement =
         InventoryMovement.builder()
             .bookStore(bookStore)
             .bookEdition(bookEdition)

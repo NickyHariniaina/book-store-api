@@ -15,8 +15,7 @@ class AuthorMapperTest {
 
   @Test
   void toDomain_should_map_request_to_author() {
-    CreateAuthorRequest request =
-        CreateAuthorRequest.builder().firstName("John").lastName("Doe").build();
+    var request = CreateAuthorRequest.builder().firstName("John").lastName("Doe").build();
 
     Author result = authorMapper.toDomain(request);
 
@@ -29,9 +28,9 @@ class AuthorMapperTest {
 
   @Test
   void toRest_should_map_author_to_response() {
-    UUID id = UUID.randomUUID();
-    Instant now = Instant.now();
-    Author author =
+    var id = UUID.randomUUID();
+    var now = Instant.now();
+    var author =
         Author.builder().id(id).firstName("Jane").lastName("Austen").createdAt(now).build();
 
     AuthorResponse result = authorMapper.toRest(author);

@@ -42,8 +42,8 @@ public class BookController {
       @RequestParam(defaultValue = "20") int size,
       @RequestParam(defaultValue = "createdAt") String sortBy,
       @RequestParam(defaultValue = "desc") String sortDir) {
-    Direction direction = Direction.fromString(sortDir);
-    Sort sort = Sort.by(direction, sortBy);
+    var direction = Direction.fromString(sortDir);
+    var sort = Sort.by(direction, sortBy);
     Pageable pageable = PageRequest.of(page, size, sort);
     return ResponseEntity.status(HttpStatus.OK).body(bookService.getAllBooks(pageable));
   }

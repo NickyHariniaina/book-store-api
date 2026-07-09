@@ -40,8 +40,8 @@ public class GenreController {
       @RequestParam(defaultValue = "20") int size,
       @RequestParam(defaultValue = "name") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
-    Direction direction = Direction.fromString(sortDir);
-    Sort sort = Sort.by(direction, sortBy);
+    var direction = Direction.fromString(sortDir);
+    var sort = Sort.by(direction, sortBy);
     Pageable pageable = PageRequest.of(page, size, sort);
     return ResponseEntity.ok(genreService.getAllGenres(pageable));
   }

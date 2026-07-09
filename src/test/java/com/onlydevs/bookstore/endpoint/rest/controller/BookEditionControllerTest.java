@@ -42,8 +42,7 @@ class BookEditionControllerTest {
   private final UUID publisherId = UUID.randomUUID();
 
   private BookEditionResponse createResponse() {
-    PublisherResponse publisher =
-        PublisherResponse.builder().id(publisherId).name("Test Publisher").build();
+    var publisher = PublisherResponse.builder().id(publisherId).name("Test Publisher").build();
 
     return BookEditionResponse.builder()
         .id(editionId)
@@ -126,7 +125,7 @@ class BookEditionControllerTest {
 
   @Test
   void createEdition_WithInvalidBody_ShouldReturnBadRequest() throws Exception {
-    CreateBookEditionRequest request = CreateBookEditionRequest.builder().build();
+    var request = CreateBookEditionRequest.builder().build();
 
     mockMvc
         .perform(
