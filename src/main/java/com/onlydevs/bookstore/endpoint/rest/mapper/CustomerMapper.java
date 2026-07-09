@@ -7,7 +7,6 @@ import com.onlydevs.bookstore.model.dto.request.UpdateCustomerRequest;
 import com.onlydevs.bookstore.model.dto.response.CustomerResponse;
 import com.onlydevs.bookstore.model.dto.response.SaleSummaryResponse;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -68,8 +67,6 @@ public class CustomerMapper {
     }
     return SaleSummaryResponse.builder()
         .id(sale.getId())
-        .storeId(sale.getBookStore().getId())
-        .storeName(sale.getBookStore().getName())
         .customerId(sale.getCustomer() != null ? sale.getCustomer().getId() : null)
         .customerName(
             sale.getCustomer() != null
@@ -93,16 +90,7 @@ public class CustomerMapper {
         .map(
             item -> {
               var quantity = BigDecimal.valueOf(item.getQuantity());
-              BigDecimal lineTotal = item.getUnitPrice().multiply(quantity);
-              if (item.getDiscountPercent() != null
-                  && item.getDiscountPercent().compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal discount =
-                    lineTotal
-                        .multiply(item.getDiscountPercent())
-                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-                lineTotal = lineTotal.subtract(discount);
-              }
-              return lineTotal;
+              return item.getUnitPrice().multiply(quantity);
             })
         .filter(Objects::nonNull)
         .reduce(BigDecimal.ZERO, BigDecimal::add);

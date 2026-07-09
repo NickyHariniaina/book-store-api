@@ -1,12 +1,10 @@
 package com.onlydevs.bookstore.endpoint.rest.mapper;
 
-import com.onlydevs.bookstore.model.BookEdition;
 import com.onlydevs.bookstore.model.Sale;
 import com.onlydevs.bookstore.model.SaleItem;
 import com.onlydevs.bookstore.model.dto.response.SaleItemResponse;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -21,8 +19,6 @@ public class SaleMapper {
     }
     return SaleResponse.builder()
         .id(sale.getId())
-        .storeId(sale.getBookStore().getId())
-        .storeName(sale.getBookStore().getName())
         .customerId(sale.getCustomer() != null ? sale.getCustomer().getId() : null)
         .customerName(
             sale.getCustomer() != null
@@ -45,19 +41,9 @@ public class SaleMapper {
     if (item == null) {
       return null;
     }
-    BookEdition edition = item.getBookEdition();
-    BigDecimal unitPrice = item.getUnitPrice();
+    var edition = item.getBookEdition();
     var quantity = BigDecimal.valueOf(item.getQuantity());
-    BigDecimal lineTotal = unitPrice.multiply(quantity);
-
-    if (item.getDiscountPercent() != null
-        && item.getDiscountPercent().compareTo(BigDecimal.ZERO) > 0) {
-      BigDecimal discount =
-          lineTotal
-              .multiply(item.getDiscountPercent())
-              .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-      lineTotal = lineTotal.subtract(discount);
-    }
+    var lineTotal = item.getUnitPrice().multiply(quantity);
 
     return SaleItemResponse.builder()
         .id(item.getId())
@@ -66,8 +52,7 @@ public class SaleMapper {
         .bookTitle(edition.getBook().getTitle())
         .format(String.valueOf(edition.getFormat()))
         .quantity(item.getQuantity())
-        .unitPrice(unitPrice)
-        .discountPercent(item.getDiscountPercent())
+        .unitPrice(item.getUnitPrice())
         .lineTotal(lineTotal)
         .build();
   }
@@ -84,16 +69,7 @@ public class SaleMapper {
         .map(
             item -> {
               var quantity = BigDecimal.valueOf(item.getQuantity());
-              BigDecimal lineTotal = item.getUnitPrice().multiply(quantity);
-              if (item.getDiscountPercent() != null
-                  && item.getDiscountPercent().compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal discount =
-                    lineTotal
-                        .multiply(item.getDiscountPercent())
-                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-                lineTotal = lineTotal.subtract(discount);
-              }
-              return lineTotal;
+              return item.getUnitPrice().multiply(quantity);
             })
         .filter(Objects::nonNull)
         .reduce(BigDecimal.ZERO, BigDecimal::add);

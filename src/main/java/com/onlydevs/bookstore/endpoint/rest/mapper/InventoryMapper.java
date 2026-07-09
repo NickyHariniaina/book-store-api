@@ -16,12 +16,9 @@ public class InventoryMapper {
     }
     var edition = item.getBookEdition();
     var book = edition.getBook();
-    var store = item.getBookStore();
 
     return InventoryItemResponse.builder()
         .id(item.getId())
-        .storeId(store.getId())
-        .storeName(store.getName())
         .editionId(edition.getId())
         .bookTitle(book.getTitle())
         .isbn(edition.getIsbn())
@@ -45,7 +42,6 @@ public class InventoryMapper {
 
     return InventoryMovementResponse.builder()
         .id(movement.getId())
-        .storeId(movement.getBookStore().getId())
         .editionId(edition.getId())
         .bookTitle(book.getTitle())
         .isbn(edition.getIsbn())
