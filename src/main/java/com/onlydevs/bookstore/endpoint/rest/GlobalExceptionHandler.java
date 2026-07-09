@@ -2,15 +2,20 @@ package com.onlydevs.bookstore.endpoint.rest;
 
 import com.onlydevs.bookstore.endpoint.rest.model.RestErrorResponse;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
+import com.onlydevs.bookstore.model.exception.ConflictException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.model.exception.NotImplementedException;
 import com.onlydevs.bookstore.model.exception.TooManyRequestsException;
 import jakarta.persistence.OptimisticLockException;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,8 +40,18 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class})
   ResponseEntity<RestErrorResponse> handleConversionFailed(MethodArgumentTypeMismatchException e) {
-    log.info("Conversion failed", e);
-    String message = e.getCause().getCause().getMessage();
+    log.info("Conversion failed for parameter '{}' with value '{}'", e.getName(), e.getValue());
+    String message;
+    if (e.getRequiredType() == UUID.class) {
+      message =
+          String.format(
+              "Invalid UUID format: '%s'. Expected format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              e.getValue());
+    } else if (e.getCause() != null) {
+      message = e.getCause().getMessage();
+    } else {
+      message = String.format("Invalid value '%s' for parameter '%s'", e.getValue(), e.getName());
+    }
     return handleBadRequest(new BadRequestException(message));
   }
 
@@ -75,6 +90,12 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(toRest(e, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
   }
 
+  @ExceptionHandler(value = {ConflictException.class})
+  ResponseEntity<RestErrorResponse> handleConflict(ConflictException e) {
+    log.info("Conflict", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
+  }
+
   @ExceptionHandler(value = {NotImplementedException.class})
   ResponseEntity<RestErrorResponse> handleNotImplemented(NotImplementedException e) {
     log.error("Not implemented", e);
@@ -86,6 +107,25 @@ public class GlobalExceptionHandler {
     log.error("Internal error", e);
     return new ResponseEntity<>(
         toRest(e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(value = {DataIntegrityViolationException.class})
+  ResponseEntity<RestErrorResponse> handleDataIntegrityViolation(
+      DataIntegrityViolationException e) {
+    log.info("Data integrity violation", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(value = {AuthenticationException.class})
+  ResponseEntity<RestErrorResponse> handleAuthentication(AuthenticationException e) {
+    log.info("Authentication failed", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(value = {AccessDeniedException.class})
+  ResponseEntity<RestErrorResponse> handleAccessDenied(AccessDeniedException e) {
+    log.info("Access denied", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.FORBIDDEN), HttpStatus.FORBIDDEN);
   }
 
   private RestErrorResponse toRest(Exception e, HttpStatus status) {

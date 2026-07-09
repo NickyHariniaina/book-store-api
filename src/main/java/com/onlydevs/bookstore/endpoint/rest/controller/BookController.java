@@ -8,11 +8,12 @@ import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
 import com.onlydevs.bookstore.service.BookService;
 import jakarta.validation.Valid;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/books")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BookController {
   private final BookService bookService;
 
@@ -37,7 +38,7 @@ public class BookController {
       @RequestParam(defaultValue = "20") int size,
       @RequestParam(defaultValue = "createdAt") String sortBy,
       @RequestParam(defaultValue = "desc") String sortDir) {
-    Sort.Direction direction = Sort.Direction.fromString(sortDir);
+    Direction direction = Direction.fromString(sortDir);
     Sort sort = Sort.by(direction, sortBy);
     Pageable pageable = PageRequest.of(page, size, sort);
     return ResponseEntity.status(HttpStatus.OK).body(bookService.getAllBooks(pageable));
@@ -45,7 +46,7 @@ public class BookController {
 
   @GetMapping("/{id}")
   public ResponseEntity<BookDetailResponse> getBookById(@PathVariable UUID id) {
-    return ResponseEntity.ok(bookService.getBookById(id));
+    return ResponseEntity.status(HttpStatus.OK).body(bookService.getBookById(id));
   }
 
   @PostMapping
@@ -57,13 +58,13 @@ public class BookController {
   @PutMapping("/{id}")
   public ResponseEntity<BookDetailResponse> updateBook(
       @PathVariable UUID id, @Valid @RequestBody UpdateBookRequest request) {
-    return ResponseEntity.ok(bookService.updateBook(id, request));
+    return ResponseEntity.status(HttpStatus.OK).body(bookService.updateBook(id, request));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteBook(@PathVariable UUID id) {
     bookService.deleteBook(id);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @PostMapping("/{id}/authors/{authorId}")
@@ -77,19 +78,19 @@ public class BookController {
   public ResponseEntity<Void> removeAuthorFromBook(
       @PathVariable UUID id, @PathVariable UUID authorId) {
     bookService.removeAuthorFromBook(id, authorId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @PostMapping("/{id}/genres/{genreId}")
   public ResponseEntity<Void> addGenreToBook(@PathVariable UUID id, @PathVariable UUID genreId) {
     bookService.addGenreToBook(id, genreId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @DeleteMapping("/{id}/genres/{genreId}")
   public ResponseEntity<Void> removeGenreFromBook(
       @PathVariable UUID id, @PathVariable UUID genreId) {
     bookService.removeGenreFromBook(id, genreId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

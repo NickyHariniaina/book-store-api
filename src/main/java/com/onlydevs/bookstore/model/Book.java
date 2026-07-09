@@ -65,7 +65,7 @@ public class Book {
 
   @Builder.Default
   @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<BookAuthor> bookAuthors = new ArrayList<>();
+  private Set<BookAuthor> bookAuthors = new HashSet<>();
 
   @Builder.Default
   @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
