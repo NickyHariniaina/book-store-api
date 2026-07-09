@@ -40,11 +40,7 @@ public class InventoryService {
 
     var editionRef = bookEditionRepository.getReferenceById(editionId);
 
-    var newItem =
-        InventoryItem.builder()
-            .bookEdition(editionRef)
-            .quantityOnHand(quantity)
-            .build();
+    var newItem = InventoryItem.builder().bookEdition(editionRef).quantityOnHand(quantity).build();
 
     inventoryItemRepository.save(newItem);
 
@@ -60,7 +56,7 @@ public class InventoryService {
   }
 
   @Transactional
-public InventoryItem adjustStock(UUID editionId, Integer quantity, String reason) {
+  public InventoryItem adjustStock(UUID editionId, Integer quantity, String reason) {
     var item = findItem(editionId);
 
     int newQuantity = item.getQuantityOnHand() + quantity;
@@ -83,7 +79,7 @@ public InventoryItem adjustStock(UUID editionId, Integer quantity, String reason
   }
 
   @Transactional
-public InventoryItem recordDamaged(UUID editionId, Integer quantity, String reason) {
+  public InventoryItem recordDamaged(UUID editionId, Integer quantity, String reason) {
     var item = findItem(editionId);
     applyStockDecrement(item, quantity);
 
@@ -99,7 +95,7 @@ public InventoryItem recordDamaged(UUID editionId, Integer quantity, String reas
   }
 
   @Transactional
-public InventoryItem recordLost(UUID editionId, Integer quantity, String reason) {
+  public InventoryItem recordLost(UUID editionId, Integer quantity, String reason) {
     var item = findItem(editionId);
     applyStockDecrement(item, quantity);
 

@@ -1,20 +1,18 @@
 package com.onlydevs.bookstore.integration;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 class InventoryIT extends FacadeIT {
 
   @LocalServerPort private int port;
 
-private WebTestClient webTestClient;
+  private WebTestClient webTestClient;
 
   @BeforeEach
   void setUp() {

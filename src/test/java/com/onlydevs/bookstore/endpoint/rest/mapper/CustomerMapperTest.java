@@ -41,7 +41,7 @@ class CustomerMapperTest {
             .updatedAt(Instant.now())
             .build();
 
-sale =
+    sale =
         Sale.builder()
             .id(UUID.randomUUID())
             .customer(customer)

@@ -49,14 +49,14 @@ class SaleServiceTest {
 
   @InjectMocks private SaleService saleService;
 
-private UUID saleId;
+  private UUID saleId;
   private UUID editionId;
   private Sale sale;
   private SaleResponse saleResponse;
 
   @BeforeEach
   void setUp() {
-saleId = UUID.randomUUID();
+    saleId = UUID.randomUUID();
     editionId = UUID.randomUUID();
 
     sale =
@@ -79,7 +79,7 @@ saleId = UUID.randomUUID();
 
   @Test
   void createSale_ShouldReturnCreatedSale() {
-given(saleRepository.save(any(Sale.class))).willReturn(sale);
+    given(saleRepository.save(any(Sale.class))).willReturn(sale);
     given(saleMapper.toRest(sale)).willReturn(saleResponse);
 
     SaleResponse result = saleService.createSale(null);
@@ -110,7 +110,7 @@ given(saleRepository.save(any(Sale.class))).willReturn(sale);
   }
 
   @Test
-void getAllSales_ShouldReturnPage() {
+  void getAllSales_ShouldReturnPage() {
     PageRequest pageable = PageRequest.of(0, 20);
     Page<Sale> salePage = new PageImpl<>(List.of(sale), pageable, 1);
 
