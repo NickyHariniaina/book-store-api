@@ -6,7 +6,6 @@ import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
-import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
@@ -25,19 +24,6 @@ public class InventoryService {
   private final InventoryMovementRepository inventoryMovementRepository;
   private final BookStoreRepository bookStoreRepository;
   private final BookEditionRepository bookEditionRepository;
-
-  public List<InventoryItem> getInventoryByStore(UUID storeId) {
-    return inventoryItemRepository.findByBookStoreId(storeId);
-  }
-
-  public InventoryItem getStockByEdition(UUID storeId, UUID editionId) {
-    return inventoryItemRepository
-        .findByBookStoreIdAndBookEditionId(storeId, editionId)
-        .orElseThrow(
-            () ->
-                new NotFoundException(
-                    "Stock not found for store " + storeId + " and edition " + editionId));
-  }
 
   @Transactional
   public InventoryItem recordArrival(
