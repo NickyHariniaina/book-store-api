@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onlydevs.bookstore.model.dto.request.CreateSaleItemRequest;
+import com.onlydevs.bookstore.model.dto.request.CreateSaleRequest;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.PaymentMethod;
 import com.onlydevs.bookstore.model.enums.SaleStatus;
@@ -40,18 +42,29 @@ class SaleControllerTest {
 
   @Test
   void createSale_ShouldReturnCreated() throws Exception {
+    var itemRequest =
+        CreateSaleItemRequest.builder()
+            .editionId(UUID.randomUUID())
+            .quantity(2)
+            .unitPrice(new BigDecimal("10.00"))
+            .build();
+    var request = CreateSaleRequest.builder().customerId(null).items(List.of(itemRequest)).build();
+
     SaleResponse response =
         SaleResponse.builder()
             .id(saleId)
             .status(SaleStatus.PENDING)
-            .total(BigDecimal.ZERO)
+            .total(new BigDecimal("20.00"))
             .items(List.of())
             .build();
 
-    given(saleService.createSale(any())).willReturn(response);
+    given(saleService.createSale(any(), any())).willReturn(response);
 
     mockMvc
-        .perform(post("/sales"))
+        .perform(
+            post("/sales")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(saleId.toString()))
         .andExpect(jsonPath("$.status").value("PENDING"));

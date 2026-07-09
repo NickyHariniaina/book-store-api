@@ -7,7 +7,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.SaleMapper;
+import com.onlydevs.bookstore.model.BookEdition;
 import com.onlydevs.bookstore.model.Sale;
+import com.onlydevs.bookstore.model.SaleItem;
+import com.onlydevs.bookstore.model.dto.request.CreateSaleItemRequest;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.SaleStatus;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
@@ -79,14 +82,41 @@ class SaleServiceTest {
 
   @Test
   void createSale_ShouldReturnCreatedSale() {
+    var edition = BookEdition.builder().id(editionId).isbn("1234567890").build();
+    var items =
+        List.of(
+            CreateSaleItemRequest.builder()
+                .editionId(editionId)
+                .quantity(2)
+                .unitPrice(new BigDecimal("10.00"))
+                .build());
+
+    sale.getSaleItems()
+        .add(
+            SaleItem.builder()
+                .bookEdition(edition)
+                .quantity(2)
+                .unitPrice(new BigDecimal("10.00"))
+                .sale(sale)
+                .build());
+
+    given(bookEditionRepository.findById(editionId)).willReturn(Optional.of(edition));
     given(saleRepository.save(any(Sale.class))).willReturn(sale);
     given(saleMapper.toRest(sale)).willReturn(saleResponse);
 
-    SaleResponse result = saleService.createSale(null);
+    SaleResponse result = saleService.createSale(null, items);
 
     assertThat(result).isNotNull();
     assertThat(result.getStatus()).isEqualTo(SaleStatus.PENDING);
+    then(bookEditionRepository).should().findById(editionId);
     then(saleRepository).should().save(any(Sale.class));
+  }
+
+  @Test
+  void createSale_WhenNoItems_ShouldThrow() {
+    assertThatThrownBy(() -> saleService.createSale(null, List.of()))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("at least one item");
   }
 
   @Test

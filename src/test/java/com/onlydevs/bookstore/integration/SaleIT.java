@@ -8,6 +8,8 @@ import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookEdition;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.Publisher;
+import com.onlydevs.bookstore.model.dto.request.CreateSaleItemRequest;
+import com.onlydevs.bookstore.model.dto.request.CreateSaleRequest;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.BookFormat;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
@@ -15,6 +17,8 @@ import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.PublisherRepository;
 import com.onlydevs.bookstore.repository.SaleRepository;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,12 +71,25 @@ class SaleIT extends FacadeIT {
         InventoryItem.builder().bookEdition(edition).quantityOnHand(10).reorderLevel(3).build());
   }
 
+  private CreateSaleRequest saleRequest() {
+    return CreateSaleRequest.builder()
+        .items(
+            List.of(
+                CreateSaleItemRequest.builder()
+                    .editionId(editionId)
+                    .quantity(2)
+                    .unitPrice(new BigDecimal("10.00"))
+                    .build()))
+        .build();
+  }
+
   @Test
   void should_create_cancel_sale() {
     SaleResponse sale =
         webTestClient
             .post()
             .uri("/sales")
+            .bodyValue(saleRequest())
             .exchange()
             .expectStatus()
             .isCreated()
@@ -104,6 +121,7 @@ class SaleIT extends FacadeIT {
         webTestClient
             .post()
             .uri("/sales")
+            .bodyValue(saleRequest())
             .exchange()
             .expectStatus()
             .isCreated()

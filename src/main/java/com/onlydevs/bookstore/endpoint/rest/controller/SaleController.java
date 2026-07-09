@@ -1,5 +1,6 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
+import com.onlydevs.bookstore.model.dto.request.CreateSaleRequest;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.PaymentMethod;
 import com.onlydevs.bookstore.service.SaleService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,8 +30,9 @@ public class SaleController {
   private final SaleService saleService;
 
   @PostMapping("/sales")
-  public ResponseEntity<SaleResponse> createSale(@RequestParam(required = false) UUID customerId) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(saleService.createSale(customerId));
+  public ResponseEntity<SaleResponse> createSale(@RequestBody CreateSaleRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(saleService.createSale(request.getCustomerId(), request.getItems()));
   }
 
   @GetMapping("/sales")
