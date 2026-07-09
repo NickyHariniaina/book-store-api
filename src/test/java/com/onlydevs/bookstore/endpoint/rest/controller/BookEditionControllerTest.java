@@ -65,7 +65,7 @@ class BookEditionControllerTest {
     given(bookEditionService.getEditionsByBookId(bookId)).willReturn(List.of(response));
 
     mockMvc
-        .perform(get("/api/v1/books/{bookId}/editions", bookId))
+        .perform(get("/books/{bookId}/editions", bookId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value(editionId.toString()))
         .andExpect(jsonPath("$[0].isbn").value("9783161484100"));
@@ -77,7 +77,7 @@ class BookEditionControllerTest {
     given(bookEditionService.getEditionById(editionId)).willReturn(response);
 
     mockMvc
-        .perform(get("/api/v1/editions/{id}", editionId))
+        .perform(get("/editions/{id}", editionId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(editionId.toString()))
         .andExpect(jsonPath("$.isbn").value("9783161484100"));
@@ -88,7 +88,7 @@ class BookEditionControllerTest {
     given(bookEditionService.getEditionById(editionId))
         .willThrow(new NotFoundException("Edition not found"));
 
-    mockMvc.perform(get("/api/v1/editions/{id}", editionId)).andExpect(status().isNotFound());
+    mockMvc.perform(get("/editions/{id}", editionId)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -97,7 +97,7 @@ class BookEditionControllerTest {
     given(bookEditionService.getEditionByIsbn("9783161484100")).willReturn(response);
 
     mockMvc
-        .perform(get("/api/v1/editions/isbn/{isbn}", "9783161484100"))
+        .perform(get("/editions/isbn/{isbn}", "9783161484100"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.isbn").value("9783161484100"));
   }
@@ -117,7 +117,7 @@ class BookEditionControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/books/{bookId}/editions", bookId)
+            post("/books/{bookId}/editions", bookId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -130,7 +130,7 @@ class BookEditionControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/books/{bookId}/editions", bookId)
+            post("/books/{bookId}/editions", bookId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -150,7 +150,7 @@ class BookEditionControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/editions/{id}", editionId)
+            put("/editions/{id}", editionId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -163,7 +163,7 @@ class BookEditionControllerTest {
     given(bookEditionService.activateEdition(editionId)).willReturn(response);
 
     mockMvc
-        .perform(patch("/api/v1/editions/{id}/activate", editionId))
+        .perform(patch("/editions/{id}/activate", editionId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(editionId.toString()));
   }
@@ -174,7 +174,7 @@ class BookEditionControllerTest {
     given(bookEditionService.deactivateEdition(editionId)).willReturn(response);
 
     mockMvc
-        .perform(patch("/api/v1/editions/{id}/deactivate", editionId))
+        .perform(patch("/editions/{id}/deactivate", editionId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(editionId.toString()));
   }

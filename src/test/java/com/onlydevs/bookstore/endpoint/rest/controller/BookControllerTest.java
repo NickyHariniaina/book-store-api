@@ -65,7 +65,7 @@ class BookControllerTest {
     given(bookService.getAllBooks(any())).willReturn(page);
 
     mockMvc
-        .perform(get("/api/v1/books").contentType(MediaType.APPLICATION_JSON))
+        .perform(get("/books").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].id").value(bookId.toString()))
         .andExpect(jsonPath("$.content[0].title").value("The Great Gatsby"))
@@ -82,7 +82,7 @@ class BookControllerTest {
     given(bookService.getBookById(bookId)).willReturn(response);
 
     mockMvc
-        .perform(get("/api/v1/books/{id}", bookId))
+        .perform(get("/books/{id}", bookId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(bookId.toString()))
         .andExpect(jsonPath("$.title").value("Test Book"));
@@ -100,7 +100,7 @@ class BookControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/books")
+            post("/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -113,7 +113,7 @@ class BookControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/books")
+            post("/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -130,7 +130,7 @@ class BookControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/books/{id}", bookId)
+            put("/books/{id}", bookId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -141,7 +141,7 @@ class BookControllerTest {
   void deleteBook_ShouldReturnNoContent() throws Exception {
     willDoNothing().given(bookService).deleteBook(bookId);
 
-    mockMvc.perform(delete("/api/v1/books/{id}", bookId)).andExpect(status().isNoContent());
+    mockMvc.perform(delete("/books/{id}", bookId)).andExpect(status().isNoContent());
   }
 
   @Test
@@ -157,7 +157,7 @@ class BookControllerTest {
     given(bookService.addAuthorToBook(bookId, authorId)).willReturn(response);
 
     mockMvc
-        .perform(post("/api/v1/books/{id}/authors/{authorId}", bookId, authorId))
+        .perform(post("/books/{id}/authors/{authorId}", bookId, authorId))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.bookId").value(bookId.toString()))
         .andExpect(jsonPath("$.authorId").value(authorId.toString()));
@@ -169,7 +169,7 @@ class BookControllerTest {
     willDoNothing().given(bookService).removeAuthorFromBook(bookId, authorId);
 
     mockMvc
-        .perform(delete("/api/v1/books/{id}/authors/{authorId}", bookId, authorId))
+        .perform(delete("/books/{id}/authors/{authorId}", bookId, authorId))
         .andExpect(status().isNoContent());
   }
 
@@ -179,7 +179,7 @@ class BookControllerTest {
     willDoNothing().given(bookService).addGenreToBook(bookId, genreId);
 
     mockMvc
-        .perform(post("/api/v1/books/{id}/genres/{genreId}", bookId, genreId))
+        .perform(post("/books/{id}/genres/{genreId}", bookId, genreId))
         .andExpect(status().isNoContent());
   }
 
@@ -189,7 +189,7 @@ class BookControllerTest {
     willDoNothing().given(bookService).removeGenreFromBook(bookId, genreId);
 
     mockMvc
-        .perform(delete("/api/v1/books/{id}/genres/{genreId}", bookId, genreId))
+        .perform(delete("/books/{id}/genres/{genreId}", bookId, genreId))
         .andExpect(status().isNoContent());
   }
 
@@ -198,7 +198,7 @@ class BookControllerTest {
     given(bookService.getEditionStock(bookId, editionId)).willReturn(42);
 
     mockMvc
-        .perform(get("/api/v1/books/{bookId}/editions/{editionId}/stock", bookId, editionId))
+        .perform(get("/books/{bookId}/editions/{editionId}/stock", bookId, editionId))
         .andExpect(status().isOk())
         .andExpect(content().string("42"));
   }
@@ -208,7 +208,7 @@ class BookControllerTest {
     given(bookService.getBookTotalStock(bookId)).willReturn(100);
 
     mockMvc
-        .perform(get("/api/v1/books/{bookId}/stock", bookId))
+        .perform(get("/books/{bookId}/stock", bookId))
         .andExpect(status().isOk())
         .andExpect(content().string("100"));
   }
@@ -228,7 +228,7 @@ class BookControllerTest {
     given(inventoryMapper.toRestList(any())).willReturn(List.of(response));
 
     mockMvc
-        .perform(get("/api/v1/books/{bookId}/low-stock", bookId))
+        .perform(get("/books/{bookId}/low-stock", bookId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].lowStock").value(true));
   }

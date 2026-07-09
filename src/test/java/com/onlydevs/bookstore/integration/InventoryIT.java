@@ -48,7 +48,7 @@ class InventoryIT extends FacadeIT {
   void get_inventory_should_return_list() {
     webTestClient
         .get()
-        .uri("/api/v1/stores/{storeId}/inventory", storeId)
+        .uri("/stores/{storeId}/inventory", storeId)
         .exchange()
         .expectStatus()
         .isOk()
@@ -61,7 +61,7 @@ class InventoryIT extends FacadeIT {
   void get_stock_by_edition_should_return_404_when_not_found() {
     webTestClient
         .get()
-        .uri("/api/v1/stores/{storeId}/inventory/{editionId}", storeId, UUID.randomUUID())
+        .uri("/stores/{storeId}/inventory/{editionId}", storeId, UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound()
@@ -76,7 +76,7 @@ class InventoryIT extends FacadeIT {
   void get_movements_should_return_list() {
     webTestClient
         .get()
-        .uri("/api/v1/stores/{storeId}/movements", storeId)
+        .uri("/stores/{storeId}/movements", storeId)
         .exchange()
         .expectStatus()
         .isOk()
@@ -89,7 +89,7 @@ class InventoryIT extends FacadeIT {
   void get_movements_with_invalid_type_should_return_bad_request() {
     webTestClient
         .get()
-        .uri("/api/v1/stores/{storeId}/movements?type=INVALID", storeId)
+        .uri("/stores/{storeId}/movements?type=INVALID", storeId)
         .exchange()
         .expectStatus()
         .isBadRequest()

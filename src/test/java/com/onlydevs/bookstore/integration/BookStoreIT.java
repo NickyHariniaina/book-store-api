@@ -37,7 +37,7 @@ class BookStoreIT extends FacadeIT {
     createdStore =
         webTestClient
             .post()
-            .uri("/api/v1/stores")
+            .uri("/stores")
             .bodyValue(
                 CreateBookStoreRequest.builder()
                     .name("Main Store")
@@ -57,7 +57,7 @@ class BookStoreIT extends FacadeIT {
   void create_store_should_persist_and_return_store() {
     webTestClient
         .post()
-        .uri("/api/v1/stores")
+        .uri("/stores")
         .bodyValue(
             CreateBookStoreRequest.builder()
                 .name("Branch Store")
@@ -81,7 +81,7 @@ class BookStoreIT extends FacadeIT {
   void get_store_by_id_should_return_store() {
     webTestClient
         .get()
-        .uri("/api/v1/stores/" + createdStore.getId())
+        .uri("/stores/" + createdStore.getId())
         .exchange()
         .expectStatus()
         .isOk()
@@ -96,7 +96,7 @@ class BookStoreIT extends FacadeIT {
   void get_all_stores_should_return_all_stores() {
     webTestClient
         .post()
-        .uri("/api/v1/stores")
+        .uri("/stores")
         .bodyValue(
             CreateBookStoreRequest.builder()
                 .name("Second Store")
@@ -110,7 +110,7 @@ class BookStoreIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/api/v1/stores")
+        .uri("/stores")
         .exchange()
         .expectStatus()
         .isOk()
@@ -126,7 +126,7 @@ class BookStoreIT extends FacadeIT {
 
     webTestClient
         .put()
-        .uri("/api/v1/stores/" + createdStore.getId())
+        .uri("/stores/" + createdStore.getId())
         .bodyValue(updateRequest)
         .exchange()
         .expectStatus()
@@ -144,14 +144,14 @@ class BookStoreIT extends FacadeIT {
   void delete_store_should_remove_store() {
     webTestClient
         .delete()
-        .uri("/api/v1/stores/" + createdStore.getId())
+        .uri("/stores/" + createdStore.getId())
         .exchange()
         .expectStatus()
         .isNoContent();
 
     webTestClient
         .get()
-        .uri("/api/v1/stores/" + createdStore.getId())
+        .uri("/stores/" + createdStore.getId())
         .exchange()
         .expectStatus()
         .isNotFound();
@@ -161,7 +161,7 @@ class BookStoreIT extends FacadeIT {
   void get_store_by_id_should_return_404_when_not_found() {
     webTestClient
         .get()
-        .uri("/api/v1/stores/" + UUID.randomUUID())
+        .uri("/stores/" + UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound()
@@ -176,7 +176,7 @@ class BookStoreIT extends FacadeIT {
   void update_store_should_return_404_when_not_found() {
     webTestClient
         .put()
-        .uri("/api/v1/stores/" + UUID.randomUUID())
+        .uri("/stores/" + UUID.randomUUID())
         .bodyValue(UpdateBookStoreRequest.builder().name("Ghost Store").build())
         .exchange()
         .expectStatus()
@@ -192,7 +192,7 @@ class BookStoreIT extends FacadeIT {
   void delete_store_should_return_404_when_not_found() {
     webTestClient
         .delete()
-        .uri("/api/v1/stores/" + UUID.randomUUID())
+        .uri("/stores/" + UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound()
@@ -207,7 +207,7 @@ class BookStoreIT extends FacadeIT {
   void create_store_should_return_400_when_name_missing() {
     webTestClient
         .post()
-        .uri("/api/v1/stores")
+        .uri("/stores")
         .bodyValue(
             CreateBookStoreRequest.builder()
                 .address("456 Branch St")

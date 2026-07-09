@@ -49,7 +49,7 @@ class GenreControllerTest {
     given(genreService.getAllGenres(any(Pageable.class))).willReturn(page);
 
     mockMvc
-        .perform(get("/api/v1/genres"))
+        .perform(get("/genres"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content.size()").value(2))
         .andExpect(jsonPath("$.content[0].name").value("Fiction"))
@@ -71,7 +71,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/genres")
+            post("/genres")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -87,7 +87,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/genres")
+            post("/genres")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isConflict());
@@ -103,7 +103,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            patch("/api/v1/genres/{id}/rename", id)
+            patch("/genres/{id}/rename", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -120,7 +120,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            patch("/api/v1/genres/{id}/rename", id)
+            patch("/genres/{id}/rename", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isNotFound());
@@ -135,16 +135,14 @@ class GenreControllerTest {
     given(genreService.getBooksByGenreId(eq(id), any())).willReturn(page);
 
     mockMvc
-        .perform(get("/api/v1/genres/{id}/books", id))
+        .perform(get("/genres/{id}/books", id))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].title").value("Test Book"));
   }
 
   @Test
   void should_delete_genre_ok() throws Exception {
-    mockMvc
-        .perform(delete("/api/v1/genres/{id}", UUID.randomUUID()))
-        .andExpect(status().isNoContent());
+    mockMvc.perform(delete("/genres/{id}", UUID.randomUUID())).andExpect(status().isNoContent());
   }
 
   @Test
@@ -153,7 +151,7 @@ class GenreControllerTest {
 
     willThrow(new NotFoundException("Genre not found")).given(genreService).deleteGenre(id);
 
-    mockMvc.perform(delete("/api/v1/genres/{id}", id)).andExpect(status().isNotFound());
+    mockMvc.perform(delete("/genres/{id}", id)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -167,7 +165,7 @@ class GenreControllerTest {
     given(genreService.getRevenuePerGenre()).willReturn(List.of(r1));
 
     mockMvc
-        .perform(get("/api/v1/genres/revenue"))
+        .perform(get("/genres/revenue"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].genreName").value("Fiction"))
         .andExpect(jsonPath("$[0].revenue").value(500.0));
@@ -179,7 +177,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/genres")
+            post("/genres")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -191,7 +189,7 @@ class GenreControllerTest {
 
     mockMvc
         .perform(
-            patch("/api/v1/genres/{id}/rename", "invalid-uuid")
+            patch("/genres/{id}/rename", "invalid-uuid")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -199,15 +197,11 @@ class GenreControllerTest {
 
   @Test
   void should_fail_when_invalid_uuid_for_delete() throws Exception {
-    mockMvc
-        .perform(delete("/api/v1/genres/{id}", "invalid-uuid"))
-        .andExpect(status().isBadRequest());
+    mockMvc.perform(delete("/genres/{id}", "invalid-uuid")).andExpect(status().isBadRequest());
   }
 
   @Test
   void should_fail_when_invalid_uuid_for_get_books() throws Exception {
-    mockMvc
-        .perform(get("/api/v1/genres/{id}/books", "invalid-uuid"))
-        .andExpect(status().isBadRequest());
+    mockMvc.perform(get("/genres/{id}/books", "invalid-uuid")).andExpect(status().isBadRequest());
   }
 }

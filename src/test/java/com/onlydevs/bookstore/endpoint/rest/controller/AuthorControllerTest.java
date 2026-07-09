@@ -54,7 +54,7 @@ class AuthorControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/authors")
+            post("/authors")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -71,7 +71,7 @@ class AuthorControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/authors")
+            post("/authors")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -83,7 +83,7 @@ class AuthorControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/authors")
+            post("/authors")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -104,7 +104,7 @@ class AuthorControllerTest {
     given(authorService.getAllAuthors(any())).willReturn(page);
 
     mockMvc
-        .perform(get("/api/v1/authors").contentType(MediaType.APPLICATION_JSON))
+        .perform(get("/authors").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].firstName").value("Jane"))
         .andExpect(jsonPath("$.content[0].lastName").value("Austen"))
@@ -127,7 +127,7 @@ class AuthorControllerTest {
     given(authorService.getById(id)).willReturn(response);
 
     mockMvc
-        .perform(get("/api/v1/authors/{id}", id))
+        .perform(get("/authors/{id}", id))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(id.toString()))
         .andExpect(jsonPath("$.firstName").value("Jane"))
@@ -150,7 +150,7 @@ class AuthorControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/authors/{id}", id)
+            put("/authors/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -163,6 +163,6 @@ class AuthorControllerTest {
     var id = UUID.randomUUID();
     willDoNothing().given(authorService).deleteById(id);
 
-    mockMvc.perform(delete("/api/v1/authors/{id}", id)).andExpect(status().isNoContent());
+    mockMvc.perform(delete("/authors/{id}", id)).andExpect(status().isNoContent());
   }
 }
