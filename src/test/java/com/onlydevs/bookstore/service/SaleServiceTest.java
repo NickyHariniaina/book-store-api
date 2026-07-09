@@ -5,19 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.never;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.SaleMapper;
-import com.onlydevs.bookstore.model.BookEdition;
 import com.onlydevs.bookstore.model.BookStore;
-import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.Sale;
-import com.onlydevs.bookstore.model.SaleItem;
-import com.onlydevs.bookstore.model.dto.request.AddSaleItemRequest;
-import com.onlydevs.bookstore.model.dto.response.SaleItemResponse;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
-import com.onlydevs.bookstore.model.enums.InventoryMovementType;
-import com.onlydevs.bookstore.model.enums.PaymentMethod;
 import com.onlydevs.bookstore.model.enums.SaleStatus;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
@@ -75,23 +67,25 @@ class SaleServiceTest {
 
     store = BookStore.builder().id(storeId).name("Main Store").build();
 
-    sale = Sale.builder()
-        .id(saleId)
-        .bookStore(store)
-        .status(SaleStatus.PENDING)
-        .saleItems(new ArrayList<>())
-        .createdAt(Instant.now())
-        .updatedAt(Instant.now())
-        .build();
+    sale =
+        Sale.builder()
+            .id(saleId)
+            .bookStore(store)
+            .status(SaleStatus.PENDING)
+            .saleItems(new ArrayList<>())
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
 
-    saleResponse = SaleResponse.builder()
-        .id(saleId)
-        .storeId(storeId)
-        .storeName("Main Store")
-        .status(SaleStatus.PENDING)
-        .items(List.of())
-        .total(BigDecimal.ZERO)
-        .build();
+    saleResponse =
+        SaleResponse.builder()
+            .id(saleId)
+            .storeId(storeId)
+            .storeName("Main Store")
+            .status(SaleStatus.PENDING)
+            .items(List.of())
+            .total(BigDecimal.ZERO)
+            .build();
   }
 
   @Test
@@ -166,10 +160,8 @@ class SaleServiceTest {
     given(saleRepository.findById(saleId)).willReturn(Optional.of(sale));
     given(saleRepository.save(any(Sale.class))).willReturn(sale);
     sale.setStatus(SaleStatus.CANCELLED);
-    SaleResponse cancelledResponse = SaleResponse.builder()
-        .id(saleId)
-        .status(SaleStatus.CANCELLED)
-        .build();
+    SaleResponse cancelledResponse =
+        SaleResponse.builder().id(saleId).status(SaleStatus.CANCELLED).build();
     given(saleMapper.toRest(any(Sale.class))).willReturn(cancelledResponse);
 
     SaleResponse result = saleService.cancelSale(saleId);
