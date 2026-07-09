@@ -13,17 +13,18 @@ import com.onlydevs.bookstore.model.enums.SaleStatus;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
+import com.onlydevs.bookstore.repository.BookPriceHistoryRepository;
 import com.onlydevs.bookstore.repository.CustomerRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import com.onlydevs.bookstore.repository.SaleRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class SaleService {
 
   private final SaleRepository saleRepository;
   private final BookEditionRepository bookEditionRepository;
+  private final BookPriceHistoryRepository bookPriceHistoryRepository;
   private final CustomerRepository customerRepository;
   private final InventoryItemRepository inventoryItemRepository;
   private final InventoryMovementRepository inventoryMovementRepository;
@@ -62,12 +64,39 @@ public class SaleService {
                       new NotFoundException(
                           "Edition not found with id: " + itemRequest.getEditionId()));
 
+      var currentPrice =
+          bookPriceHistoryRepository
+              .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(
+                  itemRequest.getEditionId())
+              .orElseThrow(
+                  () ->
+                      new BadRequestException(
+                          "No active price set for edition: " + itemRequest.getEditionId()));
+
+      var inventory =
+          inventoryItemRepository
+              .findByBookEditionId(itemRequest.getEditionId())
+              .orElseThrow(
+                  () ->
+                      new BadRequestException(
+                          "No stock record found for edition: " + itemRequest.getEditionId()));
+
+      if (inventory.getQuantityOnHand() < itemRequest.getQuantity()) {
+        throw new BadRequestException(
+            "Insufficient stock for edition "
+                + itemRequest.getEditionId()
+                + ": available="
+                + inventory.getQuantityOnHand()
+                + ", requested="
+                + itemRequest.getQuantity());
+      }
+
       var saleItem =
           SaleItem.builder()
               .sale(sale)
               .bookEdition(edition)
               .quantity(itemRequest.getQuantity())
-              .unitPrice(itemRequest.getUnitPrice())
+              .unitPrice(currentPrice.getPrice())
               .build();
 
       sale.getSaleItems().add(saleItem);

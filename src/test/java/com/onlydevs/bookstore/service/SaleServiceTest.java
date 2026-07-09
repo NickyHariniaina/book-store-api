@@ -8,6 +8,8 @@ import static org.mockito.BDDMockito.then;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.SaleMapper;
 import com.onlydevs.bookstore.model.BookEdition;
+import com.onlydevs.bookstore.model.BookPriceHistory;
+import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.Sale;
 import com.onlydevs.bookstore.model.SaleItem;
 import com.onlydevs.bookstore.model.dto.request.CreateSaleItemRequest;
@@ -83,13 +85,20 @@ class SaleServiceTest {
   @Test
   void createSale_ShouldReturnCreatedSale() {
     var edition = BookEdition.builder().id(editionId).isbn("1234567890").build();
-    var items =
-        List.of(
-            CreateSaleItemRequest.builder()
-                .editionId(editionId)
-                .quantity(2)
-                .unitPrice(new BigDecimal("10.00"))
-                .build());
+    var currentPrice =
+        BookPriceHistory.builder()
+            .id(UUID.randomUUID())
+            .bookEdition(edition)
+            .price(new BigDecimal("10.00"))
+            .effectiveFrom(Instant.now())
+            .build();
+    var inventory =
+        InventoryItem.builder()
+            .id(UUID.randomUUID())
+            .bookEdition(edition)
+            .quantityOnHand(10)
+            .build();
+    var items = List.of(CreateSaleItemRequest.builder().editionId(editionId).quantity(2).build());
 
     sale.getSaleItems()
         .add(
@@ -101,6 +110,12 @@ class SaleServiceTest {
                 .build());
 
     given(bookEditionRepository.findById(editionId)).willReturn(Optional.of(edition));
+    given(
+            bookPriceHistoryRepository
+                .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId))
+        .willReturn(Optional.of(currentPrice));
+    given(inventoryItemRepository.findByBookEditionId(editionId))
+        .willReturn(Optional.of(inventory));
     given(saleRepository.save(any(Sale.class))).willReturn(sale);
     given(saleMapper.toRest(sale)).willReturn(saleResponse);
 
