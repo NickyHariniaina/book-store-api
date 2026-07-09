@@ -4,12 +4,15 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.onlydevs.bookstore.conf.FacadeIT;
+import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookEdition;
 import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.dto.request.ReorderLevelRequest;
 import com.onlydevs.bookstore.model.enums.BookFormat;
+import com.onlydevs.bookstore.model.enums.BookLanguage;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
+import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import java.util.UUID;
@@ -29,6 +32,8 @@ class InventoryIT extends FacadeIT {
 
   @Autowired private BookEditionRepository bookEditionRepository;
 
+  @Autowired private BookRepository bookRepository;
+
   @Autowired private InventoryItemRepository inventoryItemRepository;
 
   private WebTestClient webTestClient;
@@ -41,6 +46,7 @@ class InventoryIT extends FacadeIT {
   void tearDown() {
     inventoryItemRepository.deleteAll();
     bookEditionRepository.deleteAll();
+    bookRepository.deleteAll();
     bookStoreRepository.deleteAll();
   }
 
@@ -59,9 +65,16 @@ class InventoryIT extends FacadeIT {
                 .build());
     storeId = store.getId();
 
+    var book =
+        bookRepository.save(
+            Book.builder().title("Test Book").language(BookLanguage.ENGLISH).build());
     var edition =
         bookEditionRepository.save(
-            BookEdition.builder().isbn("9780000000001").format(BookFormat.PAPERBACK).build());
+            BookEdition.builder()
+                .isbn("9780000000001")
+                .format(BookFormat.PAPERBACK)
+                .book(book)
+                .build());
     editionId = edition.getId();
   }
 
