@@ -57,11 +57,6 @@ public class Sale {
   @Column(name = "\"updated_at\"")
   private Instant updatedAt;
 
-  @NotNull
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "\"book_store_id\"", nullable = false)
-  private BookStore bookStore;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"customer_id\"")
   private Customer customer;

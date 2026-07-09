@@ -35,10 +35,6 @@ public class SaleItem {
   @Column(name = "\"unit_price\"", nullable = false, precision = 10, scale = 2)
   private BigDecimal unitPrice;
 
-  @DecimalMin("0.00")
-  @Column(name = "\"discount_percent\"", precision = 5, scale = 2)
-  private BigDecimal discountPercent;
-
   @CreationTimestamp
   @Column(name = "\"created_at\"")
   private Instant createdAt;
