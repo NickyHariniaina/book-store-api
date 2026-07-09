@@ -54,7 +54,7 @@ public class SaleService {
     var sale =
         Sale.builder().bookStore(store).customer(customer).status(SaleStatus.PENDING).build();
 
-    Sale saved = saleRepository.save(sale);
+    var saved = saleRepository.save(sale);
     return saleMapper.toRest(saved);
   }
 
