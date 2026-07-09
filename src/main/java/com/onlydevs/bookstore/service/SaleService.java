@@ -146,7 +146,7 @@ public class SaleService {
                     new BadRequestException(
                         "No stock found for edition " + editionId + " at store " + storeId));
 
-    var newQuantity = item.getQuantityOnHand() - quantity;
+    int newQuantity = item.getQuantityOnHand() - quantity;
     if (newQuantity < 0) {
       throw new BadRequestException(
           "Insufficient stock for edition "
