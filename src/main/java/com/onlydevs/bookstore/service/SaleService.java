@@ -1,13 +1,9 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.SaleMapper;
-import com.onlydevs.bookstore.model.BookEdition;
-import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.Customer;
-import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.Sale;
-import com.onlydevs.bookstore.model.SaleItem;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.enums.PaymentMethod;
@@ -41,7 +37,7 @@ public class SaleService {
 
   @Transactional
   public SaleResponse createSale(UUID storeId, UUID customerId) {
-    BookStore store =
+    var store =
         bookStoreRepository
             .findById(storeId)
             .orElseThrow(() -> new NotFoundException("Store not found with id: " + storeId));
@@ -55,16 +51,16 @@ public class SaleService {
                   () -> new NotFoundException("Customer not found with id: " + customerId));
     }
 
-    Sale sale =
+    var sale =
         Sale.builder().bookStore(store).customer(customer).status(SaleStatus.PENDING).build();
 
-    Sale saved = saleRepository.save(sale);
+    var saved = saleRepository.save(sale);
     return saleMapper.toRest(saved);
   }
 
   @Transactional
   public SaleResponse confirmSale(UUID saleId, PaymentMethod paymentMethod) {
-    Sale sale = findPendingSale(saleId);
+    var sale = findPendingSale(saleId);
 
     if (paymentMethod == null) {
       throw new BadRequestException("Payment method is required to confirm a sale");
@@ -74,28 +70,28 @@ public class SaleService {
       throw new BadRequestException("Cannot confirm a sale with no items");
     }
 
-    for (SaleItem item : sale.getSaleItems()) {
+    for (var item : sale.getSaleItems()) {
       decrementStock(
           sale.getBookStore().getId(), item.getBookEdition().getId(), item.getQuantity());
     }
 
     sale.setStatus(SaleStatus.PAID);
     sale.setPaymentMethod(paymentMethod);
-    Sale saved = saleRepository.save(sale);
+    var saved = saleRepository.save(sale);
     return saleMapper.toRest(saved);
   }
 
   @Transactional
   public SaleResponse cancelSale(UUID saleId) {
-    Sale sale = findPendingSale(saleId);
+    var sale = findPendingSale(saleId);
     sale.setStatus(SaleStatus.CANCELLED);
-    Sale saved = saleRepository.save(sale);
+    var saved = saleRepository.save(sale);
     return saleMapper.toRest(saved);
   }
 
   @Transactional
   public SaleResponse refundSale(UUID saleId) {
-    Sale sale =
+    var sale =
         saleRepository
             .findById(saleId)
             .orElseThrow(() -> new NotFoundException("Sale not found with id: " + saleId));
@@ -104,18 +100,18 @@ public class SaleService {
       throw new BadRequestException("Only PAID sales can be refunded");
     }
 
-    for (SaleItem item : sale.getSaleItems()) {
+    for (var item : sale.getSaleItems()) {
       reincrementStock(
           sale.getBookStore().getId(), item.getBookEdition().getId(), item.getQuantity());
     }
 
     sale.setStatus(SaleStatus.REFUNDED);
-    Sale saved = saleRepository.save(sale);
+    var saved = saleRepository.save(sale);
     return saleMapper.toRest(saved);
   }
 
   public SaleResponse getSale(UUID saleId) {
-    Sale sale =
+    var sale =
         saleRepository
             .findById(saleId)
             .orElseThrow(() -> new NotFoundException("Sale not found with id: " + saleId));
@@ -130,7 +126,7 @@ public class SaleService {
   }
 
   private Sale findPendingSale(UUID saleId) {
-    Sale sale =
+    var sale =
         saleRepository
             .findById(saleId)
             .orElseThrow(() -> new NotFoundException("Sale not found with id: " + saleId));
@@ -142,7 +138,7 @@ public class SaleService {
   }
 
   private void decrementStock(UUID storeId, UUID editionId, Integer quantity) {
-    InventoryItem item =
+    var item =
         inventoryItemRepository
             .findByBookStoreIdAndBookEditionId(storeId, editionId)
             .orElseThrow(
@@ -150,7 +146,7 @@ public class SaleService {
                     new BadRequestException(
                         "No stock found for edition " + editionId + " at store " + storeId));
 
-    int newQuantity = item.getQuantityOnHand() - quantity;
+    var newQuantity = item.getQuantityOnHand() - quantity;
     if (newQuantity < 0) {
       throw new BadRequestException(
           "Insufficient stock for edition "
@@ -170,7 +166,7 @@ public class SaleService {
   }
 
   private void reincrementStock(UUID storeId, UUID editionId, Integer quantity) {
-    InventoryItem item =
+    var item =
         inventoryItemRepository
             .findByBookStoreIdAndBookEditionId(storeId, editionId)
             .orElseThrow(
@@ -186,10 +182,10 @@ public class SaleService {
 
   private void createMovement(
       UUID storeId, UUID editionId, InventoryMovementType type, Integer quantity, String reason) {
-    BookStore store = bookStoreRepository.getReferenceById(storeId);
-    BookEdition edition = bookEditionRepository.getReferenceById(editionId);
+    var store = bookStoreRepository.getReferenceById(storeId);
+    var edition = bookEditionRepository.getReferenceById(editionId);
 
-    InventoryMovement movement =
+    var movement =
         InventoryMovement.builder()
             .bookStore(store)
             .bookEdition(edition)
