@@ -49,8 +49,8 @@ class CustomerMapperTest {
             .id(UUID.randomUUID())
             .bookStore(bookStore)
             .customer(customer)
-            .status(SaleStatus.COMPLETED)
-            .paymentMethod(PaymentMethod.CREDIT_CARD)
+            .status(SaleStatus.PAID)
+            .paymentMethod(PaymentMethod.CARD)
             .createdAt(Instant.now())
             .build();
 
@@ -178,8 +178,8 @@ class CustomerMapperTest {
     assertThat(result.getStoreName()).isEqualTo("Main Store");
     assertThat(result.getCustomerId()).isEqualTo(customer.getId());
     assertThat(result.getCustomerName()).isEqualTo("John Doe");
-    assertThat(result.getStatus()).isEqualTo(SaleStatus.COMPLETED);
-    assertThat(result.getPaymentMethod()).isEqualTo(PaymentMethod.CREDIT_CARD);
+    assertThat(result.getStatus()).isEqualTo(SaleStatus.PAID);
+    assertThat(result.getPaymentMethod()).isEqualTo(PaymentMethod.CARD);
   }
 
   @Test
