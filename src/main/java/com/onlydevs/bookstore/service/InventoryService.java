@@ -86,7 +86,7 @@ public class InventoryService {
     item.setQuantityOnHand(newQuantity);
     inventoryItemRepository.save(item);
 
-    String movementReason = (reason != null) ? reason : "Stock adjustment";
+    String movementReason = (reason != null && !reason.isBlank()) ? reason : "Stock adjustment";
     createMovement(
         item.getBookStore(),
         item.getBookEdition(),
