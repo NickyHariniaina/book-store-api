@@ -16,8 +16,6 @@ import lombok.Setter;
 public class InventoryItemResponse {
 
   private UUID id;
-  private UUID storeId;
-  private String storeName;
   private UUID editionId;
   private String bookTitle;
   private String isbn;

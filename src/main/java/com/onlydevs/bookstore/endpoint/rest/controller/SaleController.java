@@ -27,16 +27,13 @@ public class SaleController {
 
   private final SaleService saleService;
 
-  @PostMapping("/stores/{storeId}/sales")
-  public ResponseEntity<SaleResponse> createSale(
-      @PathVariable UUID storeId, @RequestParam(required = false) UUID customerId) {
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(saleService.createSale(storeId, customerId));
+  @PostMapping("/sales")
+  public ResponseEntity<SaleResponse> createSale(@RequestParam(required = false) UUID customerId) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(saleService.createSale(customerId));
   }
 
-  @GetMapping("/stores/{storeId}/sales")
-  public ResponseEntity<Page<SaleResponse>> getStoreSales(
-      @PathVariable UUID storeId,
+  @GetMapping("/sales")
+  public ResponseEntity<Page<SaleResponse>> getAllSales(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size,
       @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -44,7 +41,7 @@ public class SaleController {
     var direction = Direction.fromString(sortDir);
     var sort = Sort.by(direction, sortBy);
     Pageable pageable = PageRequest.of(page, size, sort);
-    return ResponseEntity.ok(saleService.getStoreSales(storeId, pageable));
+    return ResponseEntity.ok(saleService.getAllSales(pageable));
   }
 
   @GetMapping("/sales/{id}")

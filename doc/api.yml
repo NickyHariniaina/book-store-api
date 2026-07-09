@@ -1,10 +1,11 @@
 openapi: "3.0.3"
 info:
   title: Bookstore API
-  version: "1.0.0"
+  version: "2.0.0"
   description: >
     REST API for the onlydevs bookstore digitalization platform.
     Covers catalog management, inventory tracking, and point-of-sale.
+    Now refactored to a single-store model.
 servers:
   - url: /
     description: Default server
@@ -15,10 +16,8 @@ tags:
   - name: BookEditions
   - name: Genres
   - name: Publishers
-  - name: BookStores
   - name: Inventory
-  - name: Customers
-  - name: BookPriceHistory
+- name: Sales
   - name: Dashboard
 components:
   schemas:
@@ -100,21 +99,6 @@ components:
         email: { type: string, maxLength: 255 }
         phone: { type: string, maxLength: 50 }
         country: { type: string, maxLength: 100 }
-    CreateBookStoreRequest:
-      type: object
-      required: [name, address]
-      properties:
-        name: { type: string, maxLength: 200 }
-        address: { type: string, maxLength: 500 }
-        phone: { type: string, maxLength: 50 }
-        email: { type: string, maxLength: 255 }
-    UpdateBookStoreRequest:
-      type: object
-      properties:
-        name: { type: string, maxLength: 200 }
-        address: { type: string, maxLength: 500 }
-        phone: { type: string, maxLength: 50 }
-        email: { type: string, maxLength: 255 }
     ArrivalRequest:
       type: object
       required: [editionId, quantity]
@@ -206,22 +190,10 @@ components:
         genres: { type: array, items: { $ref: '#/components/schemas/GenreResponse' } }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
-    BookStoreResponse:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        name: { type: string }
-        address: { type: string }
-        phone: { type: string, nullable: true }
-        email: { type: string, nullable: true }
-        createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
     InventoryItemResponse:
       type: object
       properties:
         id: { type: string, format: uuid }
-        storeId: { type: string, format: uuid }
-        storeName: { type: string }
         editionId: { type: string, format: uuid }
         bookTitle: { type: string }
         isbn: { type: string }
@@ -233,7 +205,6 @@ components:
       type: object
       properties:
         id: { type: string, format: uuid }
-        storeId: { type: string, format: uuid }
         editionId: { type: string, format: uuid }
         bookTitle: { type: string }
         isbn: { type: string }
@@ -244,6 +215,29 @@ components:
         reference: { type: string, nullable: true }
         movedAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
+    SaleResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customerId: { type: string, format: uuid, nullable: true }
+        customerName: { type: string, nullable: true }
+        status: { type: string, enum: [PENDING, PAID, CANCELLED, REFUNDED] }
+        paymentMethod: { type: string, nullable: true }
+        total: { type: number }
+        items: { type: array, items: { $ref: '#/components/schemas/SaleItemResponse' } }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SaleItemResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        editionId: { type: string, format: uuid }
+        isbn: { type: string }
+        bookTitle: { type: string }
+        format: { type: string }
+        quantity: { type: integer }
+        unitPrice: { type: number }
+        lineTotal: { type: number }
     RevenuePerGenreResponse:
       type: object
       properties:
@@ -413,7 +407,7 @@ paths:
   /editions/{editionId}/stock:
     get:
       tags: [Inventory]
-      summary: Get total stock of an edition across all stores
+      summary: Get stock of an edition
       parameters:
         - in: path
           name: editionId
@@ -428,7 +422,7 @@ paths:
   /books/{bookId}/stock:
     get:
       tags: [Books]
-      summary: Get total stock of a book across all editions and all stores
+      summary: Get total stock of a book across all editions
       parameters:
         - in: path
           name: bookId
@@ -443,7 +437,7 @@ paths:
   /books/low-stock:
     get:
       tags: [Books]
-      summary: Get all low stock items across all stores
+      summary: Get all low stock items
       responses:
         '200':
           description: OK
@@ -894,218 +888,11 @@ paths:
           schema: { type: string, format: uuid }
       responses: { '204': { description: Deleted } }
 
-  # BookStores
-  /stores:
-    get:
-      tags: [BookStores]
-      summary: List all stores (paginated)
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  content: { type: array, items: { $ref: '#/components/schemas/BookStoreResponse' } }
-    post:
-      tags: [BookStores]
-      summary: Create store
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/CreateBookStoreRequest' }
-      responses:
-        '201':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/BookStoreResponse' }
-  /stores/{id}:
-    get:
-      tags: [BookStores]
-      summary: Get store detail
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/BookStoreResponse' }
-    put:
-      tags: [BookStores]
-      summary: Update store
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      requestBody:
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/UpdateBookStoreRequest' }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/BookStoreResponse' }
-    delete:
-      tags: [BookStores]
-      summary: Delete store
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses: { '204': { description: Deleted } }
-  /stores/{id}/stock/{editionId}:
-    get:
-      tags: [BookStores]
-      summary: Stock quantity for specific edition at a store
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-        - in: path
-          name: editionId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: { type: integer }
-  /stores/{id}/books/{bookId}/stock:
-    get:
-      tags: [BookStores]
-      summary: Total stock of a book (all editions) at a specific store
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-        - in: path
-          name: bookId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: { type: integer }
-
-  /stores/{id}/low-stock:
-    get:
-      tags: [BookStores]
-      summary: Low stock items at a store (quantity <= reorder level)
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/InventoryItemResponse' }
-
-  # Customers
-  /customers:
-    get:
-      tags: [Customers]
-      summary: List all customers
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/CustomerResponse' }
-    post:
-      tags: [Customers]
-      summary: Create a customer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/CreateCustomerRequest' }
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/CustomerResponse' }
-  /customers/{id}:
-    get:
-      tags: [Customers]
-      summary: Get customer detail
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/CustomerResponse' }
-        '404': { description: Customer not found }
-    put:
-      tags: [Customers]
-      summary: Update customer
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      requestBody:
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/UpdateCustomerRequest' }
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/CustomerResponse' }
-  /customers/{id}/sales:
-    get:
-      tags: [Customers]
-      summary: List sales for a customer
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/SaleSummaryResponse' }
-
-  # Inventory
-  /stores/{storeId}/inventory/arrival:
+# Inventory
+  /inventory/arrival:
     post:
       tags: [Inventory]
       summary: Record book arrival (+stock)
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
       requestBody:
         required: true
         content:
@@ -1116,15 +903,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/InventoryItemResponse' }
-  /stores/{storeId}/inventory/adjustment:
+  /inventory/adjustment:
     post:
       tags: [Inventory]
       summary: Manual stock adjustment (+/-)
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
       requestBody:
         required: true
         content:
@@ -1135,15 +917,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/InventoryItemResponse' }
-  /stores/{storeId}/inventory/damaged:
+  /inventory/damaged:
     post:
       tags: [Inventory]
       summary: Mark copies damaged (-stock)
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
       requestBody:
         required: true
         content:
@@ -1154,15 +931,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/InventoryItemResponse' }
-  /stores/{storeId}/inventory/lost:
+  /inventory/lost:
     post:
       tags: [Inventory]
       summary: Mark copies lost (-stock)
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
       requestBody:
         required: true
         content:
@@ -1173,30 +945,22 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/InventoryItemResponse' }
-  /stores/{storeId}/movements:
+  /inventory/low-stock:
     get:
       tags: [Inventory]
-      summary: Movement log (filter by type)
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-        - in: query
-          name: type
-          required: false
-          schema: { $ref: '#/components/schemas/InventoryMovementType' }
+      summary: Get all low stock items
       responses:
         '200':
+          description: OK
           content:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/InventoryMovementResponse' }
+                items: { $ref: '#/components/schemas/InventoryItemResponse' }
   /editions/{editionId}/movements:
     get:
       tags: [Inventory]
-      summary: Inventory movements for an edition (across all stores)
+      summary: Inventory movements for an edition
       parameters:
         - in: path
           name: editionId
@@ -1209,3 +973,97 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/InventoryMovementResponse' }
+
+  # Sales
+  /sales:
+    post:
+      tags: [Sales]
+      summary: Create a new sale
+      parameters:
+        - in: query
+          name: customerId
+          required: false
+          schema: { type: string, format: uuid }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SaleResponse' }
+    get:
+      tags: [Sales]
+      summary: List all sales (paginated)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 0 }
+        - in: query
+          name: size
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content: { type: array, items: { $ref: '#/components/schemas/SaleResponse' } }
+  /sales/{id}:
+    get:
+      tags: [Sales]
+      summary: Get sale by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SaleResponse' }
+  /sales/{id}/confirm:
+    patch:
+      tags: [Sales]
+      summary: Confirm a sale (deduct stock)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: paymentMethod
+          required: true
+          schema: { type: string, enum: [CARD, CASH, TRANSFER] }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SaleResponse' }
+  /sales/{id}/cancel:
+    patch:
+      tags: [Sales]
+      summary: Cancel a pending sale
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SaleResponse' }
+  /sales/{id}/refund:
+    patch:
+      tags: [Sales]
+      summary: Refund a paid sale (restore stock)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SaleResponse' }

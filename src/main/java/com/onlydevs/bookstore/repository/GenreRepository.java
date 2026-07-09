@@ -20,7 +20,7 @@ public interface GenreRepository extends JpaRepository<Genre, UUID> {
   @Query(
       """
 SELECT g.name AS name,
-       SUM(si.unitPrice * si.quantity * (1 - COALESCE(si.discountPercent, 0) / 100)) AS revenue
+       SUM(si.unitPrice * si.quantity) AS revenue
 FROM Genre g
 JOIN g.books b
 JOIN b.bookEditions e
@@ -28,7 +28,7 @@ JOIN e.saleItems si
 JOIN si.sale s
 WHERE s.status = 'PAID'
 GROUP BY g.name
-ORDER BY SUM(si.unitPrice * si.quantity * (1 - COALESCE(si.discountPercent, 0) / 100)) DESC
+ORDER BY SUM(si.unitPrice * si.quantity) DESC
 """)
   List<GenreRevenue> revenueByGenre();
 }

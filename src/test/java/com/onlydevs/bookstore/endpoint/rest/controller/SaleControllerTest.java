@@ -36,47 +36,42 @@ class SaleControllerTest {
 
   @MockBean private SaleService saleService;
 
-  private final UUID storeId = UUID.randomUUID();
   private final UUID saleId = UUID.randomUUID();
-  private final UUID editionId = UUID.randomUUID();
 
   @Test
   void createSale_ShouldReturnCreated() throws Exception {
     SaleResponse response =
         SaleResponse.builder()
             .id(saleId)
-            .storeId(storeId)
-            .storeName("Main Store")
             .status(SaleStatus.PENDING)
             .total(BigDecimal.ZERO)
             .items(List.of())
             .build();
 
-    given(saleService.createSale(any(), any())).willReturn(response);
+    given(saleService.createSale(any())).willReturn(response);
 
     mockMvc
-        .perform(post("/stores/{storeId}/sales", storeId))
+        .perform(post("/sales"))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(saleId.toString()))
         .andExpect(jsonPath("$.status").value("PENDING"));
   }
 
   @Test
-  void getStoreSales_ShouldReturnPage() throws Exception {
+  void getAllSales_ShouldReturnPage() throws Exception {
     SaleResponse response =
         SaleResponse.builder()
             .id(saleId)
-            .storeId(storeId)
             .status(SaleStatus.PAID)
             .total(new BigDecimal("19.99"))
             .items(List.of())
             .build();
 
     Page<SaleResponse> page = new PageImpl<>(List.of(response), PageRequest.of(0, 20), 1);
-    given(saleService.getStoreSales(any(), any())).willReturn(page);
+    given(saleService.getAllSales(any())).willReturn(page);
 
     mockMvc
-        .perform(get("/stores/{storeId}/sales", storeId))
+        .perform(get("/sales"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].status").value("PAID"))
         .andExpect(jsonPath("$.totalElements").value(1));
@@ -84,8 +79,7 @@ class SaleControllerTest {
 
   @Test
   void getSale_ShouldReturnSale() throws Exception {
-    SaleResponse response =
-        SaleResponse.builder().id(saleId).storeId(storeId).status(SaleStatus.PENDING).build();
+    SaleResponse response = SaleResponse.builder().id(saleId).status(SaleStatus.PENDING).build();
 
     given(saleService.getSale(saleId)).willReturn(response);
 
@@ -100,7 +94,6 @@ class SaleControllerTest {
     SaleResponse response =
         SaleResponse.builder()
             .id(saleId)
-            .storeId(storeId)
             .status(SaleStatus.PAID)
             .paymentMethod(PaymentMethod.CARD)
             .total(new BigDecimal("19.99"))
@@ -117,8 +110,7 @@ class SaleControllerTest {
 
   @Test
   void cancelSale_ShouldReturnOk() throws Exception {
-    SaleResponse response =
-        SaleResponse.builder().id(saleId).storeId(storeId).status(SaleStatus.CANCELLED).build();
+    SaleResponse response = SaleResponse.builder().id(saleId).status(SaleStatus.CANCELLED).build();
 
     given(saleService.cancelSale(saleId)).willReturn(response);
 
@@ -130,8 +122,7 @@ class SaleControllerTest {
 
   @Test
   void refundSale_ShouldReturnOk() throws Exception {
-    SaleResponse response =
-        SaleResponse.builder().id(saleId).storeId(storeId).status(SaleStatus.REFUNDED).build();
+    SaleResponse response = SaleResponse.builder().id(saleId).status(SaleStatus.REFUNDED).build();
 
     given(saleService.refundSale(saleId)).willReturn(response);
 

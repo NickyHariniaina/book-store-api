@@ -29,7 +29,6 @@ class InventoryControllerTest {
 
   @MockBean private InventoryMapper inventoryMapper;
 
-  private final UUID storeId = UUID.randomUUID();
   private final UUID editionId = UUID.randomUUID();
 
   @Test
@@ -47,7 +46,6 @@ class InventoryControllerTest {
     InventoryMovementResponse response =
         InventoryMovementResponse.builder()
             .id(UUID.randomUUID())
-            .storeId(storeId)
             .editionId(editionId)
             .type("ARRIVAL")
             .quantity(5)

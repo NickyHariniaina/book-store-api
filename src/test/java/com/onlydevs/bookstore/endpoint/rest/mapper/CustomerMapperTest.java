@@ -2,7 +2,6 @@ package com.onlydevs.bookstore.endpoint.rest.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.Customer;
 import com.onlydevs.bookstore.model.Sale;
 import com.onlydevs.bookstore.model.SaleItem;
@@ -42,12 +41,9 @@ class CustomerMapperTest {
             .updatedAt(Instant.now())
             .build();
 
-    var bookStore = BookStore.builder().id(UUID.randomUUID()).name("Main Store").build();
-
     sale =
         Sale.builder()
             .id(UUID.randomUUID())
-            .bookStore(bookStore)
             .customer(customer)
             .status(SaleStatus.PAID)
             .paymentMethod(PaymentMethod.CARD)
@@ -60,7 +56,6 @@ class CustomerMapperTest {
             .sale(sale)
             .quantity(2)
             .unitPrice(new BigDecimal("10.00"))
-            .discountPercent(BigDecimal.ZERO)
             .build();
 
     sale.setSaleItems(List.of(saleItem));
@@ -174,8 +169,6 @@ class CustomerMapperTest {
     SaleSummaryResponse result = customerMapper.toSaleSummary(sale);
 
     assertThat(result.getId()).isEqualTo(sale.getId());
-    assertThat(result.getStoreId()).isEqualTo(sale.getBookStore().getId());
-    assertThat(result.getStoreName()).isEqualTo("Main Store");
     assertThat(result.getCustomerId()).isEqualTo(customer.getId());
     assertThat(result.getCustomerName()).isEqualTo("John Doe");
     assertThat(result.getStatus()).isEqualTo(SaleStatus.PAID);
@@ -219,7 +212,6 @@ class CustomerMapperTest {
     var sale2 =
         Sale.builder()
             .id(UUID.randomUUID())
-            .bookStore(sale.getBookStore())
             .status(SaleStatus.PENDING)
             .saleItems(List.of())
             .build();
@@ -229,14 +221,5 @@ class CustomerMapperTest {
     assertThat(result).hasSize(2);
     assertThat(result.get(0).getStatus()).isEqualTo(SaleStatus.PAID);
     assertThat(result.get(1).getStatus()).isEqualTo(SaleStatus.PENDING);
-  }
-
-  @Test
-  void toSaleSummary_WithDiscount_ShouldComputeDiscountedTotal() {
-    saleItem.setDiscountPercent(new BigDecimal("10.00"));
-
-    SaleSummaryResponse result = customerMapper.toSaleSummary(sale);
-
-    assertThat(result.getTotal()).isEqualByComparingTo(new BigDecimal("18.00"));
   }
 }

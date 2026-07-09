@@ -55,11 +55,6 @@ public class InventoryMovement {
 
   @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "\"book_store_id\"", nullable = false)
-  private BookStore bookStore;
-
-  @NotNull
-  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "\"book_edition_id\"", nullable = false)
   private BookEdition bookEdition;
 }

@@ -20,8 +20,6 @@ import lombok.Setter;
 public class SaleResponse {
 
   private UUID id;
-  private UUID storeId;
-  private String storeName;
   private UUID customerId;
   private String customerName;
   private SaleStatus status;
