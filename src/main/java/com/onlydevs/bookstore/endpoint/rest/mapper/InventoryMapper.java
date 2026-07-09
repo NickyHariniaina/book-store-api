@@ -65,7 +65,7 @@ public class InventoryMapper {
 
   private Integer computeSignedQuantity(InventoryMovement movement) {
     return switch (movement.getInventoryMovementType()) {
-      case ARRIVAL, RETURN, ADJUSTMENT -> movement.getQuantity();
+      case ARRIVAL, ADJUSTMENT -> movement.getQuantity();
       case SALE, DAMAGED, LOST -> -movement.getQuantity();
     };
   }

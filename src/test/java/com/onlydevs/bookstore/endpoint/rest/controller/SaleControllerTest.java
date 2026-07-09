@@ -2,7 +2,6 @@ package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,8 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onlydevs.bookstore.model.dto.request.AddSaleItemRequest;
-import com.onlydevs.bookstore.model.dto.response.SaleItemResponse;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.PaymentMethod;
 import com.onlydevs.bookstore.model.enums.SaleStatus;
@@ -27,7 +24,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(SaleController.class)
@@ -97,59 +93,6 @@ class SaleControllerTest {
         .perform(get("/sales/{id}", saleId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(saleId.toString()));
-  }
-
-  @Test
-  void addItem_ShouldReturnOk() throws Exception {
-    AddSaleItemRequest request =
-        AddSaleItemRequest.builder().editionId(editionId).quantity(1).build();
-
-    SaleItemResponse itemResponse =
-        SaleItemResponse.builder()
-            .id(UUID.randomUUID())
-            .editionId(editionId)
-            .quantity(1)
-            .unitPrice(new BigDecimal("9.99"))
-            .lineTotal(new BigDecimal("9.99"))
-            .build();
-
-    SaleResponse response =
-        SaleResponse.builder()
-            .id(saleId)
-            .storeId(storeId)
-            .status(SaleStatus.PENDING)
-            .items(List.of(itemResponse))
-            .total(new BigDecimal("9.99"))
-            .build();
-
-    given(saleService.addItem(any(), any())).willReturn(response);
-
-    mockMvc
-        .perform(
-            post("/sales/{id}/items", saleId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.items[0].quantity").value(1));
-  }
-
-  @Test
-  void removeItem_ShouldReturnOk() throws Exception {
-    SaleResponse response =
-        SaleResponse.builder()
-            .id(saleId)
-            .storeId(storeId)
-            .status(SaleStatus.PENDING)
-            .total(BigDecimal.ZERO)
-            .items(List.of())
-            .build();
-
-    given(saleService.removeItem(any(), any())).willReturn(response);
-
-    mockMvc
-        .perform(delete("/sales/{id}/items/{itemId}", saleId, UUID.randomUUID()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.items").isEmpty());
   }
 
   @Test

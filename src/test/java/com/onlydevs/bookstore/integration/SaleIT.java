@@ -9,7 +9,6 @@ import com.onlydevs.bookstore.model.BookEdition;
 import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.Publisher;
-import com.onlydevs.bookstore.model.dto.request.AddSaleItemRequest;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.BookFormat;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
@@ -17,7 +16,6 @@ import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.PublisherRepository;
-import com.onlydevs.bookstore.repository.SaleItemRepository;
 import com.onlydevs.bookstore.repository.SaleRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +36,6 @@ class SaleIT extends FacadeIT {
   @Autowired private PublisherRepository publisherRepository;
   @Autowired private InventoryItemRepository inventoryItemRepository;
   @Autowired private SaleRepository saleRepository;
-  @Autowired private SaleItemRepository saleItemRepository;
 
   private UUID storeId;
   private UUID editionId;
@@ -47,7 +44,6 @@ class SaleIT extends FacadeIT {
   void setup() {
     webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
 
-    saleItemRepository.deleteAll();
     saleRepository.deleteAll();
     inventoryItemRepository.deleteAll();
     bookEditionRepository.deleteAll();
@@ -88,64 +84,6 @@ class SaleIT extends FacadeIT {
             .quantityOnHand(10)
             .reorderLevel(3)
             .build());
-  }
-
-  @Test
-  void should_create_sale_and_confirm() {
-    // Create sale
-    SaleResponse sale =
-        webTestClient
-            .post()
-            .uri("/stores/" + storeId + "/sales")
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(SaleResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    assertNotNull(sale);
-    assertEquals("PENDING", sale.getStatus().name());
-    UUID saleId = sale.getId();
-
-    // Add item
-    AddSaleItemRequest addItem =
-        AddSaleItemRequest.builder().editionId(editionId).quantity(2).build();
-
-    SaleResponse afterAdd =
-        webTestClient
-            .post()
-            .uri("/sales/" + saleId + "/items")
-            .bodyValue(addItem)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(SaleResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    assertNotNull(afterAdd);
-    assertEquals(1, afterAdd.getItems().size());
-
-    // Confirm sale
-    SaleResponse confirmed =
-        webTestClient
-            .patch()
-            .uri("/sales/" + saleId + "/confirm?paymentMethod=CARD")
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(SaleResponse.class)
-            .returnResult()
-            .getResponseBody();
-
-    assertNotNull(confirmed);
-    assertEquals("PAID", confirmed.getStatus().name());
-
-    // Verify stock decremented
-    InventoryItem item =
-        inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId).orElseThrow();
-    assertEquals(8, item.getQuantityOnHand());
   }
 
   @Test

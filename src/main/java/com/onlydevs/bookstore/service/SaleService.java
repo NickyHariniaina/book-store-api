@@ -8,7 +8,6 @@ import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.Sale;
 import com.onlydevs.bookstore.model.SaleItem;
-import com.onlydevs.bookstore.model.dto.request.AddSaleItemRequest;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.enums.PaymentMethod;
@@ -16,15 +15,12 @@ import com.onlydevs.bookstore.model.enums.SaleStatus;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
-import com.onlydevs.bookstore.repository.BookPriceHistoryRepository;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.CustomerRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
-import com.onlydevs.bookstore.repository.SaleItemRepository;
 import com.onlydevs.bookstore.repository.SaleRepository;
 import jakarta.transaction.Transactional;
-import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,10 +32,8 @@ import org.springframework.stereotype.Service;
 public class SaleService {
 
   private final SaleRepository saleRepository;
-  private final SaleItemRepository saleItemRepository;
   private final BookStoreRepository bookStoreRepository;
   private final BookEditionRepository bookEditionRepository;
-  private final BookPriceHistoryRepository bookPriceHistoryRepository;
   private final CustomerRepository customerRepository;
   private final InventoryItemRepository inventoryItemRepository;
   private final InventoryMovementRepository inventoryMovementRepository;
@@ -66,47 +60,6 @@ public class SaleService {
 
     Sale saved = saleRepository.save(sale);
     return saleMapper.toRest(saved);
-  }
-
-  @Transactional
-  public SaleResponse addItem(UUID saleId, AddSaleItemRequest request) {
-    Sale sale = findPendingSale(saleId);
-
-    BookEdition edition =
-        bookEditionRepository
-            .findById(request.getEditionId())
-            .orElseThrow(
-                () ->
-                    new NotFoundException("Edition not found with id: " + request.getEditionId()));
-
-    BigDecimal unitPrice = getCurrentPrice(edition.getId());
-
-    SaleItem item =
-        SaleItem.builder()
-            .sale(sale)
-            .bookEdition(edition)
-            .quantity(request.getQuantity())
-            .unitPrice(unitPrice)
-            .discountPercent(request.getDiscountPercent())
-            .build();
-
-    sale.getSaleItems().add(item);
-    saleItemRepository.save(item);
-
-    return saleMapper.toRest(sale);
-  }
-
-  @Transactional
-  public SaleResponse removeItem(UUID saleId, UUID itemId) {
-    Sale sale = findPendingSale(saleId);
-
-    boolean removed = sale.getSaleItems().removeIf(item -> item.getId().equals(itemId));
-    if (!removed) {
-      throw new NotFoundException("Item not found with id: " + itemId);
-    }
-
-    saleItemRepository.deleteByIdAndSaleId(itemId, saleId);
-    return saleMapper.toRest(sale);
   }
 
   @Transactional
@@ -228,7 +181,7 @@ public class SaleService {
     item.setQuantityOnHand(item.getQuantityOnHand() + quantity);
     inventoryItemRepository.save(item);
 
-    createMovement(storeId, editionId, InventoryMovementType.RETURN, quantity, "Sale refund");
+    createMovement(storeId, editionId, InventoryMovementType.ADJUSTMENT, quantity, "Sale refund");
   }
 
   private void createMovement(
@@ -247,12 +200,5 @@ public class SaleService {
             .build();
 
     inventoryMovementRepository.save(movement);
-  }
-
-  private BigDecimal getCurrentPrice(UUID editionId) {
-    return bookPriceHistoryRepository
-        .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId)
-        .map(price -> price.getPrice())
-        .orElse(BigDecimal.ZERO);
   }
 }
