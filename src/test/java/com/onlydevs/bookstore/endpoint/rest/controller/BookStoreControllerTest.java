@@ -7,13 +7,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
+import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.service.BookStoreService;
 import java.time.Instant;
 import java.util.List;
@@ -39,7 +42,11 @@ class BookStoreControllerTest {
 
   @MockBean private BookStoreService bookStoreService;
 
+  @MockBean private InventoryMapper inventoryMapper;
+
   private final UUID storeId = UUID.randomUUID();
+  private final UUID editionId = UUID.randomUUID();
+  private final UUID bookId = UUID.randomUUID();
 
   @Test
   void get_all_stores_should_return_page_of_stores() throws Exception {
@@ -138,5 +145,55 @@ class BookStoreControllerTest {
     willDoNothing().given(bookStoreService).deleteStore(storeId);
 
     mockMvc.perform(delete("/api/v1/stores/{id}", storeId)).andExpect(status().isNoContent());
+  }
+
+  @Test
+  void get_inventory_should_return_list() throws Exception {
+    InventoryItemResponse response =
+        InventoryItemResponse.builder()
+            .id(UUID.randomUUID())
+            .storeId(storeId)
+            .editionId(editionId)
+            .quantityOnHand(10)
+            .reorderLevel(5)
+            .lowStock(false)
+            .build();
+
+    given(bookStoreService.getInventoryByStore(storeId)).willReturn(List.of());
+    given(inventoryMapper.toRestList(any())).willReturn(List.of(response));
+
+    mockMvc
+        .perform(get("/api/v1/stores/{id}/inventory", storeId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].quantityOnHand").value(10));
+  }
+
+  @Test
+  void get_stock_by_edition_should_return_item() throws Exception {
+    InventoryItemResponse response =
+        InventoryItemResponse.builder()
+            .id(UUID.randomUUID())
+            .storeId(storeId)
+            .editionId(editionId)
+            .quantityOnHand(10)
+            .build();
+
+    given(bookStoreService.getStockByEdition(storeId, editionId)).willReturn(null);
+    given(inventoryMapper.toRest(any())).willReturn(response);
+
+    mockMvc
+        .perform(get("/api/v1/stores/{id}/inventory/{editionId}", storeId, editionId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.quantityOnHand").value(10));
+  }
+
+  @Test
+  void get_book_stock_by_store_should_return_stock() throws Exception {
+    given(bookStoreService.getBookStockByStore(storeId, bookId)).willReturn(50);
+
+    mockMvc
+        .perform(get("/api/v1/stores/{id}/books/{bookId}/stock", storeId, bookId))
+        .andExpect(status().isOk())
+        .andExpect(content().string("50"));
   }
 }

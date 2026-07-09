@@ -627,4 +627,50 @@ class BookServiceTest {
         .isInstanceOf(BadRequestException.class)
         .hasMessageContaining("Edition does not belong to book");
   }
+
+  @Test
+  void getBookTotalStock_whenBookExists_shouldReturnSum() {
+    given(bookRepository.existsById(bookId)).willReturn(true);
+    given(inventoryItemRepository.sumQuantityByBookId(bookId)).willReturn(25);
+
+    Integer result = bookService.getBookTotalStock(bookId);
+
+    assertThat(result).isEqualTo(25);
+    then(bookRepository).should().existsById(bookId);
+    then(inventoryItemRepository).should().sumQuantityByBookId(bookId);
+  }
+
+  @Test
+  void getBookTotalStock_whenBookNotFound_shouldThrow() {
+    given(bookRepository.existsById(bookId)).willReturn(false);
+
+    assertThatThrownBy(() -> bookService.getBookTotalStock(bookId))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining("Book not found");
+  }
+
+  @Test
+  void getBookLowStock_whenBookExists_shouldReturnItems() {
+    var lowItem1 = InventoryItem.builder().quantityOnHand(2).reorderLevel(5).build();
+    var lowItem2 = InventoryItem.builder().quantityOnHand(0).reorderLevel(3).build();
+
+    given(bookRepository.existsById(bookId)).willReturn(true);
+    given(inventoryItemRepository.findLowStockByBookId(bookId))
+        .willReturn(List.of(lowItem1, lowItem2));
+
+    var result = bookService.getBookLowStock(bookId);
+
+    assertThat(result).hasSize(2);
+    then(bookRepository).should().existsById(bookId);
+    then(inventoryItemRepository).should().findLowStockByBookId(bookId);
+  }
+
+  @Test
+  void getBookLowStock_whenBookNotFound_shouldThrow() {
+    given(bookRepository.existsById(bookId)).willReturn(false);
+
+    assertThatThrownBy(() -> bookService.getBookLowStock(bookId))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining("Book not found");
+  }
 }

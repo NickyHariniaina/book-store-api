@@ -64,37 +64,6 @@ class InventoryServiceTest {
   }
 
   @Test
-  void get_inventory_by_store_should_return_list() {
-    given(inventoryItemRepository.findByBookStoreId(storeId)).willReturn(List.of(item));
-
-    var result = inventoryService.getInventoryByStore(storeId);
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getQuantityOnHand()).isEqualTo(10);
-    then(inventoryItemRepository).should().findByBookStoreId(storeId);
-  }
-
-  @Test
-  void get_stock_by_edition_when_found_should_return_item() {
-    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
-        .willReturn(Optional.of(item));
-
-    var result = inventoryService.getStockByEdition(storeId, editionId);
-
-    assertThat(result).isNotNull();
-    assertThat(result.getQuantityOnHand()).isEqualTo(10);
-  }
-
-  @Test
-  void get_stock_by_edition_when_not_found_should_throw() {
-    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
-        .willReturn(Optional.empty());
-
-    assertThatThrownBy(() -> inventoryService.getStockByEdition(storeId, editionId))
-        .isInstanceOf(NotFoundException.class);
-  }
-
-  @Test
   void record_arrival_when_item_exists_should_increment_stock() {
     given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
         .willReturn(Optional.of(item));

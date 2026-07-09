@@ -44,46 +44,6 @@ class InventoryControllerTest {
   private final UUID editionId = UUID.randomUUID();
 
   @Test
-  void get_inventory_should_return_list() throws Exception {
-    InventoryItemResponse response =
-        InventoryItemResponse.builder()
-            .id(UUID.randomUUID())
-            .storeId(storeId)
-            .editionId(editionId)
-            .quantityOnHand(10)
-            .reorderLevel(5)
-            .lowStock(false)
-            .build();
-
-    given(inventoryService.getInventoryByStore(storeId)).willReturn(List.of());
-    given(inventoryMapper.toRestList(any())).willReturn(List.of(response));
-
-    mockMvc
-        .perform(get("/api/v1/stores/{storeId}/inventory", storeId))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].quantityOnHand").value(10));
-  }
-
-  @Test
-  void get_stock_by_edition_should_return_item() throws Exception {
-    InventoryItemResponse response =
-        InventoryItemResponse.builder()
-            .id(UUID.randomUUID())
-            .storeId(storeId)
-            .editionId(editionId)
-            .quantityOnHand(10)
-            .build();
-
-    given(inventoryService.getStockByEdition(storeId, editionId)).willReturn(new InventoryItem());
-    given(inventoryMapper.toRest(any())).willReturn(response);
-
-    mockMvc
-        .perform(get("/api/v1/stores/{storeId}/inventory/{editionId}", storeId, editionId))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.quantityOnHand").value(10));
-  }
-
-  @Test
   void record_arrival_should_return_created() throws Exception {
     ArrivalRequest request =
         ArrivalRequest.builder().editionId(editionId).quantity(5).reference("REF-001").build();

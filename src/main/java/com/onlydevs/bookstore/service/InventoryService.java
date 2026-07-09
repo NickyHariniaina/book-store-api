@@ -6,6 +6,7 @@ import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
+import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
@@ -65,9 +66,18 @@ public class InventoryService {
     return newItem;
   }
 
+  private InventoryItem findItem(UUID storeId, UUID editionId) {
+    return inventoryItemRepository
+        .findByBookStoreIdAndBookEditionId(storeId, editionId)
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    "Stock not found for store " + storeId + " and edition " + editionId));
+  }
+
   @Transactional
   public InventoryItem adjustStock(UUID storeId, UUID editionId, Integer quantity, String reason) {
-    InventoryItem item = getStockByEdition(storeId, editionId);
+    InventoryItem item = findItem(storeId, editionId);
 
     int newQuantity = item.getQuantityOnHand() + quantity;
     if (newQuantity < 0) {
@@ -92,7 +102,7 @@ public class InventoryService {
   @Transactional
   public InventoryItem recordDamaged(
       UUID storeId, UUID editionId, Integer quantity, String reason) {
-    InventoryItem item = getStockByEdition(storeId, editionId);
+    InventoryItem item = findItem(storeId, editionId);
     applyStockDecrement(item, quantity);
 
     String movementReason = (reason != null) ? reason : "Marked as damaged";
@@ -109,7 +119,7 @@ public class InventoryService {
 
   @Transactional
   public InventoryItem recordLost(UUID storeId, UUID editionId, Integer quantity, String reason) {
-    InventoryItem item = getStockByEdition(storeId, editionId);
+    InventoryItem item = findItem(storeId, editionId);
     applyStockDecrement(item, quantity);
 
     String movementReason = (reason != null) ? reason : "Marked as lost";
