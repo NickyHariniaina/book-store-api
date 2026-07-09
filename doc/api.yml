@@ -17,6 +17,8 @@ tags:
   - name: Publishers
   - name: BookStores
   - name: Inventory
+  - name: Customers
+  - name: BookPriceHistory
   - name: Dashboard
 components:
   schemas:
@@ -247,6 +249,69 @@ components:
       properties:
         genreName: { type: string }
         revenue: { type: number }
+
+    # Customer
+    CreateCustomerRequest:
+      type: object
+      required: [firstName, lastName, email]
+      properties:
+        firstName: { type: string, maxLength: 100 }
+        lastName: { type: string, maxLength: 100 }
+        email: { type: string, format: email, maxLength: 255 }
+        phone: { type: string, maxLength: 50 }
+    UpdateCustomerRequest:
+      type: object
+      properties:
+        firstName: { type: string, maxLength: 100 }
+        lastName: { type: string, maxLength: 100 }
+        email: { type: string, format: email, maxLength: 255 }
+        phone: { type: string, maxLength: 50 }
+    CustomerResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        firstName: { type: string }
+        lastName: { type: string }
+        fullName: { type: string }
+        email: { type: string }
+        phone: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SaleSummaryResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        storeId: { type: string, format: uuid }
+        storeName: { type: string }
+        customerId: { type: string, format: uuid, nullable: true }
+        customerName: { type: string, nullable: true }
+        status: { $ref: '#/components/schemas/SaleStatus' }
+        paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
+        total: { type: number }
+    SaleStatus:
+      type: string
+      enum: [PENDING, PAID, CANCELLED, REFUNDED]
+    PaymentMethod:
+      type: string
+      enum: [CASH, CARD, MOBILE_MONEY, BANK_TRANSFER]
+
+    # BookPriceHistory
+    CreateBookPriceRequest:
+      type: object
+      required: [price, effectiveFrom]
+      properties:
+        price: { type: number, minimum: 0 }
+        effectiveFrom: { type: string, format: date-time }
+    BookPriceResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        editionId: { type: string, format: uuid }
+        price: { type: number }
+        effectiveFrom: { type: string, format: date-time }
+        effectiveTo: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+
     Exception:
       type: object
       properties:
@@ -624,6 +689,60 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/BookEditionResponse' }
 
+  # BookPriceHistory
+  /editions/{id}/prices:
+    get:
+      tags: [BookPriceHistory]
+      summary: List all price records for an edition
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/BookPriceResponse' }
+    post:
+      tags: [BookPriceHistory]
+      summary: Set a new price for an edition (closes previous current price)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateBookPriceRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BookPriceResponse' }
+  /editions/{id}/prices/current:
+    get:
+      tags: [BookPriceHistory]
+      summary: Get the current active price for an edition
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BookPriceResponse' }
+        '404': { description: No price found }
+
   # Genres
   /genres:
     get:
@@ -897,6 +1016,85 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/InventoryItemResponse' }
+
+  # Customers
+  /customers:
+    get:
+      tags: [Customers]
+      summary: List all customers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CustomerResponse' }
+    post:
+      tags: [Customers]
+      summary: Create a customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCustomerRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CustomerResponse' }
+  /customers/{id}:
+    get:
+      tags: [Customers]
+      summary: Get customer detail
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CustomerResponse' }
+        '404': { description: Customer not found }
+    put:
+      tags: [Customers]
+      summary: Update customer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateCustomerRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CustomerResponse' }
+  /customers/{id}/sales:
+    get:
+      tags: [Customers]
+      summary: List sales for a customer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SaleSummaryResponse' }
 
   # Inventory
   /stores/{storeId}/inventory/arrival:
