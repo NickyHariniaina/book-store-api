@@ -1,7 +1,5 @@
 package com.onlydevs.bookstore.integration;
 
-import static org.hamcrest.Matchers.containsString;
-
 import com.onlydevs.bookstore.conf.FacadeIT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,17 +18,14 @@ class InventoryIT extends FacadeIT {
   }
 
   @Test
-  void get_stock_by_edition_should_return_404_when_not_found() {
+  void get_stock_by_edition_should_return_zero_when_not_found() {
     webTestClient
         .get()
         .uri("/editions/{editionId}/stock", java.util.UUID.randomUUID())
         .exchange()
         .expectStatus()
-        .isNotFound()
-        .expectBody()
-        .jsonPath("$.type")
-        .isEqualTo("404 NOT_FOUND")
-        .jsonPath("$.message")
-        .value(containsString("Stock not found"));
+        .isOk()
+        .expectBody(Integer.class)
+        .isEqualTo(0);
   }
 }

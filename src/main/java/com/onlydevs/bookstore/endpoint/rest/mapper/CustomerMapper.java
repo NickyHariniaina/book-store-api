@@ -87,10 +87,7 @@ public class CustomerMapper {
       return BigDecimal.ZERO;
     }
     return sale.getSaleItems().stream()
-        .map(
-            item -> {
-              return item.getUnitPrice().multiply(quantity);
-            })
+        .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
         .filter(Objects::nonNull)
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }

@@ -215,8 +215,6 @@ class CustomerControllerTest {
     var saleResponse =
         SaleSummaryResponse.builder()
             .id(UUID.randomUUID())
-            .storeId(UUID.randomUUID())
-            .storeName("Main Store")
             .customerId(customerId)
             .customerName("John Doe")
             .status(SaleStatus.PAID)
@@ -228,7 +226,6 @@ class CustomerControllerTest {
     mockMvc
         .perform(get("/customers/{id}/sales", customerId))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].storeName").value("Main Store"))
         .andExpect(jsonPath("$[0].status").value("PAID"))
         .andExpect(jsonPath("$[0].total").value(29.99));
   }
