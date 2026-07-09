@@ -109,9 +109,9 @@ public class BookController {
     return ResponseEntity.ok(bookService.getBookTotalStock(bookId));
   }
 
-  @GetMapping("/{bookId}/low-stock")
-  public ResponseEntity<List<InventoryItemResponse>> getBookLowStock(@PathVariable UUID bookId) {
-    var items = bookService.getBookLowStock(bookId);
+  @GetMapping("/low-stock")
+  public ResponseEntity<List<InventoryItemResponse>> getAllLowStock() {
+    var items = bookService.getAllLowStock();
     return ResponseEntity.ok(inventoryMapper.toRestList(items));
   }
 }

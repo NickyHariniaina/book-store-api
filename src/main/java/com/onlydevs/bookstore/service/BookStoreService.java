@@ -11,14 +11,14 @@ import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BookStoreService {
 
   private final BookStoreRepository bookStoreRepository;
@@ -91,5 +91,12 @@ public class BookStoreService {
 
   public Integer getBookStockByStore(UUID storeId, UUID bookId) {
     return inventoryItemRepository.sumQuantityByStoreIdAndBookId(storeId, bookId);
+  }
+
+  public List<InventoryItem> getLowStockItems(UUID storeId) {
+    if (!bookStoreRepository.existsById(storeId)) {
+      throw new NotFoundException("BookStore not found with id: " + storeId);
+    }
+    return inventoryItemRepository.findLowStockByStoreId(storeId);
   }
 }

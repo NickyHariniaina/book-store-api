@@ -34,7 +34,12 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, UU
 
   @EntityGraph(attributePaths = {"bookEdition.book", "bookStore"})
   @Query(
-      "SELECT i FROM InventoryItem i WHERE i.bookEdition.book.id = :bookId AND i.quantityOnHand <="
+      "SELECT i FROM InventoryItem i WHERE i.quantityOnHand <= i.reorderLevel")
+  List<InventoryItem> findAllLowStock();
+
+  @EntityGraph(attributePaths = {"bookEdition.book", "bookStore"})
+  @Query(
+      "SELECT i FROM InventoryItem i WHERE i.bookStore.id = :storeId AND i.quantityOnHand <="
           + " i.reorderLevel")
-  List<InventoryItem> findLowStockByBookId(@Param("bookId") UUID bookId);
+  List<InventoryItem> findLowStockByStoreId(@Param("storeId") UUID storeId);
 }

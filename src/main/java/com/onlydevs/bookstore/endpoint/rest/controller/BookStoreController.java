@@ -131,6 +131,12 @@ public class BookStoreController {
     return ResponseEntity.status(HttpStatus.CREATED).body(inventoryMapper.toRest(item));
   }
 
+  @GetMapping("/{id}/low-stock")
+  public ResponseEntity<List<InventoryItemResponse>> getLowStock(@PathVariable UUID id) {
+    var items = bookStoreService.getLowStockItems(id);
+    return ResponseEntity.ok(inventoryMapper.toRestList(items));
+  }
+
   @GetMapping("/{storeId}/movements")
   public ResponseEntity<List<InventoryMovementResponse>> getMovements(
       @PathVariable UUID storeId, @RequestParam(name = "type", required = false) String type) {

@@ -379,15 +379,10 @@ paths:
           content:
             application/json:
               schema: { type: integer }
-  /books/{bookId}/low-stock:
+  /books/low-stock:
     get:
       tags: [Books]
-      summary: Get low stock items for a book across all stores
-      parameters:
-        - in: path
-          name: bookId
-          required: true
-          schema: { type: string, format: uuid }
+      summary: Get all low stock items across all stores
       responses:
         '200':
           description: OK
@@ -903,6 +898,24 @@ paths:
           content:
             application/json:
               schema: { type: integer }
+
+  /stores/{id}/low-stock:
+    get:
+      tags: [BookStores]
+      summary: Low stock items at a store (quantity <= reorder level)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/InventoryItemResponse' }
 
   # Inventory
   /stores/{storeId}/inventory/arrival:

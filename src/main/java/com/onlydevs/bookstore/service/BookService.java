@@ -117,11 +117,8 @@ public class BookService {
     return inventoryItemRepository.sumQuantityByBookId(bookId);
   }
 
-  public List<InventoryItem> getBookLowStock(UUID bookId) {
-    if (!bookRepository.existsById(bookId)) {
-      throw new NotFoundException("Book not found with id: " + bookId);
-    }
-    return inventoryItemRepository.findLowStockByBookId(bookId);
+  public List<InventoryItem> getAllLowStock() {
+    return inventoryItemRepository.findAllLowStock();
   }
 
   @Transactional
