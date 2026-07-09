@@ -18,12 +18,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AddSaleItemRequest {
 
-  @NotNull
-  private UUID editionId;
+  @NotNull private UUID editionId;
 
-  @NotNull
-  @Positive
-  private Integer quantity;
+  @NotNull @Positive private Integer quantity;
 
   @DecimalMin("0.00")
   private BigDecimal discountPercent;
