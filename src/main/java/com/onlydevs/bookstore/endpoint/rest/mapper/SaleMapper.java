@@ -64,7 +64,7 @@ public class SaleMapper {
         .editionId(edition.getId())
         .isbn(edition.getIsbn())
         .bookTitle(edition.getBook().getTitle())
-        .format(edition.getFormat())
+        .format(String.valueOf(edition.getFormat()))
         .quantity(item.getQuantity())
         .unitPrice(unitPrice)
         .discountPercent(item.getDiscountPercent())

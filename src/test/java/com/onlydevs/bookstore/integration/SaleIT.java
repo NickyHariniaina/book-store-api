@@ -11,11 +11,14 @@ import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.request.AddSaleItemRequest;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
+import com.onlydevs.bookstore.model.enums.BookFormat;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.PublisherRepository;
+import com.onlydevs.bookstore.repository.SaleItemRepository;
+import com.onlydevs.bookstore.repository.SaleRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +37,8 @@ class SaleIT extends FacadeIT {
   @Autowired private BookEditionRepository bookEditionRepository;
   @Autowired private PublisherRepository publisherRepository;
   @Autowired private InventoryItemRepository inventoryItemRepository;
+  @Autowired private SaleRepository saleRepository;
+  @Autowired private SaleItemRepository saleItemRepository;
 
   private UUID storeId;
   private UUID editionId;
@@ -42,19 +47,26 @@ class SaleIT extends FacadeIT {
   void setup() {
     webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
 
-    bookStoreRepository.deleteAll();
+    saleItemRepository.deleteAll();
+    saleRepository.deleteAll();
     inventoryItemRepository.deleteAll();
     bookEditionRepository.deleteAll();
     bookRepository.deleteAll();
     publisherRepository.deleteAll();
+    bookStoreRepository.deleteAll();
 
     BookStore store =
         bookStoreRepository.save(
-            BookStore.builder().name("Test Store").address("123 Test St").build());
+            BookStore.builder()
+                .name("Test Store")
+                .address("123 Test St")
+                .phone("0340000000")
+                .build());
     storeId = store.getId();
 
     Publisher publisher =
-        publisherRepository.save(Publisher.builder().name("Test Publisher").build());
+        publisherRepository.save(
+            Publisher.builder().name("Test Publisher").phone("0123456789").build());
 
     Book book = bookRepository.save(Book.builder().title("Test Book").build());
 
@@ -63,8 +75,8 @@ class SaleIT extends FacadeIT {
             BookEdition.builder()
                 .book(book)
                 .publisher(publisher)
-                .isbn("978-1234567890")
-                .format("PAPERBACK")
+                .isbn("978123456789")
+                .format(BookFormat.valueOf("PAPERBACK"))
                 .active(true)
                 .build());
     editionId = edition.getId();

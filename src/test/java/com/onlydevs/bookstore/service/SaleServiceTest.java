@@ -159,7 +159,6 @@ class SaleServiceTest {
   void cancelSale_ShouldSetCancelled() {
     given(saleRepository.findById(saleId)).willReturn(Optional.of(sale));
     given(saleRepository.save(any(Sale.class))).willReturn(sale);
-    sale.setStatus(SaleStatus.CANCELLED);
     SaleResponse cancelledResponse =
         SaleResponse.builder().id(saleId).status(SaleStatus.CANCELLED).build();
     given(saleMapper.toRest(any(Sale.class))).willReturn(cancelledResponse);
