@@ -17,8 +17,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SaleSummaryResponse {
   private UUID id;
-  private UUID storeId;
-  private String storeName;
   private UUID customerId;
   private String customerName;
   private SaleStatus status;
