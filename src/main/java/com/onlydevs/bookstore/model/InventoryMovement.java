@@ -4,7 +4,6 @@ import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
@@ -32,7 +31,6 @@ public class InventoryMovement {
   private InventoryMovementType inventoryMovementType;
 
   @NotNull
-  @Positive
   @Column(nullable = false)
   private Integer quantity;
 
