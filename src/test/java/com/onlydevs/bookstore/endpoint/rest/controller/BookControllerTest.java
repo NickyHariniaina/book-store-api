@@ -10,11 +10,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
 import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.service.BookService;
 import java.time.Instant;
 import java.util.List;
@@ -40,7 +42,10 @@ class BookControllerTest {
 
   @MockBean private BookService bookService;
 
+  @MockBean private InventoryMapper inventoryMapper;
+
   private final UUID bookId = UUID.randomUUID();
+  private final UUID editionId = UUID.randomUUID();
 
   @Test
   void getAllBooks_ShouldReturnPageOfBooks() throws Exception {
@@ -60,7 +65,7 @@ class BookControllerTest {
     given(bookService.getAllBooks(any())).willReturn(page);
 
     mockMvc
-        .perform(get("/api/v1/books").contentType(MediaType.APPLICATION_JSON))
+        .perform(get("/books").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].id").value(bookId.toString()))
         .andExpect(jsonPath("$.content[0].title").value("The Great Gatsby"))
@@ -77,7 +82,7 @@ class BookControllerTest {
     given(bookService.getBookById(bookId)).willReturn(response);
 
     mockMvc
-        .perform(get("/api/v1/books/{id}", bookId))
+        .perform(get("/books/{id}", bookId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(bookId.toString()))
         .andExpect(jsonPath("$.title").value("Test Book"));
@@ -95,7 +100,7 @@ class BookControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/books")
+            post("/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -108,7 +113,7 @@ class BookControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/books")
+            post("/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -125,7 +130,7 @@ class BookControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/books/{id}", bookId)
+            put("/books/{id}", bookId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -136,7 +141,7 @@ class BookControllerTest {
   void deleteBook_ShouldReturnNoContent() throws Exception {
     willDoNothing().given(bookService).deleteBook(bookId);
 
-    mockMvc.perform(delete("/api/v1/books/{id}", bookId)).andExpect(status().isNoContent());
+    mockMvc.perform(delete("/books/{id}", bookId)).andExpect(status().isNoContent());
   }
 
   @Test
@@ -152,7 +157,7 @@ class BookControllerTest {
     given(bookService.addAuthorToBook(bookId, authorId)).willReturn(response);
 
     mockMvc
-        .perform(post("/api/v1/books/{id}/authors/{authorId}", bookId, authorId))
+        .perform(post("/books/{id}/authors/{authorId}", bookId, authorId))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.bookId").value(bookId.toString()))
         .andExpect(jsonPath("$.authorId").value(authorId.toString()));
@@ -164,7 +169,7 @@ class BookControllerTest {
     willDoNothing().given(bookService).removeAuthorFromBook(bookId, authorId);
 
     mockMvc
-        .perform(delete("/api/v1/books/{id}/authors/{authorId}", bookId, authorId))
+        .perform(delete("/books/{id}/authors/{authorId}", bookId, authorId))
         .andExpect(status().isNoContent());
   }
 
@@ -174,7 +179,7 @@ class BookControllerTest {
     willDoNothing().given(bookService).addGenreToBook(bookId, genreId);
 
     mockMvc
-        .perform(post("/api/v1/books/{id}/genres/{genreId}", bookId, genreId))
+        .perform(post("/books/{id}/genres/{genreId}", bookId, genreId))
         .andExpect(status().isNoContent());
   }
 
@@ -184,7 +189,37 @@ class BookControllerTest {
     willDoNothing().given(bookService).removeGenreFromBook(bookId, genreId);
 
     mockMvc
-        .perform(delete("/api/v1/books/{id}/genres/{genreId}", bookId, genreId))
+        .perform(delete("/books/{id}/genres/{genreId}", bookId, genreId))
         .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void getBookTotalStock_ShouldReturnStock() throws Exception {
+    given(bookService.getBookTotalStock(bookId)).willReturn(100);
+
+    mockMvc
+        .perform(get("/books/{bookId}/stock", bookId))
+        .andExpect(status().isOk())
+        .andExpect(content().string("100"));
+  }
+
+  @Test
+  void getAllLowStock_ShouldReturnItems() throws Exception {
+    InventoryItemResponse response =
+        InventoryItemResponse.builder()
+            .id(UUID.randomUUID())
+            .editionId(editionId)
+            .quantityOnHand(2)
+            .reorderLevel(5)
+            .lowStock(true)
+            .build();
+
+    given(bookService.getAllLowStock()).willReturn(List.of());
+    given(inventoryMapper.toRestList(any())).willReturn(List.of(response));
+
+    mockMvc
+        .perform(get("/books/low-stock"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].lowStock").value(true));
   }
 }

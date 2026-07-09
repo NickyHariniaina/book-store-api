@@ -9,11 +9,13 @@ import static org.mockito.Mockito.never;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookStoreMapper;
 import com.onlydevs.bookstore.model.BookStore;
+import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookStoreRepository;
+import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -36,15 +38,21 @@ class BookStoreServiceTest {
 
   @Mock private BookStoreMapper bookStoreMapper;
 
+  @Mock private InventoryItemRepository inventoryItemRepository;
+
   @InjectMocks private BookStoreService bookStoreService;
 
   private UUID storeId;
+  private UUID editionId;
+  private UUID bookId;
   private BookStore bookStore;
   private BookStoreResponse bookStoreResponse;
 
   @BeforeEach
   void setUp() {
     storeId = UUID.randomUUID();
+    editionId = UUID.randomUUID();
+    bookId = UUID.randomUUID();
     bookStore =
         BookStore.builder()
             .id(storeId)
@@ -203,5 +211,58 @@ class BookStoreServiceTest {
 
     then(bookStoreRepository).should().existsById(storeId);
     then(bookStoreRepository).should(never()).deleteById(any());
+  }
+
+  @Test
+  void get_stock_by_edition_when_found_should_return_integer() {
+    var item = InventoryItem.builder().quantityOnHand(10).build();
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.of(item));
+
+    var result = bookStoreService.getStockByEdition(storeId, editionId);
+
+    assertThat(result).isEqualTo(10);
+    then(inventoryItemRepository).should().findByBookStoreIdAndBookEditionId(storeId, editionId);
+  }
+
+  @Test
+  void get_stock_by_edition_when_not_found_should_throw() {
+    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
+        .willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> bookStoreService.getStockByEdition(storeId, editionId))
+        .isInstanceOf(NotFoundException.class);
+  }
+
+  @Test
+  void get_book_stock_by_store_should_return_sum() {
+    given(inventoryItemRepository.sumQuantityByStoreIdAndBookId(storeId, bookId)).willReturn(15);
+
+    var result = bookStoreService.getBookStockByStore(storeId, bookId);
+
+    assertThat(result).isEqualTo(15);
+    then(inventoryItemRepository).should().sumQuantityByStoreIdAndBookId(storeId, bookId);
+  }
+
+  @Test
+  void get_low_stock_items_when_store_exists_should_return_items() {
+    var lowItem = InventoryItem.builder().quantityOnHand(2).reorderLevel(5).build();
+    given(bookStoreRepository.existsById(storeId)).willReturn(true);
+    given(inventoryItemRepository.findLowStockByStoreId(storeId)).willReturn(List.of(lowItem));
+
+    var result = bookStoreService.getLowStockItems(storeId);
+
+    assertThat(result).hasSize(1);
+    then(bookStoreRepository).should().existsById(storeId);
+    then(inventoryItemRepository).should().findLowStockByStoreId(storeId);
+  }
+
+  @Test
+  void get_low_stock_items_when_store_not_found_should_throw() {
+    given(bookStoreRepository.existsById(storeId)).willReturn(false);
+
+    assertThatThrownBy(() -> bookStoreService.getLowStockItems(storeId))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining("BookStore not found");
   }
 }
