@@ -7,7 +7,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.SaleMapper;
-import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.Sale;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.SaleStatus;
@@ -15,7 +14,6 @@ import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookPriceHistoryRepository;
-import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.CustomerRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
@@ -42,7 +40,6 @@ class SaleServiceTest {
 
   @Mock private SaleRepository saleRepository;
   @Mock private SaleItemRepository saleItemRepository;
-  @Mock private BookStoreRepository bookStoreRepository;
   @Mock private BookEditionRepository bookEditionRepository;
   @Mock private BookPriceHistoryRepository bookPriceHistoryRepository;
   @Mock private CustomerRepository customerRepository;
@@ -52,25 +49,19 @@ class SaleServiceTest {
 
   @InjectMocks private SaleService saleService;
 
-  private UUID storeId;
   private UUID saleId;
   private UUID editionId;
-  private BookStore store;
   private Sale sale;
   private SaleResponse saleResponse;
 
   @BeforeEach
   void setUp() {
-    storeId = UUID.randomUUID();
     saleId = UUID.randomUUID();
     editionId = UUID.randomUUID();
-
-    store = BookStore.builder().id(storeId).name("Main Store").build();
 
     sale =
         Sale.builder()
             .id(saleId)
-            .bookStore(store)
             .status(SaleStatus.PENDING)
             .saleItems(new ArrayList<>())
             .createdAt(Instant.now())
@@ -80,8 +71,6 @@ class SaleServiceTest {
     saleResponse =
         SaleResponse.builder()
             .id(saleId)
-            .storeId(storeId)
-            .storeName("Main Store")
             .status(SaleStatus.PENDING)
             .items(List.of())
             .total(BigDecimal.ZERO)
@@ -90,25 +79,14 @@ class SaleServiceTest {
 
   @Test
   void createSale_ShouldReturnCreatedSale() {
-    given(bookStoreRepository.findById(storeId)).willReturn(Optional.of(store));
     given(saleRepository.save(any(Sale.class))).willReturn(sale);
     given(saleMapper.toRest(sale)).willReturn(saleResponse);
 
-    SaleResponse result = saleService.createSale(storeId, null);
+    SaleResponse result = saleService.createSale(null);
 
     assertThat(result).isNotNull();
-    assertThat(result.getStoreName()).isEqualTo("Main Store");
     assertThat(result.getStatus()).isEqualTo(SaleStatus.PENDING);
     then(saleRepository).should().save(any(Sale.class));
-  }
-
-  @Test
-  void createSale_WhenStoreNotFound_ShouldThrow() {
-    given(bookStoreRepository.findById(storeId)).willReturn(Optional.empty());
-
-    assertThatThrownBy(() -> saleService.createSale(storeId, null))
-        .isInstanceOf(NotFoundException.class)
-        .hasMessageContaining("Store not found");
   }
 
   @Test
@@ -132,27 +110,16 @@ class SaleServiceTest {
   }
 
   @Test
-  void getStoreSales_ShouldReturnPage() {
+  void getAllSales_ShouldReturnPage() {
     PageRequest pageable = PageRequest.of(0, 20);
     Page<Sale> salePage = new PageImpl<>(List.of(sale), pageable, 1);
 
-    given(bookStoreRepository.existsById(storeId)).willReturn(true);
-    given(saleRepository.findByBookStoreId(storeId, pageable)).willReturn(salePage);
+    given(saleRepository.findAll(pageable)).willReturn(salePage);
     given(saleMapper.toRest(sale)).willReturn(saleResponse);
 
-    Page<SaleResponse> result = saleService.getStoreSales(storeId, pageable);
+    Page<SaleResponse> result = saleService.getAllSales(pageable);
 
     assertThat(result).hasSize(1);
-    assertThat(result.getContent().getFirst().getStoreName()).isEqualTo("Main Store");
-  }
-
-  @Test
-  void getStoreSales_WhenStoreNotFound_ShouldThrow() {
-    given(bookStoreRepository.existsById(storeId)).willReturn(false);
-
-    assertThatThrownBy(() -> saleService.getStoreSales(storeId, PageRequest.of(0, 20)))
-        .isInstanceOf(NotFoundException.class)
-        .hasMessageContaining("Store not found");
   }
 
   @Test

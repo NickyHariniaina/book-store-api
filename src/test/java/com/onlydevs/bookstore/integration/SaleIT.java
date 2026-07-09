@@ -6,14 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.onlydevs.bookstore.conf.FacadeIT;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookEdition;
-import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.BookFormat;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
-import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.PublisherRepository;
 import com.onlydevs.bookstore.repository.SaleRepository;
@@ -30,14 +28,12 @@ class SaleIT extends FacadeIT {
 
   @LocalServerPort int port;
 
-  @Autowired private BookStoreRepository bookStoreRepository;
   @Autowired private BookRepository bookRepository;
   @Autowired private BookEditionRepository bookEditionRepository;
   @Autowired private PublisherRepository publisherRepository;
   @Autowired private InventoryItemRepository inventoryItemRepository;
   @Autowired private SaleRepository saleRepository;
 
-  private UUID storeId;
   private UUID editionId;
 
   @BeforeEach
@@ -49,16 +45,6 @@ class SaleIT extends FacadeIT {
     bookEditionRepository.deleteAll();
     bookRepository.deleteAll();
     publisherRepository.deleteAll();
-    bookStoreRepository.deleteAll();
-
-    BookStore store =
-        bookStoreRepository.save(
-            BookStore.builder()
-                .name("Test Store")
-                .address("123 Test St")
-                .phone("0340000000")
-                .build());
-    storeId = store.getId();
 
     Publisher publisher =
         publisherRepository.save(
@@ -78,12 +64,7 @@ class SaleIT extends FacadeIT {
     editionId = edition.getId();
 
     inventoryItemRepository.save(
-        InventoryItem.builder()
-            .bookStore(store)
-            .bookEdition(edition)
-            .quantityOnHand(10)
-            .reorderLevel(3)
-            .build());
+        InventoryItem.builder().bookEdition(edition).quantityOnHand(10).reorderLevel(3).build());
   }
 
   @Test
@@ -91,7 +72,7 @@ class SaleIT extends FacadeIT {
     SaleResponse sale =
         webTestClient
             .post()
-            .uri("/stores/" + storeId + "/sales")
+            .uri("/sales")
             .exchange()
             .expectStatus()
             .isCreated()
@@ -122,7 +103,7 @@ class SaleIT extends FacadeIT {
     SaleResponse sale =
         webTestClient
             .post()
-            .uri("/stores/" + storeId + "/sales")
+            .uri("/sales")
             .exchange()
             .expectStatus()
             .isCreated()
@@ -143,7 +124,6 @@ class SaleIT extends FacadeIT {
         .value(
             response -> {
               assertEquals(saleId, response.getId());
-              assertEquals("Test Store", response.getStoreName());
             });
   }
 

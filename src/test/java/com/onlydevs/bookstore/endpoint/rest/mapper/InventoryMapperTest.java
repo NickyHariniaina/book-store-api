@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookEdition;
-import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
@@ -21,11 +20,9 @@ class InventoryMapperTest {
 
   private final InventoryMapper inventoryMapper = new InventoryMapper();
 
-  private UUID storeId;
   private UUID editionId;
   private UUID itemId;
   private UUID movementId;
-  private BookStore store;
   private Book book;
   private BookEdition edition;
   private InventoryItem item;
@@ -33,12 +30,9 @@ class InventoryMapperTest {
 
   @BeforeEach
   void setUp() {
-    storeId = UUID.randomUUID();
     editionId = UUID.randomUUID();
     itemId = UUID.randomUUID();
     movementId = UUID.randomUUID();
-
-    store = BookStore.builder().id(storeId).name("Test Store").build();
 
     book =
         Book.builder()
@@ -58,7 +52,6 @@ class InventoryMapperTest {
     item =
         InventoryItem.builder()
             .id(itemId)
-            .bookStore(store)
             .bookEdition(edition)
             .quantityOnHand(10)
             .reorderLevel(5)
@@ -68,7 +61,6 @@ class InventoryMapperTest {
     movement =
         InventoryMovement.builder()
             .id(movementId)
-            .bookStore(store)
             .bookEdition(edition)
             .inventoryMovementType(InventoryMovementType.ARRIVAL)
             .quantity(5)
@@ -84,8 +76,6 @@ class InventoryMapperTest {
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(itemId);
-    assertThat(result.getStoreId()).isEqualTo(storeId);
-    assertThat(result.getStoreName()).isEqualTo("Test Store");
     assertThat(result.getEditionId()).isEqualTo(editionId);
     assertThat(result.getBookTitle()).isEqualTo("Test Book");
     assertThat(result.getIsbn()).isEqualTo("1234567890");
@@ -124,7 +114,6 @@ class InventoryMapperTest {
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(movementId);
-    assertThat(result.getStoreId()).isEqualTo(storeId);
     assertThat(result.getEditionId()).isEqualTo(editionId);
     assertThat(result.getBookTitle()).isEqualTo("Test Book");
     assertThat(result.getIsbn()).isEqualTo("1234567890");
