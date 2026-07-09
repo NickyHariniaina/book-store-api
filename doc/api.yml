@@ -26,12 +26,6 @@ components:
     BookFormat:
       type: string
       enum: [HARDCOVER, PAPERBACK, EBOOK, AUDIOBOOK]
-    SaleStatus:
-      type: string
-      enum: [PENDING, PAID, CANCELLED, REFUNDED]
-    PaymentMethod:
-      type: string
-      enum: [CASH, CARD, MOBILE_MONEY, BANK_TRANSFER]
     InventoryMovementType:
       type: string
       enum: [ARRIVAL, SALE, RETURN, ADJUSTMENT, DAMAGED, LOST]
