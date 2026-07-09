@@ -30,7 +30,7 @@ public class BookStoreService {
   }
 
   public BookStoreResponse getStoreById(UUID id) {
-    BookStore bookStore =
+    var bookStore =
         bookStoreRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("BookStore not found with id: " + id));
@@ -39,14 +39,14 @@ public class BookStoreService {
 
   @Transactional
   public BookStoreResponse createStore(CreateBookStoreRequest request) {
-    BookStore bookStore = bookStoreMapper.toDomain(request);
-    BookStore saved = bookStoreRepository.save(bookStore);
+    var bookStore = bookStoreMapper.toDomain(request);
+    var saved = bookStoreRepository.save(bookStore);
     return bookStoreMapper.toRest(saved);
   }
 
   @Transactional
   public BookStoreResponse updateStore(UUID id, UpdateBookStoreRequest request) {
-    BookStore bookStore =
+    var bookStore =
         bookStoreRepository
             .findById(id)
             .orElseThrow(() -> new NotFoundException("BookStore not found with id: " + id));
@@ -64,7 +64,7 @@ public class BookStoreService {
       bookStore.setEmail(request.getEmail());
     }
 
-    BookStore saved = bookStoreRepository.save(bookStore);
+    var saved = bookStoreRepository.save(bookStore);
     return bookStoreMapper.toRest(saved);
   }
 

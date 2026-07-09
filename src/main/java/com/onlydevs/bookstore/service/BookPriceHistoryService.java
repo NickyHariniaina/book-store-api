@@ -33,7 +33,7 @@ public class BookPriceHistoryService {
     if (!bookEditionRepository.existsById(editionId)) {
       throw new NotFoundException("Edition not found with id: " + editionId);
     }
-    BookPriceHistory price =
+    var price =
         bookPriceHistoryRepository
             .findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(editionId)
             .orElseThrow(
@@ -43,7 +43,7 @@ public class BookPriceHistoryService {
 
   @Transactional
   public BookPriceResponse createPrice(UUID editionId, CreateBookPriceRequest request) {
-    BookEdition edition =
+    var edition =
         bookEditionRepository
             .findById(editionId)
             .orElseThrow(() -> new NotFoundException("Edition not found with id: " + editionId));
@@ -58,14 +58,14 @@ public class BookPriceHistoryService {
               }
             });
 
-    BookPriceHistory newPrice =
+    var newPrice =
         BookPriceHistory.builder()
             .price(request.getPrice())
             .effectiveFrom(request.getEffectiveFrom())
             .bookEdition(edition)
             .build();
 
-    BookPriceHistory saved = bookPriceHistoryRepository.save(newPrice);
+    var saved = bookPriceHistoryRepository.save(newPrice);
     return bookPriceHistoryMapper.toResponse(saved);
   }
 }
