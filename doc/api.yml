@@ -30,7 +30,7 @@ components:
       enum: [HARDCOVER, PAPERBACK, EBOOK, AUDIOBOOK]
     InventoryMovementType:
       type: string
-      enum: [ARRIVAL, SALE, RETURN, ADJUSTMENT, DAMAGED, LOST]
+      enum: [ARRIVAL, SALE, ADJUSTMENT, DAMAGED, LOST]
 
     CreateBookRequest:
       type: object
