@@ -1,11 +1,16 @@
 package com.onlydevs.bookstore.endpoint.rest.controller;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
+import com.onlydevs.bookstore.model.dto.request.AdjustStockRequest;
+import com.onlydevs.bookstore.model.dto.request.ArrivalRequest;
 import com.onlydevs.bookstore.model.dto.request.CreateBookStoreRequest;
+import com.onlydevs.bookstore.model.dto.request.StockLossRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookStoreRequest;
 import com.onlydevs.bookstore.model.dto.response.BookStoreResponse;
 import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
+import com.onlydevs.bookstore.model.dto.response.InventoryMovementResponse;
 import com.onlydevs.bookstore.service.BookStoreService;
+import com.onlydevs.bookstore.service.InventoryService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -28,11 +33,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/stores")
+@RequestMapping("/stores")
 @RequiredArgsConstructor
 public class BookStoreController {
 
   private final BookStoreService bookStoreService;
+  private final InventoryService inventoryService;
   private final InventoryMapper inventoryMapper;
 
   @GetMapping
@@ -87,5 +93,48 @@ public class BookStoreController {
   public ResponseEntity<Integer> getBookStockByStore(
       @PathVariable UUID id, @PathVariable UUID bookId) {
     return ResponseEntity.ok(bookStoreService.getBookStockByStore(id, bookId));
+  }
+
+  @PostMapping("/{storeId}/inventory/arrival")
+  public ResponseEntity<InventoryItemResponse> recordArrival(
+      @PathVariable UUID storeId, @Valid @RequestBody ArrivalRequest request) {
+    var item =
+        inventoryService.recordArrival(
+            storeId, request.getEditionId(), request.getQuantity(), request.getReference());
+    return ResponseEntity.status(HttpStatus.CREATED).body(inventoryMapper.toRest(item));
+  }
+
+  @PostMapping("/{storeId}/inventory/adjustment")
+  public ResponseEntity<InventoryItemResponse> adjustStock(
+      @PathVariable UUID storeId, @Valid @RequestBody AdjustStockRequest request) {
+    var item =
+        inventoryService.adjustStock(
+            storeId, request.getEditionId(), request.getQuantity(), request.getReason());
+    return ResponseEntity.status(HttpStatus.CREATED).body(inventoryMapper.toRest(item));
+  }
+
+  @PostMapping("/{storeId}/inventory/damaged")
+  public ResponseEntity<InventoryItemResponse> recordDamaged(
+      @PathVariable UUID storeId, @Valid @RequestBody StockLossRequest request) {
+    var item =
+        inventoryService.recordDamaged(
+            storeId, request.getEditionId(), request.getQuantity(), request.getReason());
+    return ResponseEntity.status(HttpStatus.CREATED).body(inventoryMapper.toRest(item));
+  }
+
+  @PostMapping("/{storeId}/inventory/lost")
+  public ResponseEntity<InventoryItemResponse> recordLost(
+      @PathVariable UUID storeId, @Valid @RequestBody StockLossRequest request) {
+    var item =
+        inventoryService.recordLost(
+            storeId, request.getEditionId(), request.getQuantity(), request.getReason());
+    return ResponseEntity.status(HttpStatus.CREATED).body(inventoryMapper.toRest(item));
+  }
+
+  @GetMapping("/{storeId}/movements")
+  public ResponseEntity<List<InventoryMovementResponse>> getMovements(
+      @PathVariable UUID storeId, @RequestParam(name = "type", required = false) String type) {
+    return ResponseEntity.ok(
+        inventoryMapper.toMovementRestList(inventoryService.getMovements(storeId, type)));
   }
 }
