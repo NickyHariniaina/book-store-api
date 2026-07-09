@@ -1,14 +1,12 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.model.BookEdition;
-import com.onlydevs.bookstore.model.BookStore;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
-import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import java.util.List;
@@ -23,13 +21,11 @@ public class InventoryService {
 
   private final InventoryItemRepository inventoryItemRepository;
   private final InventoryMovementRepository inventoryMovementRepository;
-  private final BookStoreRepository bookStoreRepository;
   private final BookEditionRepository bookEditionRepository;
 
   @Transactional
-  public InventoryItem recordArrival(
-      UUID storeId, UUID editionId, Integer quantity, String reference) {
-    var optItem = inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId);
+  public InventoryItem recordArrival(UUID editionId, Integer quantity, String reference) {
+    var optItem = inventoryItemRepository.findByBookEditionId(editionId);
 
     if (optItem.isPresent()) {
       var item = optItem.get();
@@ -37,22 +33,15 @@ public class InventoryService {
       inventoryItemRepository.save(item);
 
       createMovement(
-          item.getBookStore(),
-          item.getBookEdition(),
-          InventoryMovementType.ARRIVAL,
-          quantity,
-          "Arrival",
-          reference);
+          item.getBookEdition(), InventoryMovementType.ARRIVAL, quantity, "Arrival", reference);
 
       return item;
     }
 
-    var storeRef = bookStoreRepository.getReferenceById(storeId);
     var editionRef = bookEditionRepository.getReferenceById(editionId);
 
     var newItem =
         InventoryItem.builder()
-            .bookStore(storeRef)
             .bookEdition(editionRef)
             .quantityOnHand(quantity)
             .reorderLevel(3)
@@ -60,24 +49,20 @@ public class InventoryService {
 
     inventoryItemRepository.save(newItem);
 
-    createMovement(
-        storeRef, editionRef, InventoryMovementType.ARRIVAL, quantity, "Arrival", reference);
+    createMovement(editionRef, InventoryMovementType.ARRIVAL, quantity, "Arrival", reference);
 
     return newItem;
   }
 
-  private InventoryItem findItem(UUID storeId, UUID editionId) {
+  private InventoryItem findItem(UUID editionId) {
     return inventoryItemRepository
-        .findByBookStoreIdAndBookEditionId(storeId, editionId)
-        .orElseThrow(
-            () ->
-                new NotFoundException(
-                    "Stock not found for store " + storeId + " and edition " + editionId));
+        .findByBookEditionId(editionId)
+        .orElseThrow(() -> new NotFoundException("Stock not found for edition " + editionId));
   }
 
   @Transactional
-  public InventoryItem adjustStock(UUID storeId, UUID editionId, Integer quantity, String reason) {
-    var item = findItem(storeId, editionId);
+  public InventoryItem adjustStock(UUID editionId, Integer quantity, String reason) {
+    var item = findItem(editionId);
 
     int newQuantity = item.getQuantityOnHand() + quantity;
     if (newQuantity < 0) {
@@ -89,7 +74,6 @@ public class InventoryService {
 
     String movementReason = (reason != null) ? reason : "Stock adjustment";
     createMovement(
-        item.getBookStore(),
         item.getBookEdition(),
         InventoryMovementType.ADJUSTMENT,
         quantity,
@@ -100,14 +84,12 @@ public class InventoryService {
   }
 
   @Transactional
-  public InventoryItem recordDamaged(
-      UUID storeId, UUID editionId, Integer quantity, String reason) {
-    var item = findItem(storeId, editionId);
+  public InventoryItem recordDamaged(UUID editionId, Integer quantity, String reason) {
+    var item = findItem(editionId);
     applyStockDecrement(item, quantity);
 
     String movementReason = (reason != null) ? reason : "Marked as damaged";
     createMovement(
-        item.getBookStore(),
         item.getBookEdition(),
         InventoryMovementType.DAMAGED,
         quantity,
@@ -118,13 +100,12 @@ public class InventoryService {
   }
 
   @Transactional
-  public InventoryItem recordLost(UUID storeId, UUID editionId, Integer quantity, String reason) {
-    var item = findItem(storeId, editionId);
+  public InventoryItem recordLost(UUID editionId, Integer quantity, String reason) {
+    var item = findItem(editionId);
     applyStockDecrement(item, quantity);
 
     String movementReason = (reason != null) ? reason : "Marked as lost";
     createMovement(
-        item.getBookStore(),
         item.getBookEdition(),
         InventoryMovementType.LOST,
         quantity,
@@ -135,32 +116,18 @@ public class InventoryService {
   }
 
   public Integer getEditionStock(UUID editionId) {
-    return inventoryItemRepository.findByBookEditionId(editionId).stream()
-        .mapToInt(InventoryItem::getQuantityOnHand)
-        .sum();
+    return inventoryItemRepository
+        .findByBookEditionId(editionId)
+        .map(InventoryItem::getQuantityOnHand)
+        .orElse(0);
   }
 
   public List<InventoryMovement> getMovementsByEdition(UUID editionId) {
     return inventoryMovementRepository.findByBookEditionId(editionId);
   }
 
-  public List<InventoryMovement> getMovements(UUID storeId, InventoryMovementType type) {
-    if (type == null) {
-      return inventoryMovementRepository.findByBookStoreId(storeId);
-    }
-    return inventoryMovementRepository.findByBookStoreIdAndInventoryMovementType(storeId, type);
-  }
-
-  public List<InventoryMovement> getMovements(UUID storeId, String type) {
-    InventoryMovementType jpaType = null;
-    if (type != null) {
-      try {
-        jpaType = InventoryMovementType.valueOf(type);
-      } catch (IllegalArgumentException e) {
-        throw new BadRequestException("Unknown inventory movement type: " + type);
-      }
-    }
-    return getMovements(storeId, jpaType);
+  public List<InventoryItem> getAllLowStock() {
+    return inventoryItemRepository.findAllLowStock();
   }
 
   private void applyStockDecrement(InventoryItem item, Integer quantity) {
@@ -177,7 +144,6 @@ public class InventoryService {
   }
 
   private void createMovement(
-      BookStore bookStore,
       BookEdition bookEdition,
       InventoryMovementType type,
       Integer quantity,
@@ -185,7 +151,6 @@ public class InventoryService {
       String reference) {
     var movement =
         InventoryMovement.builder()
-            .bookStore(bookStore)
             .bookEdition(bookEdition)
             .inventoryMovementType(type)
             .quantity(quantity)

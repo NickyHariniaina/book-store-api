@@ -11,7 +11,6 @@ import com.onlydevs.bookstore.model.enums.SaleStatus;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
-import com.onlydevs.bookstore.repository.BookStoreRepository;
 import com.onlydevs.bookstore.repository.CustomerRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Service;
 public class SaleService {
 
   private final SaleRepository saleRepository;
-  private final BookStoreRepository bookStoreRepository;
   private final BookEditionRepository bookEditionRepository;
   private final CustomerRepository customerRepository;
   private final InventoryItemRepository inventoryItemRepository;
@@ -36,12 +34,7 @@ public class SaleService {
   private final SaleMapper saleMapper;
 
   @Transactional
-  public SaleResponse createSale(UUID storeId, UUID customerId) {
-    var store =
-        bookStoreRepository
-            .findById(storeId)
-            .orElseThrow(() -> new NotFoundException("Store not found with id: " + storeId));
-
+  public SaleResponse createSale(UUID customerId) {
     Customer customer = null;
     if (customerId != null) {
       customer =
@@ -51,8 +44,7 @@ public class SaleService {
                   () -> new NotFoundException("Customer not found with id: " + customerId));
     }
 
-    var sale =
-        Sale.builder().bookStore(store).customer(customer).status(SaleStatus.PENDING).build();
+    var sale = Sale.builder().customer(customer).status(SaleStatus.PENDING).build();
 
     var saved = saleRepository.save(sale);
     return saleMapper.toRest(saved);
@@ -71,8 +63,7 @@ public class SaleService {
     }
 
     for (var item : sale.getSaleItems()) {
-      decrementStock(
-          sale.getBookStore().getId(), item.getBookEdition().getId(), item.getQuantity());
+      decrementStock(item.getBookEdition().getId(), item.getQuantity());
     }
 
     sale.setStatus(SaleStatus.PAID);
@@ -101,8 +92,7 @@ public class SaleService {
     }
 
     for (var item : sale.getSaleItems()) {
-      reincrementStock(
-          sale.getBookStore().getId(), item.getBookEdition().getId(), item.getQuantity());
+      reincrementStock(item.getBookEdition().getId(), item.getQuantity());
     }
 
     sale.setStatus(SaleStatus.REFUNDED);
@@ -118,11 +108,8 @@ public class SaleService {
     return saleMapper.toRest(sale);
   }
 
-  public Page<SaleResponse> getStoreSales(UUID storeId, Pageable pageable) {
-    if (!bookStoreRepository.existsById(storeId)) {
-      throw new NotFoundException("Store not found with id: " + storeId);
-    }
-    return saleRepository.findByBookStoreId(storeId, pageable).map(saleMapper::toRest);
+  public Page<SaleResponse> getAllSales(Pageable pageable) {
+    return saleRepository.findAll(pageable).map(saleMapper::toRest);
   }
 
   private Sale findPendingSale(UUID saleId) {
@@ -137,22 +124,17 @@ public class SaleService {
     return sale;
   }
 
-  private void decrementStock(UUID storeId, UUID editionId, Integer quantity) {
+  private void decrementStock(UUID editionId, Integer quantity) {
     var item =
         inventoryItemRepository
-            .findByBookStoreIdAndBookEditionId(storeId, editionId)
-            .orElseThrow(
-                () ->
-                    new BadRequestException(
-                        "No stock found for edition " + editionId + " at store " + storeId));
+            .findByBookEditionId(editionId)
+            .orElseThrow(() -> new BadRequestException("No stock found for edition " + editionId));
 
     var newQuantity = item.getQuantityOnHand() - quantity;
     if (newQuantity < 0) {
       throw new BadRequestException(
           "Insufficient stock for edition "
               + editionId
-              + " at store "
-              + storeId
               + ": available="
               + item.getQuantityOnHand()
               + ", requested="
@@ -162,32 +144,27 @@ public class SaleService {
     item.setQuantityOnHand(newQuantity);
     inventoryItemRepository.save(item);
 
-    createMovement(storeId, editionId, InventoryMovementType.SALE, quantity, "Sale confirmation");
+    createMovement(editionId, InventoryMovementType.SALE, quantity, "Sale confirmation");
   }
 
-  private void reincrementStock(UUID storeId, UUID editionId, Integer quantity) {
+  private void reincrementStock(UUID editionId, Integer quantity) {
     var item =
         inventoryItemRepository
-            .findByBookStoreIdAndBookEditionId(storeId, editionId)
-            .orElseThrow(
-                () ->
-                    new BadRequestException(
-                        "No stock found for edition " + editionId + " at store " + storeId));
+            .findByBookEditionId(editionId)
+            .orElseThrow(() -> new BadRequestException("No stock found for edition " + editionId));
 
     item.setQuantityOnHand(item.getQuantityOnHand() + quantity);
     inventoryItemRepository.save(item);
 
-    createMovement(storeId, editionId, InventoryMovementType.ADJUSTMENT, quantity, "Sale refund");
+    createMovement(editionId, InventoryMovementType.ADJUSTMENT, quantity, "Sale refund");
   }
 
   private void createMovement(
-      UUID storeId, UUID editionId, InventoryMovementType type, Integer quantity, String reason) {
-    var store = bookStoreRepository.getReferenceById(storeId);
+      UUID editionId, InventoryMovementType type, Integer quantity, String reason) {
     var edition = bookEditionRepository.getReferenceById(editionId);
 
     var movement =
         InventoryMovement.builder()
-            .bookStore(store)
             .bookEdition(edition)
             .inventoryMovementType(type)
             .quantity(quantity)
