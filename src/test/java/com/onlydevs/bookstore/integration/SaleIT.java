@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.onlydevs.bookstore.conf.FacadeIT;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookEdition;
+import com.onlydevs.bookstore.model.BookPriceHistory;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.request.CreateSaleItemRequest;
@@ -13,6 +14,7 @@ import com.onlydevs.bookstore.model.dto.request.CreateSaleRequest;
 import com.onlydevs.bookstore.model.dto.response.SaleResponse;
 import com.onlydevs.bookstore.model.enums.BookFormat;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
+import com.onlydevs.bookstore.repository.BookPriceHistoryRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.PublisherRepository;
@@ -34,6 +36,7 @@ class SaleIT extends FacadeIT {
 
   @Autowired private BookRepository bookRepository;
   @Autowired private BookEditionRepository bookEditionRepository;
+  @Autowired private BookPriceHistoryRepository bookPriceHistoryRepository;
   @Autowired private PublisherRepository publisherRepository;
   @Autowired private InventoryItemRepository inventoryItemRepository;
   @Autowired private SaleRepository saleRepository;
@@ -69,17 +72,18 @@ class SaleIT extends FacadeIT {
 
     inventoryItemRepository.save(
         InventoryItem.builder().bookEdition(edition).quantityOnHand(10).reorderLevel(3).build());
+
+    bookPriceHistoryRepository.save(
+        BookPriceHistory.builder()
+            .bookEdition(edition)
+            .price(new BigDecimal("10.00"))
+            .effectiveFrom(java.time.Instant.now())
+            .build());
   }
 
   private CreateSaleRequest saleRequest() {
     return CreateSaleRequest.builder()
-        .items(
-            List.of(
-                CreateSaleItemRequest.builder()
-                    .editionId(editionId)
-                    .quantity(2)
-                    .unitPrice(new BigDecimal("10.00"))
-                    .build()))
+        .items(List.of(CreateSaleItemRequest.builder().editionId(editionId).quantity(2).build()))
         .build();
   }
 
