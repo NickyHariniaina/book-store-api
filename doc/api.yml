@@ -275,8 +275,6 @@ components:
       type: object
       properties:
         id: { type: string, format: uuid }
-        storeId: { type: string, format: uuid }
-        storeName: { type: string }
         customerId: { type: string, format: uuid, nullable: true }
         customerName: { type: string, nullable: true }
         status: { $ref: '#/components/schemas/SaleStatus' }
@@ -1055,7 +1053,7 @@ summary: Create a new sale with items
         - in: query
           name: paymentMethod
           required: true
-          schema: { type: string, enum: [CARD, CASH, TRANSFER] }
+          schema: { $ref: '#/components/schemas/PaymentMethod' }
       responses:
         '200':
           content:

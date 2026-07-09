@@ -17,7 +17,7 @@ import com.onlydevs.bookstore.repository.CustomerRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import com.onlydevs.bookstore.repository.SaleRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
