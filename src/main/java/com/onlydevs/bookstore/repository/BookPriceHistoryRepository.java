@@ -11,5 +11,8 @@ import org.springframework.stereotype.Repository;
 public interface BookPriceHistoryRepository extends JpaRepository<BookPriceHistory, UUID> {
   List<BookPriceHistory> findByBookEditionIdOrderByEffectiveFromDesc(UUID bookEditionId);
 
+  Optional<BookPriceHistory> findFirstByBookEditionIdAndEffectiveToIsNullOrderByEffectiveFromDesc(
+      UUID bookEditionId);
+
   Optional<BookPriceHistory> findFirstByBookEditionIdOrderByEffectiveFromDesc(UUID bookEditionId);
 }
