@@ -1,10 +1,8 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookMapper;
-import com.onlydevs.bookstore.model.Author;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookAuthor;
-import com.onlydevs.bookstore.model.Genre;
 import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;

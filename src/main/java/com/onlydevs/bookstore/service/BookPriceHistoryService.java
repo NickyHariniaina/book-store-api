@@ -1,7 +1,6 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookPriceHistoryMapper;
-import com.onlydevs.bookstore.model.BookEdition;
 import com.onlydevs.bookstore.model.BookPriceHistory;
 import com.onlydevs.bookstore.model.dto.request.CreateBookPriceRequest;
 import com.onlydevs.bookstore.model.dto.response.BookPriceResponse;

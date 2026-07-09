@@ -1,9 +1,7 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookEditionMapper;
-import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookEdition;
-import com.onlydevs.bookstore.model.Publisher;
 import com.onlydevs.bookstore.model.dto.request.CreateBookEditionRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookEditionRequest;
 import com.onlydevs.bookstore.model.dto.response.BookEditionResponse;

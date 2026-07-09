@@ -1,7 +1,6 @@
 package com.onlydevs.bookstore.service;
 
 import com.onlydevs.bookstore.endpoint.rest.mapper.CustomerMapper;
-import com.onlydevs.bookstore.model.Customer;
 import com.onlydevs.bookstore.model.dto.request.CreateCustomerRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateCustomerRequest;
 import com.onlydevs.bookstore.model.dto.response.CustomerResponse;
