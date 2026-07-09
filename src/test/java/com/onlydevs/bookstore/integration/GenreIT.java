@@ -246,6 +246,21 @@ class GenreIT extends FacadeIT {
     return sale;
   }
 
+  private static Sale paidDiscountedSale(
+      BookStore store, BookEdition edition, int quantity, double price, double discountPercent) {
+    var sale = Sale.builder().status(SaleStatus.PAID).bookStore(store).build();
+    sale.setSaleItems(
+        List.of(
+            SaleItem.builder()
+                .bookEdition(edition)
+                .quantity(quantity)
+                .unitPrice(BigDecimal.valueOf(price))
+                .discountPercent(BigDecimal.valueOf(discountPercent))
+                .sale(sale)
+                .build()));
+    return sale;
+  }
+
   @Test
   void should_get_revenue_per_genre_with_paid_sales_only() {
     var data =
@@ -347,6 +362,47 @@ class GenreIT extends FacadeIT {
                       .findFirst()
                       .orElseThrow();
               assertEquals(0, BigDecimal.valueOf(20.00).compareTo(fictionRev.getRevenue()));
+            });
+  }
+
+  @Test
+  void should_get_revenue_per_genre_with_discount() {
+    var data =
+        TestData.create(
+            genreRepository, bookRepository, bookEditionRepository, bookStoreRepository);
+    saleRepository.save(paidDiscountedSale(data.store, data.editionA, 2, 10.00, 20.0));
+    saleRepository.save(paidDiscountedSale(data.store, data.editionB, 3, 15.00, 10.0));
+
+    webTestClient
+        .get()
+        .uri("/genres/revenue")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBodyList(RevenuePerGenreResponse.class)
+        .hasSize(2)
+        .consumeWith(
+            result -> {
+              var revenues = result.getResponseBody();
+              assertNotNull(revenues);
+              var fictionRev =
+                  revenues.stream()
+                      .filter(r -> r.getGenreName().equals("Fiction"))
+                      .findFirst()
+                      .orElseThrow();
+              var scienceRev =
+                  revenues.stream()
+                      .filter(r -> r.getGenreName().equals("Science"))
+                      .findFirst()
+                      .orElseThrow();
+              assertEquals(
+                  0,
+                  BigDecimal.valueOf(16.00)
+                      .compareTo(fictionRev.getRevenue())); // 2 * 10 * (1 - 20/100) = 16
+              assertEquals(
+                  0,
+                  BigDecimal.valueOf(40.50)
+                      .compareTo(scienceRev.getRevenue())); // 3 * 15 * (1 - 10/100) = 40.5
             });
   }
 
