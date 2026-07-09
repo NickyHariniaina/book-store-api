@@ -7,7 +7,7 @@ import com.onlydevs.bookstore.service.BookEditionService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1")
-@AllArgsConstructor
+@RequestMapping
+@RequiredArgsConstructor
 public class BookEditionController {
   private final BookEditionService bookEditionService;
 

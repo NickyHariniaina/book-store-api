@@ -49,7 +49,7 @@ class PublisherControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/publishers")
+            post("/publishers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -70,7 +70,7 @@ class PublisherControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/publishers")
+            post("/publishers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isConflict());
@@ -84,7 +84,7 @@ class PublisherControllerTest {
     given(publisherService.getAllPublishers(any())).willReturn(new PageImpl<>(List.of(publisher)));
 
     mockMvc
-        .perform(get("/api/v1/publishers"))
+        .perform(get("/publishers"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].name").value("Test Publisher"));
   }
@@ -97,7 +97,7 @@ class PublisherControllerTest {
     given(publisherService.getPublisherById(id)).willReturn(response);
 
     mockMvc
-        .perform(get("/api/v1/publishers/{id}", id))
+        .perform(get("/publishers/{id}", id))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("Test Publisher"));
   }
@@ -109,7 +109,7 @@ class PublisherControllerTest {
     given(publisherService.getPublisherById(id))
         .willThrow(new NotFoundException("Publisher not found"));
 
-    mockMvc.perform(get("/api/v1/publishers/{id}", id)).andExpect(status().isNotFound());
+    mockMvc.perform(get("/publishers/{id}", id)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -122,7 +122,7 @@ class PublisherControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/publishers/{id}", id)
+            put("/publishers/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -139,7 +139,7 @@ class PublisherControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/publishers/{id}", id)
+            put("/publishers/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isNotFound());
@@ -148,7 +148,7 @@ class PublisherControllerTest {
   @Test
   void should_delete_publisher_ok() throws Exception {
     mockMvc
-        .perform(delete("/api/v1/publishers/{id}", UUID.randomUUID()))
+        .perform(delete("/publishers/{id}", UUID.randomUUID()))
         .andExpect(status().isNoContent());
   }
 
@@ -160,7 +160,7 @@ class PublisherControllerTest {
         .given(publisherService)
         .deletePublisher(id);
 
-    mockMvc.perform(delete("/api/v1/publishers/{id}", id)).andExpect(status().isNotFound());
+    mockMvc.perform(delete("/publishers/{id}", id)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -169,7 +169,7 @@ class PublisherControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/publishers")
+            post("/publishers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -177,9 +177,7 @@ class PublisherControllerTest {
 
   @Test
   void should_fail_when_invalid_uuid_for_get() throws Exception {
-    mockMvc
-        .perform(get("/api/v1/publishers/{id}", "invalid-uuid"))
-        .andExpect(status().isBadRequest());
+    mockMvc.perform(get("/publishers/{id}", "invalid-uuid")).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -188,7 +186,7 @@ class PublisherControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/publishers/{id}", "invalid-uuid")
+            put("/publishers/{id}", "invalid-uuid")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -196,8 +194,6 @@ class PublisherControllerTest {
 
   @Test
   void should_fail_when_invalid_uuid_for_delete() throws Exception {
-    mockMvc
-        .perform(delete("/api/v1/publishers/{id}", "invalid-uuid"))
-        .andExpect(status().isBadRequest());
+    mockMvc.perform(delete("/publishers/{id}", "invalid-uuid")).andExpect(status().isBadRequest());
   }
 }

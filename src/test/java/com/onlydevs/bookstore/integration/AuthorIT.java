@@ -35,7 +35,7 @@ class AuthorIT extends FacadeIT {
 
     webTestClient
         .post()
-        .uri("/api/v1/authors")
+        .uri("/authors")
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -55,7 +55,7 @@ class AuthorIT extends FacadeIT {
   void should_fail_when_creating_author_without_firstName() {
     webTestClient
         .post()
-        .uri("/api/v1/authors")
+        .uri("/authors")
         .bodyValue(CreateAuthorRequest.builder().lastName("Austen").build())
         .exchange()
         .expectStatus()
@@ -66,7 +66,7 @@ class AuthorIT extends FacadeIT {
   void should_fail_when_creating_author_without_lastName() {
     webTestClient
         .post()
-        .uri("/api/v1/authors")
+        .uri("/authors")
         .bodyValue(CreateAuthorRequest.builder().firstName("Jane").build())
         .exchange()
         .expectStatus()
@@ -80,7 +80,7 @@ class AuthorIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/api/v1/authors/" + saved.getId())
+        .uri("/authors/" + saved.getId())
         .exchange()
         .expectStatus()
         .isOk()
@@ -95,12 +95,7 @@ class AuthorIT extends FacadeIT {
 
   @Test
   void should_get_author_by_id_fail_when_not_found() {
-    webTestClient
-        .get()
-        .uri("/api/v1/authors/" + UUID.randomUUID())
-        .exchange()
-        .expectStatus()
-        .isNotFound();
+    webTestClient.get().uri("/authors/" + UUID.randomUUID()).exchange().expectStatus().isNotFound();
   }
 
   @Test
@@ -110,7 +105,7 @@ class AuthorIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/api/v1/authors")
+        .uri("/authors")
         .exchange()
         .expectStatus()
         .isOk()
@@ -128,7 +123,7 @@ class AuthorIT extends FacadeIT {
 
     webTestClient
         .put()
-        .uri("/api/v1/authors/" + saved.getId())
+        .uri("/authors/" + saved.getId())
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -148,7 +143,7 @@ class AuthorIT extends FacadeIT {
 
     webTestClient
         .put()
-        .uri("/api/v1/authors/" + UUID.randomUUID())
+        .uri("/authors/" + UUID.randomUUID())
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -162,7 +157,7 @@ class AuthorIT extends FacadeIT {
 
     webTestClient
         .put()
-        .uri("/api/v1/authors/" + saved.getId())
+        .uri("/authors/" + saved.getId())
         .bodyValue(UpdateAuthorRequest.builder().build())
         .exchange()
         .expectStatus()
@@ -180,12 +175,7 @@ class AuthorIT extends FacadeIT {
     var saved =
         authorRepository.save(Author.builder().firstName("Jane").lastName("Austen").build());
 
-    webTestClient
-        .delete()
-        .uri("/api/v1/authors/" + saved.getId())
-        .exchange()
-        .expectStatus()
-        .isNoContent();
+    webTestClient.delete().uri("/authors/" + saved.getId()).exchange().expectStatus().isNoContent();
 
     assertFalse(authorRepository.existsById(saved.getId()));
   }
@@ -194,7 +184,7 @@ class AuthorIT extends FacadeIT {
   void should_delete_author_fail_when_not_found() {
     webTestClient
         .delete()
-        .uri("/api/v1/authors/" + UUID.randomUUID())
+        .uri("/authors/" + UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound();

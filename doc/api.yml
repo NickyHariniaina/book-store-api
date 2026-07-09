@@ -6,7 +6,7 @@ info:
     REST API for the onlydevs bookstore digitalization platform.
     Covers catalog management, inventory tracking, and point-of-sale.
 servers:
-  - url: /api/v1
+  - url: /
     description: Default server
 tags:
   - name: Books
@@ -17,29 +17,19 @@ tags:
   - name: Publishers
   - name: BookStores
   - name: Inventory
-  - name: Customers
-  - name: Sales
   - name: Dashboard
 components:
   schemas:
-    # Enums
     AuthorRole:
       type: string
       enum: [PRIMARY, CO_AUTHOR, EDITOR, TRANSLATOR, ILLUSTRATOR, FOREWORD]
     BookFormat:
       type: string
       enum: [HARDCOVER, PAPERBACK, EBOOK, AUDIOBOOK]
-    SaleStatus:
-      type: string
-      enum: [PENDING, PAID, CANCELLED, REFUNDED]
-    PaymentMethod:
-      type: string
-      enum: [CASH, CARD, MOBILE_MONEY, BANK_TRANSFER]
     InventoryMovementType:
       type: string
       enum: [ARRIVAL, SALE, RETURN, ADJUSTMENT, DAMAGED, LOST]
 
-    # Request DTOs
     CreateBookRequest:
       type: object
       required: [title]
@@ -80,29 +70,6 @@ components:
       properties:
         firstName: { type: string, maxLength: 100 }
         lastName: { type: string, maxLength: 100 }
-    AddBookAuthorRequest:
-      type: object
-      required: [role]
-      properties:
-        role: { $ref: '#/components/schemas/AuthorRole' }
-        contributionOrder: { type: integer, minimum: 1 }
-    ChangeAuthorRoleRequest:
-      type: object
-      required: [role]
-      properties:
-        role: { $ref: '#/components/schemas/AuthorRole' }
-    UpdateContributionOrderRequest:
-      type: object
-      required: [contributionOrder]
-      properties:
-        contributionOrder: { type: integer, minimum: 1 }
-    ReorderAuthorsRequest:
-      type: object
-      required: [authorIDs]
-      properties:
-        authorIDs:
-          type: array
-          items: { type: string, format: uuid }
     CreateGenreRequest:
       type: object
       required: [name]
@@ -131,21 +98,6 @@ components:
         email: { type: string, maxLength: 255 }
         phone: { type: string, maxLength: 50 }
         country: { type: string, maxLength: 100 }
-    CreateCustomerRequest:
-      type: object
-      required: [firstName, lastName, email]
-      properties:
-        firstName: { type: string, maxLength: 100 }
-        lastName: { type: string, maxLength: 100 }
-        email: { type: string, maxLength: 255 }
-        phone: { type: string, maxLength: 50 }
-    UpdateCustomerRequest:
-      type: object
-      properties:
-        firstName: { type: string, maxLength: 100 }
-        lastName: { type: string, maxLength: 100 }
-        email: { type: string, maxLength: 255 }
-        phone: { type: string, maxLength: 50 }
     CreateBookStoreRequest:
       type: object
       required: [name, address]
@@ -161,21 +113,6 @@ components:
         address: { type: string, maxLength: 500 }
         phone: { type: string, maxLength: 50 }
         email: { type: string, maxLength: 255 }
-    OpenSaleRequest:
-      type: object
-      properties:
-        customerId: { type: string, format: uuid }
-    AddSaleItemRequest:
-      type: object
-      required: [editionId, quantity]
-      properties:
-        editionId: { type: string, format: uuid }
-        quantity: { type: integer, minimum: 1 }
-    ConfirmSaleRequest:
-      type: object
-      required: [paymentMethod]
-      properties:
-        paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
     ArrivalRequest:
       type: object
       required: [editionId, quantity]
@@ -197,14 +134,7 @@ components:
         editionId: { type: string, format: uuid }
         quantity: { type: integer, minimum: 1 }
         reason: { type: string, maxLength: 500 }
-    SetPriceRequest:
-      type: object
-      required: [price, effectiveFrom]
-      properties:
-        price: { type: number, minimum: 0.01 }
-        effectiveFrom: { type: string, format: date-time }
 
-    # Response DTOs
     AuthorResponse:
       type: object
       properties:
@@ -221,8 +151,8 @@ components:
         bookTitle: { type: string }
         authorId: { type: string, format: uuid }
         authorFullName: { type: string }
-        role: { $ref: '#/components/schemas/AuthorRole' }
-        contributionOrder: { type: integer }
+        role: { type: string, nullable: true }
+        contributionOrder: { type: integer, nullable: true }
     GenreResponse:
       type: object
       properties:
@@ -239,15 +169,6 @@ components:
         phone: { type: string, nullable: true }
         country: { type: string, nullable: true }
         createdAt: { type: string, format: date-time }
-    PriceResponse:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        price: { type: number }
-        effectiveFrom: { type: string, format: date-time }
-        effectiveTo: { type: string, format: date-time, nullable: true }
-        active: { type: boolean }
-        createdAt: { type: string, format: date-time }
     BookEditionResponse:
       type: object
       properties:
@@ -257,9 +178,8 @@ components:
         publisher: { $ref: '#/components/schemas/PublisherResponse' }
         isbn: { type: string }
         edition: { type: string, nullable: true }
-        format: { $ref: '#/components/schemas/BookFormat' }
+        format: { type: string }
         active: { type: boolean }
-        currentPrice: { type: number, nullable: true }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     BookSummaryResponse:
@@ -282,7 +202,6 @@ components:
         coverUrl: { type: string, nullable: true }
         authors: { type: array, items: { $ref: '#/components/schemas/BookAuthorResponse' } }
         genres: { type: array, items: { $ref: '#/components/schemas/GenreResponse' } }
-        editions: { type: array, items: { $ref: '#/components/schemas/BookEditionResponse' } }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     BookStoreResponse:
@@ -304,7 +223,6 @@ components:
         editionId: { type: string, format: uuid }
         bookTitle: { type: string }
         isbn: { type: string }
-        format: { $ref: '#/components/schemas/BookFormat' }
         quantityOnHand: { type: integer }
         reorderLevel: { type: integer }
         lowStock: { type: boolean }
@@ -317,78 +235,13 @@ components:
         editionId: { type: string, format: uuid }
         bookTitle: { type: string }
         isbn: { type: string }
-        type: { $ref: '#/components/schemas/InventoryMovementType' }
+        type: { type: string }
         quantity: { type: integer }
         signedQuantity: { type: integer }
         reason: { type: string, nullable: true }
         reference: { type: string, nullable: true }
         movedAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
-    CustomerResponse:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        firstName: { type: string }
-        lastName: { type: string }
-        fullName: { type: string }
-        email: { type: string }
-        phone: { type: string, nullable: true }
-        createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
-    SaleItemResponse:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        editionId: { type: string, format: uuid }
-        bookTitle: { type: string }
-        isbn: { type: string }
-        format: { $ref: '#/components/schemas/BookFormat' }
-        quantity: { type: integer }
-        unitPrice: { type: number }
-        discount: { type: number }
-        subtotal: { type: number }
-        createdAt: { type: string, format: date-time }
-    SaleSummaryResponse:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        storeId: { type: string, format: uuid }
-        storeName: { type: string }
-        customerId: { type: string, format: uuid, nullable: true }
-        customerName: { type: string, nullable: true }
-        status: { $ref: '#/components/schemas/SaleStatus' }
-        paymentMethod: { $ref: '#/components/schemas/PaymentMethod', nullable: true }
-        total: { type: number }
-        itemCount: { type: integer }
-        createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
-    SaleDetailResponse:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        storeId: { type: string, format: uuid }
-        storeName: { type: string }
-        customer: { $ref: '#/components/schemas/CustomerResponse', nullable: true }
-        status: { $ref: '#/components/schemas/SaleStatus' }
-        paymentMethod: { $ref: '#/components/schemas/PaymentMethod', nullable: true }
-        items: { type: array, items: { $ref: '#/components/schemas/SaleItemResponse' } }
-        total: { type: number }
-        createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
-    RevenueResponse:
-      type: object
-      properties:
-        revenue: { type: number }
-        period: { type: string }
-    TopSellerResponse:
-      type: object
-      properties:
-        editionId: { type: string, format: uuid }
-        bookTitle: { type: string }
-        isbn: { type: string }
-        format: { $ref: '#/components/schemas/BookFormat' }
-        totalQuantitySold: { type: integer }
-        totalRevenue: { type: number }
     RevenuePerGenreResponse:
       type: object
       properties:
@@ -413,7 +266,28 @@ paths:
     get:
       tags: [Books]
       summary: Search and list books (paginated)
-      responses: { '200': { description: OK } }
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 0 }
+        - in: query
+          name: size
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: sortBy
+          schema: { type: string, default: createdAt }
+        - in: query
+          name: sortDir
+          schema: { type: string, default: desc }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content: { type: array, items: { $ref: '#/components/schemas/BookSummaryResponse' } }
     post:
       tags: [Books]
       summary: Create new book
@@ -471,6 +345,48 @@ paths:
       responses:
         '204': { description: Deleted }
         '404': { description: Not found }
+  /editions/{editionId}/stock:
+    get:
+      tags: [Inventory]
+      summary: Get total stock of an edition across all stores
+      parameters:
+        - in: path
+          name: editionId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: integer }
+  /books/{bookId}/stock:
+    get:
+      tags: [Books]
+      summary: Get total stock of a book across all editions and all stores
+      parameters:
+        - in: path
+          name: bookId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: integer }
+  /books/low-stock:
+    get:
+      tags: [Books]
+      summary: Get all low stock items across all stores
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/InventoryItemResponse' }
   /books/{id}/genres/{genreId}:
     post:
       tags: [Books]
@@ -500,26 +416,10 @@ paths:
       responses: { '204': { description: No Content } }
 
   # Book Authors
-  /books/{bookId}/authors:
-    get:
-      tags: [BookAuthors]
-      summary: Authors for a book ordered by contributionOrder
-      parameters:
-        - in: path
-          name: bookId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/BookAuthorResponse' }
   /books/{bookId}/authors/{authorId}:
     post:
       tags: [BookAuthors]
-      summary: Add author to book with role
+      summary: Add author to book
       parameters:
         - in: path
           name: bookId
@@ -529,17 +429,11 @@ paths:
           name: authorId
           required: true
           schema: { type: string, format: uuid }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/AddBookAuthorRequest' }
       responses:
         '201':
           content:
             application/json:
               schema: { $ref: '#/components/schemas/BookAuthorResponse' }
-        '409': { description: Author already linked to this book }
     delete:
       tags: [BookAuthors]
       summary: Remove author from book
@@ -552,104 +446,21 @@ paths:
           name: authorId
           required: true
           schema: { type: string, format: uuid }
-      responses:
-        '204': { description: Removed }
-        '400': { description: Cannot remove last author }
-  /books/{bookId}/authors/{authorId}/role:
-    patch:
-      tags: [BookAuthors]
-      summary: Change author role on book
-      parameters:
-        - in: path
-          name: bookId
-          required: true
-          schema: { type: string, format: uuid }
-        - in: path
-          name: authorId
-          required: true
-          schema: { type: string, format: uuid }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/ChangeAuthorRoleRequest' }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/BookAuthorResponse' }
-  /books/{bookId}/authors/reorder:
-    patch:
-      tags: [BookAuthors]
-      summary: Bulk reorder all authors on a book
-      parameters:
-        - in: path
-          name: bookId
-          required: true
-          schema: { type: string, format: uuid }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/ReorderAuthorsRequest' }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/BookAuthorResponse' }
-  /authors/{authorId}/books:
-    get:
-      tags: [BookAuthors]
-      summary: All books an author contributed to
-      parameters:
-        - in: path
-          name: authorId
-          required: true
-          schema: { type: string, format: uuid }
-        - in: query
-          name: role
-          schema: { $ref: '#/components/schemas/AuthorRole' }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/BookAuthorResponse' }
-  /authors/{authorId}/contributions:
-    get:
-      tags: [BookAuthors]
-      summary: Role breakdown map for author profile
-      parameters:
-        - in: path
-          name: authorId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          description: Map of AuthorRole to count
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: { type: integer }
+      responses: { '204': { description: Removed } }
 
   # Authors
   /authors:
     get:
       tags: [Authors]
-      summary: Search authors by name
+      summary: Search authors by name (paginated)
       responses:
         '200':
-          description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuthorResponse'
+                type: object
+                properties:
+                  content: { type: array, items: { $ref: '#/components/schemas/AuthorResponse' } }
     post:
       tags: [Authors]
       summary: Create author
@@ -708,7 +519,7 @@ paths:
   /books/{bookId}/editions:
     get:
       tags: [BookEditions]
-      summary: List editions for a book (paginated)
+      summary: List editions for a book
       parameters:
         - in: path
           name: bookId
@@ -773,7 +584,7 @@ paths:
   /editions/isbn/{isbn}:
     get:
       tags: [BookEditions]
-      summary: Lookup by ISBN (barcode scan)
+      summary: Lookup by ISBN
       parameters:
         - in: path
           name: isbn
@@ -812,86 +623,20 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/BookEditionResponse' }
-  /editions/{id}/prices:
-    get:
-      tags: [BookEditions]
-      summary: Full price history
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/PriceResponse' }
-    post:
-      tags: [BookEditions]
-      summary: Set new price (auto-closes previous)
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/SetPriceRequest' }
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/PriceResponse' }
-  /editions/{id}/prices/current:
-    get:
-      tags: [BookEditions]
-      summary: Current active price
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/PriceResponse' }
-  /editions/{id}/movements:
-    get:
-      tags: [BookEditions]
-      summary: Inventory movements for an edition
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/InventoryMovementResponse' }
 
   # Genres
   /genres:
     get:
       tags: [Genres]
-      summary: List all genres
+      summary: List all genres (paginated)
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/GenreResponse' }
+                type: object
+                properties:
+                  content: { type: array, items: { $ref: '#/components/schemas/GenreResponse' } }
     post:
       tags: [Genres]
       summary: Create genre
@@ -908,7 +653,7 @@ paths:
   /genres/{id}/books:
     get:
       tags: [Genres]
-      summary: Books in genre
+      summary: Books in genre (paginated)
       parameters:
         - in: path
           name: id
@@ -919,8 +664,9 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/BookSummaryResponse' }
+                type: object
+                properties:
+                  content: { type: array, items: { $ref: '#/components/schemas/BookSummaryResponse' } }
   /genres/{id}/rename:
     patch:
       tags: [Genres]
@@ -966,14 +712,15 @@ paths:
   /publishers:
     get:
       tags: [Publishers]
-      summary: List and search publishers
+      summary: List and search publishers (paginated)
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/PublisherResponse' }
+                type: object
+                properties:
+                  content: { type: array, items: { $ref: '#/components/schemas/PublisherResponse' } }
     post:
       tags: [Publishers]
       summary: Create publisher
@@ -1032,14 +779,15 @@ paths:
   /stores:
     get:
       tags: [BookStores]
-      summary: List all stores
+      summary: List all stores (paginated)
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/BookStoreResponse' }
+                type: object
+                properties:
+                  content: { type: array, items: { $ref: '#/components/schemas/BookStoreResponse' } }
     post:
       tags: [BookStores]
       summary: Create store
@@ -1084,63 +832,22 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/BookStoreResponse' }
-  /stores/{id}/stock:
-    get:
+    delete:
       tags: [BookStores]
-      summary: Books in stock (dashboard)
+      summary: Delete store
       parameters:
         - in: path
           name: id
           required: true
           schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/InventoryItemResponse' }
-  /stores/{id}/low-stock:
+      responses: { '204': { description: Deleted } }
+  /stores/{id}/stock/{editionId}:
     get:
       tags: [BookStores]
-      summary: Low stock items (dashboard)
+      summary: Stock quantity for specific edition at a store
       parameters:
         - in: path
           name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/InventoryItemResponse' }
-
-  # Inventory
-  /stores/{storeId}/inventory:
-    get:
-      tags: [Inventory]
-      summary: All inventory for a store (paginated)
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/InventoryItemResponse' }
-  /stores/{storeId}/inventory/{editionId}:
-    get:
-      tags: [Inventory]
-      summary: Stock level for specific edition
-      parameters:
-        - in: path
-          name: storeId
           required: true
           schema: { type: string, format: uuid }
         - in: path
@@ -1149,9 +856,49 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         '200':
+          description: OK
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/InventoryItemResponse' }
+              schema: { type: integer }
+  /stores/{id}/books/{bookId}/stock:
+    get:
+      tags: [BookStores]
+      summary: Total stock of a book (all editions) at a specific store
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+        - in: path
+          name: bookId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: integer }
+
+  /stores/{id}/low-stock:
+    get:
+      tags: [BookStores]
+      summary: Low stock items at a store (quantity <= reorder level)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/InventoryItemResponse' }
+
+  # Inventory
   /stores/{storeId}/inventory/arrival:
     post:
       tags: [Inventory]
@@ -1231,10 +978,30 @@ paths:
   /stores/{storeId}/movements:
     get:
       tags: [Inventory]
-      summary: Movement log (filter by type/date)
+      summary: Movement log (filter by type)
       parameters:
         - in: path
           name: storeId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: type
+          required: false
+          schema: { $ref: '#/components/schemas/InventoryMovementType' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/InventoryMovementResponse' }
+  /editions/{editionId}/movements:
+    get:
+      tags: [Inventory]
+      summary: Inventory movements for an edition (across all stores)
+      parameters:
+        - in: path
+          name: editionId
           required: true
           schema: { type: string, format: uuid }
       responses:
@@ -1244,336 +1011,3 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/InventoryMovementResponse' }
-
-  # Customers
-  /customers:
-    get:
-      tags: [Customers]
-      summary: Search customers by name or email
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/CustomerResponse' }
-    post:
-      tags: [Customers]
-      summary: Register customer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/CreateCustomerRequest' }
-      responses:
-        '201':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/CustomerResponse' }
-  /customers/{id}:
-    get:
-      tags: [Customers]
-      summary: Get customer profile
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/CustomerResponse' }
-    put:
-      tags: [Customers]
-      summary: Update customer
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      requestBody:
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/UpdateCustomerRequest' }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/CustomerResponse' }
-  /customers/{id}/sales:
-    get:
-      tags: [Customers]
-      summary: Customer purchase history
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/SaleSummaryResponse' }
-
-  # Sales
-  /stores/{storeId}/sales:
-    post:
-      tags: [Sales]
-      summary: Open new PENDING sale
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-      requestBody:
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/OpenSaleRequest' }
-      responses:
-        '201':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SaleDetailResponse' }
-    get:
-      tags: [Sales]
-      summary: List sales (filter status/date)
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/SaleSummaryResponse' }
-  /sales/{id}:
-    get:
-      tags: [Sales]
-      summary: Get sale detail
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SaleDetailResponse' }
-  /sales/{id}/items:
-    get:
-      tags: [Sales]
-      summary: Line items in a sale
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/SaleItemResponse' }
-    post:
-      tags: [Sales]
-      summary: Add item to PENDING sale
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/AddSaleItemRequest' }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SaleDetailResponse' }
-        '400': { description: Sale not in PENDING status or edition not active }
-  /sales/{id}/items/{itemId}:
-    delete:
-      tags: [Sales]
-      summary: Remove item from PENDING sale
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-        - in: path
-          name: itemId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '204': { description: No Content }
-  /sales/{id}/confirm:
-    patch:
-      tags: [Sales]
-      summary: Confirm sale — PENDING to PAID, decrements stock
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/ConfirmSaleRequest' }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SaleDetailResponse' }
-        '400': { description: Not PENDING or insufficient stock }
-  /sales/{id}/cancel:
-    patch:
-      tags: [Sales]
-      summary: Cancel sale — PENDING to CANCELLED
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SaleDetailResponse' }
-  /sales/{id}/refund:
-    patch:
-      tags: [Sales]
-      summary: Refund sale — PAID to REFUNDED, restores stock
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SaleDetailResponse' }
-
-  # Dashboard
-  /stores/{storeId}/sales/pending:
-    get:
-      tags: [Dashboard]
-      summary: Pending sales (dashboard)
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/SaleSummaryResponse' }
-  /stores/{storeId}/sales/recent:
-    get:
-      tags: [Dashboard]
-      summary: Recent confirmed sales (dashboard)
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/SaleSummaryResponse' }
-  /stores/{storeId}/dashboard/today-revenue:
-    get:
-      tags: [Dashboard]
-      summary: Revenue since midnight UTC today
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/RevenueResponse' }
-  /stores/{storeId}/dashboard/monthly-revenue:
-    get:
-      tags: [Dashboard]
-      summary: Revenue for a calendar month
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-        - in: query
-          name: year
-          required: true
-          schema: { type: integer }
-        - in: query
-          name: month
-          required: true
-          schema: { type: integer, minimum: 1, maximum: 12 }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/RevenueResponse' }
-  /stores/{storeId}/dashboard/top-sellers:
-    get:
-      tags: [Dashboard]
-      summary: Top N editions by units sold
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-        - in: query
-          name: limit
-          schema: { type: integer, default: 10 }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/TopSellerResponse' }
-  /stores/{storeId}/dashboard/revenue-per-genre:
-    get:
-      tags: [Dashboard]
-      summary: Revenue grouped by genre for a date range
-      parameters:
-        - in: path
-          name: storeId
-          required: true
-          schema: { type: string, format: uuid }
-        - in: query
-          name: from
-          required: true
-          schema: { type: string, format: date-time }
-        - in: query
-          name: to
-          required: true
-          schema: { type: string, format: date-time }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/RevenuePerGenreResponse' }

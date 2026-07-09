@@ -594,37 +594,46 @@ class BookServiceTest {
   }
 
   @Test
-  void getEditionStock_withValidBookAndEdition_shouldReturnCorrectStock() {
-    BookEdition edition = BookEdition.builder().id(editionId).book(book).build();
-    InventoryItem item1 = InventoryItem.builder().quantityOnHand(5).build();
-    InventoryItem item2 = InventoryItem.builder().quantityOnHand(3).build();
+  void getBookTotalStock_whenBookExists_shouldReturnSum() {
+    given(bookRepository.existsById(bookId)).willReturn(true);
+    given(inventoryItemRepository.sumQuantityByBookId(bookId)).willReturn(25);
 
-    given(bookEditionRepository.findById(editionId)).willReturn(Optional.of(edition));
-    given(inventoryItemRepository.findByBookEditionId(editionId)).willReturn(List.of(item1, item2));
+    Integer result = bookService.getBookTotalStock(bookId);
 
-    Integer stock = bookService.getEditionStock(bookId, editionId);
-
-    assertThat(stock).isEqualTo(8);
+    assertThat(result).isEqualTo(25);
+    then(bookRepository).should().existsById(bookId);
+    then(inventoryItemRepository).should().sumQuantityByBookId(bookId);
   }
 
   @Test
-  void getEditionStock_withNonExistingEdition_shouldThrow404() {
-    given(bookEditionRepository.findById(editionId)).willReturn(Optional.empty());
+  void getBookTotalStock_whenBookNotFound_shouldThrow() {
+    given(bookRepository.existsById(bookId)).willReturn(false);
 
-    assertThatThrownBy(() -> bookService.getEditionStock(bookId, editionId))
+    assertThatThrownBy(() -> bookService.getBookTotalStock(bookId))
         .isInstanceOf(NotFoundException.class)
-        .hasMessageContaining("Edition not found");
+        .hasMessageContaining("Book not found");
   }
 
   @Test
-  void getEditionStock_withEditionBelongingToAnotherBook_shouldThrow404() {
-    Book otherBook = Book.builder().id(UUID.randomUUID()).title("Other Book").build();
-    BookEdition edition = BookEdition.builder().id(editionId).book(otherBook).build();
+  void getAllLowStock_shouldReturnItems() {
+    var lowItem1 = InventoryItem.builder().quantityOnHand(2).reorderLevel(5).build();
+    var lowItem2 = InventoryItem.builder().quantityOnHand(0).reorderLevel(3).build();
 
-    given(bookEditionRepository.findById(editionId)).willReturn(Optional.of(edition));
+    given(inventoryItemRepository.findAllLowStock()).willReturn(List.of(lowItem1, lowItem2));
 
-    assertThatThrownBy(() -> bookService.getEditionStock(bookId, editionId))
-        .isInstanceOf(BadRequestException.class)
-        .hasMessageContaining("Edition does not belong to book");
+    var result = bookService.getAllLowStock();
+
+    assertThat(result).hasSize(2);
+    then(inventoryItemRepository).should().findAllLowStock();
+  }
+
+  @Test
+  void getAllLowStock_whenEmpty_shouldReturnEmptyList() {
+    given(inventoryItemRepository.findAllLowStock()).willReturn(List.of());
+
+    var result = bookService.getAllLowStock();
+
+    assertThat(result).isEmpty();
+    then(inventoryItemRepository).should().findAllLowStock();
   }
 }
