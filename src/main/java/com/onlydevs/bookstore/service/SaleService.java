@@ -17,13 +17,13 @@ import com.onlydevs.bookstore.repository.CustomerRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import com.onlydevs.bookstore.repository.SaleRepository;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
