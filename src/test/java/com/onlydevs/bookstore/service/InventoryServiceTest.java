@@ -51,7 +51,7 @@ class InventoryServiceTest {
   void setUp() {
     storeId = UUID.randomUUID();
     editionId = UUID.randomUUID();
-    store = BookStore.builder().id(storeId).name("Test Store").build();
+    store = BookStore.builder().id(storeId).name("My Store").build();
     edition = BookEdition.builder().id(editionId).isbn("1234567890").build();
     item =
         InventoryItem.builder()
@@ -61,37 +61,6 @@ class InventoryServiceTest {
             .quantityOnHand(10)
             .reorderLevel(5)
             .build();
-  }
-
-  @Test
-  void get_inventory_by_store_should_return_list() {
-    given(inventoryItemRepository.findByBookStoreId(storeId)).willReturn(List.of(item));
-
-    var result = inventoryService.getInventoryByStore(storeId);
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getQuantityOnHand()).isEqualTo(10);
-    then(inventoryItemRepository).should().findByBookStoreId(storeId);
-  }
-
-  @Test
-  void get_stock_by_edition_when_found_should_return_item() {
-    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
-        .willReturn(Optional.of(item));
-
-    var result = inventoryService.getStockByEdition(storeId, editionId);
-
-    assertThat(result).isNotNull();
-    assertThat(result.getQuantityOnHand()).isEqualTo(10);
-  }
-
-  @Test
-  void get_stock_by_edition_when_not_found_should_throw() {
-    given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
-        .willReturn(Optional.empty());
-
-    assertThatThrownBy(() -> inventoryService.getStockByEdition(storeId, editionId))
-        .isInstanceOf(NotFoundException.class);
   }
 
   @Test
@@ -238,5 +207,27 @@ class InventoryServiceTest {
     then(inventoryMovementRepository)
         .should()
         .findByBookStoreIdAndInventoryMovementType(storeId, InventoryMovementType.ARRIVAL);
+  }
+
+  @Test
+  void getEditionStock_shouldSumAcrossAllStores() {
+    InventoryItem item1 = InventoryItem.builder().quantityOnHand(5).build();
+    InventoryItem item2 = InventoryItem.builder().quantityOnHand(3).build();
+    given(inventoryItemRepository.findByBookEditionId(editionId)).willReturn(List.of(item1, item2));
+
+    Integer stock = inventoryService.getEditionStock(editionId);
+
+    assertThat(stock).isEqualTo(8);
+    then(inventoryItemRepository).should().findByBookEditionId(editionId);
+  }
+
+  @Test
+  void getEditionStock_withNoInventory_shouldReturnZero() {
+    given(inventoryItemRepository.findByBookEditionId(editionId)).willReturn(List.of());
+
+    Integer stock = inventoryService.getEditionStock(editionId);
+
+    assertThat(stock).isEqualTo(0);
+    then(inventoryItemRepository).should().findByBookEditionId(editionId);
   }
 }

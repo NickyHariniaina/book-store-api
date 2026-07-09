@@ -41,7 +41,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .post()
-        .uri("/api/v1/publishers")
+        .uri("/publishers")
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -68,7 +68,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .post()
-        .uri("/api/v1/publishers")
+        .uri("/publishers")
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -82,7 +82,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/api/v1/publishers")
+        .uri("/publishers")
         .exchange()
         .expectStatus()
         .isOk()
@@ -102,7 +102,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/api/v1/publishers/{id}", saved.getId())
+        .uri("/publishers/{id}", saved.getId())
         .exchange()
         .expectStatus()
         .isOk()
@@ -118,7 +118,7 @@ class PublisherIT extends FacadeIT {
   void should_fail_when_publisher_not_found() {
     webTestClient
         .get()
-        .uri("/api/v1/publishers/{id}", UUID.randomUUID())
+        .uri("/publishers/{id}", UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound();
@@ -133,7 +133,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .put()
-        .uri("/api/v1/publishers/{id}", saved.getId())
+        .uri("/publishers/{id}", saved.getId())
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -141,7 +141,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .get()
-        .uri("/api/v1/publishers/{id}", saved.getId())
+        .uri("/publishers/{id}", saved.getId())
         .exchange()
         .expectStatus()
         .isOk()
@@ -155,7 +155,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .put()
-        .uri("/api/v1/publishers/{id}", UUID.randomUUID())
+        .uri("/publishers/{id}", UUID.randomUUID())
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -169,7 +169,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .delete()
-        .uri("/api/v1/publishers/{id}", saved.getId())
+        .uri("/publishers/{id}", saved.getId())
         .exchange()
         .expectStatus()
         .isNoContent();
@@ -181,7 +181,7 @@ class PublisherIT extends FacadeIT {
   void should_fail_when_delete_not_found() {
     webTestClient
         .delete()
-        .uri("/api/v1/publishers/{id}", UUID.randomUUID())
+        .uri("/publishers/{id}", UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound();
@@ -191,7 +191,7 @@ class PublisherIT extends FacadeIT {
   void should_fail_when_invalid_uuid_for_get() {
     webTestClient
         .get()
-        .uri("/api/v1/publishers/{id}", "invalid-uuid")
+        .uri("/publishers/{id}", "invalid-uuid")
         .exchange()
         .expectStatus()
         .isBadRequest();
@@ -203,7 +203,7 @@ class PublisherIT extends FacadeIT {
 
     webTestClient
         .put()
-        .uri("/api/v1/publishers/{id}", "invalid-uuid")
+        .uri("/publishers/{id}", "invalid-uuid")
         .bodyValue(request)
         .exchange()
         .expectStatus()
@@ -214,7 +214,7 @@ class PublisherIT extends FacadeIT {
   void should_fail_when_invalid_uuid_for_delete() {
     webTestClient
         .delete()
-        .uri("/api/v1/publishers/{id}", "invalid-uuid")
+        .uri("/publishers/{id}", "invalid-uuid")
         .exchange()
         .expectStatus()
         .isBadRequest();

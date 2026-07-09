@@ -26,19 +26,6 @@ public class InventoryService {
   private final BookStoreRepository bookStoreRepository;
   private final BookEditionRepository bookEditionRepository;
 
-  public List<InventoryItem> getInventoryByStore(UUID storeId) {
-    return inventoryItemRepository.findByBookStoreId(storeId);
-  }
-
-  public InventoryItem getStockByEdition(UUID storeId, UUID editionId) {
-    return inventoryItemRepository
-        .findByBookStoreIdAndBookEditionId(storeId, editionId)
-        .orElseThrow(
-            () ->
-                new NotFoundException(
-                    "Stock not found for store " + storeId + " and edition " + editionId));
-  }
-
   @Transactional
   public InventoryItem recordArrival(
       UUID storeId, UUID editionId, Integer quantity, String reference) {
@@ -68,7 +55,7 @@ public class InventoryService {
             .bookStore(storeRef)
             .bookEdition(editionRef)
             .quantityOnHand(quantity)
-            .reorderLevel(0)
+            .reorderLevel(3)
             .build();
 
     inventoryItemRepository.save(newItem);
@@ -79,9 +66,18 @@ public class InventoryService {
     return newItem;
   }
 
+  private InventoryItem findItem(UUID storeId, UUID editionId) {
+    return inventoryItemRepository
+        .findByBookStoreIdAndBookEditionId(storeId, editionId)
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    "Stock not found for store " + storeId + " and edition " + editionId));
+  }
+
   @Transactional
   public InventoryItem adjustStock(UUID storeId, UUID editionId, Integer quantity, String reason) {
-    InventoryItem item = getStockByEdition(storeId, editionId);
+    InventoryItem item = findItem(storeId, editionId);
 
     int newQuantity = item.getQuantityOnHand() + quantity;
     if (newQuantity < 0) {
@@ -106,7 +102,7 @@ public class InventoryService {
   @Transactional
   public InventoryItem recordDamaged(
       UUID storeId, UUID editionId, Integer quantity, String reason) {
-    InventoryItem item = getStockByEdition(storeId, editionId);
+    InventoryItem item = findItem(storeId, editionId);
     applyStockDecrement(item, quantity);
 
     String movementReason = (reason != null) ? reason : "Marked as damaged";
@@ -123,7 +119,7 @@ public class InventoryService {
 
   @Transactional
   public InventoryItem recordLost(UUID storeId, UUID editionId, Integer quantity, String reason) {
-    InventoryItem item = getStockByEdition(storeId, editionId);
+    InventoryItem item = findItem(storeId, editionId);
     applyStockDecrement(item, quantity);
 
     String movementReason = (reason != null) ? reason : "Marked as lost";
@@ -136,6 +132,12 @@ public class InventoryService {
         "LOST-" + UUID.randomUUID());
 
     return item;
+  }
+
+  public Integer getEditionStock(UUID editionId) {
+    return inventoryItemRepository.findByBookEditionId(editionId).stream()
+        .mapToInt(InventoryItem::getQuantityOnHand)
+        .sum();
   }
 
   public List<InventoryMovement> getMovementsByEdition(UUID editionId) {
