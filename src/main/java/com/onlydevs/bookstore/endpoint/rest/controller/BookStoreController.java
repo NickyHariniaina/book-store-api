@@ -76,17 +76,10 @@ public class BookStoreController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @GetMapping("/{id}/inventory")
-  public ResponseEntity<List<InventoryItemResponse>> getInventory(@PathVariable UUID id) {
-    var items = bookStoreService.getInventoryByStore(id);
-    return ResponseEntity.ok(inventoryMapper.toRestList(items));
-  }
-
-  @GetMapping("/{id}/inventory/{editionId}")
-  public ResponseEntity<InventoryItemResponse> getStockByEdition(
+  @GetMapping("/{id}/stock/{editionId}")
+  public ResponseEntity<Integer> getStockByEdition(
       @PathVariable UUID id, @PathVariable UUID editionId) {
-    var item = bookStoreService.getStockByEdition(id, editionId);
-    return ResponseEntity.ok(inventoryMapper.toRest(item));
+    return ResponseEntity.ok(bookStoreService.getStockByEdition(id, editionId));
   }
 
   @GetMapping("/{id}/books/{bookId}/stock")

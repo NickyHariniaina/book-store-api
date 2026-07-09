@@ -841,26 +841,10 @@ paths:
           required: true
           schema: { type: string, format: uuid }
       responses: { '204': { description: Deleted } }
-  /stores/{id}/inventory:
+  /stores/{id}/stock/{editionId}:
     get:
       tags: [BookStores]
-      summary: All inventory items at a store
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/InventoryItemResponse' }
-  /stores/{id}/inventory/{editionId}:
-    get:
-      tags: [BookStores]
-      summary: Stock level for specific edition at a store
+      summary: Stock quantity for specific edition at a store
       parameters:
         - in: path
           name: id
@@ -872,9 +856,10 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         '200':
+          description: OK
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/InventoryItemResponse' }
+              schema: { type: integer }
   /stores/{id}/books/{bookId}/stock:
     get:
       tags: [BookStores]

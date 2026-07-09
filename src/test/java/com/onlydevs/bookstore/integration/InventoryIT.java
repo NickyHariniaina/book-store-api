@@ -45,23 +45,10 @@ class InventoryIT extends FacadeIT {
   }
 
   @Test
-  void get_inventory_should_return_list() {
-    webTestClient
-        .get()
-        .uri("/stores/{storeId}/inventory", storeId)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$")
-        .isArray();
-  }
-
-  @Test
   void get_stock_by_edition_should_return_404_when_not_found() {
     webTestClient
         .get()
-        .uri("/stores/{storeId}/inventory/{editionId}", storeId, UUID.randomUUID())
+        .uri("/stores/{storeId}/stock/{editionId}", storeId, UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isNotFound()

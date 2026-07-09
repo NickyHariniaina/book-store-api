@@ -214,25 +214,14 @@ class BookStoreServiceTest {
   }
 
   @Test
-  void get_inventory_by_store_should_return_list() {
-    var item = InventoryItem.builder().id(UUID.randomUUID()).build();
-    given(inventoryItemRepository.findByBookStoreId(storeId)).willReturn(List.of(item));
-
-    var result = bookStoreService.getInventoryByStore(storeId);
-
-    assertThat(result).hasSize(1);
-    then(inventoryItemRepository).should().findByBookStoreId(storeId);
-  }
-
-  @Test
-  void get_stock_by_edition_when_found_should_return_item() {
-    var item = InventoryItem.builder().id(UUID.randomUUID()).build();
+  void get_stock_by_edition_when_found_should_return_integer() {
+    var item = InventoryItem.builder().quantityOnHand(10).build();
     given(inventoryItemRepository.findByBookStoreIdAndBookEditionId(storeId, editionId))
         .willReturn(Optional.of(item));
 
     var result = bookStoreService.getStockByEdition(storeId, editionId);
 
-    assertThat(result).isNotNull();
+    assertThat(result).isEqualTo(10);
     then(inventoryItemRepository).should().findByBookStoreIdAndBookEditionId(storeId, editionId);
   }
 

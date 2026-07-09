@@ -76,13 +76,10 @@ public class BookStoreService {
     bookStoreRepository.deleteById(id);
   }
 
-  public List<InventoryItem> getInventoryByStore(UUID storeId) {
-    return inventoryItemRepository.findByBookStoreId(storeId);
-  }
-
-  public InventoryItem getStockByEdition(UUID storeId, UUID editionId) {
+  public Integer getStockByEdition(UUID storeId, UUID editionId) {
     return inventoryItemRepository
         .findByBookStoreIdAndBookEditionId(storeId, editionId)
+        .map(InventoryItem::getQuantityOnHand)
         .orElseThrow(
             () ->
                 new NotFoundException(

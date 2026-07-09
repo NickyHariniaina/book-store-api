@@ -157,43 +157,13 @@ class BookStoreControllerTest {
   }
 
   @Test
-  void get_inventory_should_return_list() throws Exception {
-    InventoryItemResponse response =
-        InventoryItemResponse.builder()
-            .id(UUID.randomUUID())
-            .storeId(storeId)
-            .editionId(editionId)
-            .quantityOnHand(10)
-            .reorderLevel(5)
-            .lowStock(false)
-            .build();
-
-    given(bookStoreService.getInventoryByStore(storeId)).willReturn(List.of());
-    given(inventoryMapper.toRestList(any())).willReturn(List.of(response));
+  void get_stock_by_edition_should_return_integer() throws Exception {
+    given(bookStoreService.getStockByEdition(storeId, editionId)).willReturn(10);
 
     mockMvc
-        .perform(get("/stores/{id}/inventory", storeId))
+        .perform(get("/stores/{id}/stock/{editionId}", storeId, editionId))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].quantityOnHand").value(10));
-  }
-
-  @Test
-  void get_stock_by_edition_should_return_item() throws Exception {
-    InventoryItemResponse response =
-        InventoryItemResponse.builder()
-            .id(UUID.randomUUID())
-            .storeId(storeId)
-            .editionId(editionId)
-            .quantityOnHand(10)
-            .build();
-
-    given(bookStoreService.getStockByEdition(storeId, editionId)).willReturn(null);
-    given(inventoryMapper.toRest(any())).willReturn(response);
-
-    mockMvc
-        .perform(get("/stores/{id}/inventory/{editionId}", storeId, editionId))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.quantityOnHand").value(10));
+        .andExpect(content().string("10"));
   }
 
   @Test
