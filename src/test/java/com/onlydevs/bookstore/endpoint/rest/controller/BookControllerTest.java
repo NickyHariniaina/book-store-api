@@ -10,13 +10,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onlydevs.bookstore.endpoint.rest.mapper.InventoryMapper;
 import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
 import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
-import com.onlydevs.bookstore.model.dto.response.InventoryItemResponse;
 import com.onlydevs.bookstore.service.BookService;
 import java.time.Instant;
 import java.util.List;
@@ -41,8 +39,6 @@ class BookControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockBean private BookService bookService;
-
-  @MockBean private InventoryMapper inventoryMapper;
 
   private final UUID bookId = UUID.randomUUID();
   private final UUID editionId = UUID.randomUUID();
@@ -184,35 +180,5 @@ class BookControllerTest {
     mockMvc
         .perform(delete("/books/{id}/genres/{genreId}", bookId, genreId))
         .andExpect(status().isNoContent());
-  }
-
-  @Test
-  void getBookTotalStock_ShouldReturnStock() throws Exception {
-    given(bookService.getBookTotalStock(bookId)).willReturn(100);
-
-    mockMvc
-        .perform(get("/books/{bookId}/stock", bookId))
-        .andExpect(status().isOk())
-        .andExpect(content().string("100"));
-  }
-
-  @Test
-  void getAllLowStock_ShouldReturnItems() throws Exception {
-    InventoryItemResponse response =
-        InventoryItemResponse.builder()
-            .id(UUID.randomUUID())
-            .editionId(editionId)
-            .quantityOnHand(2)
-            .reorderLevel(5)
-            .lowStock(true)
-            .build();
-
-    given(bookService.getAllLowStock()).willReturn(List.of());
-    given(inventoryMapper.toRestList(any())).willReturn(List.of(response));
-
-    mockMvc
-        .perform(get("/books/low-stock"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].lowStock").value(true));
   }
 }

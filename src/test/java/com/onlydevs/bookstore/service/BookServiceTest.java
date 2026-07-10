@@ -23,7 +23,6 @@ import com.onlydevs.bookstore.repository.BookAuthorRepository;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.GenreRepository;
-import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
@@ -55,8 +54,6 @@ class BookServiceTest {
   @Mock private BookAuthorRepository bookAuthorRepository;
 
   @Mock private BookEditionRepository bookEditionRepository;
-
-  @Mock private InventoryItemRepository inventoryItemRepository;
 
   @InjectMocks private BookService bookService;
 
@@ -590,49 +587,5 @@ class BookServiceTest {
 
     assertThat(book.getGenres()).doesNotContain(genre);
     then(bookRepository).should().save(book);
-  }
-
-  @Test
-  void getBookTotalStock_whenBookExists_shouldReturnSum() {
-    given(bookRepository.existsById(bookId)).willReturn(true);
-    given(inventoryItemRepository.sumQuantityByBookId(bookId)).willReturn(25);
-
-    Integer result = bookService.getBookTotalStock(bookId);
-
-    assertThat(result).isEqualTo(25);
-    then(bookRepository).should().existsById(bookId);
-    then(inventoryItemRepository).should().sumQuantityByBookId(bookId);
-  }
-
-  @Test
-  void getBookTotalStock_whenBookNotFound_shouldThrow() {
-    given(bookRepository.existsById(bookId)).willReturn(false);
-
-    assertThatThrownBy(() -> bookService.getBookTotalStock(bookId))
-        .isInstanceOf(NotFoundException.class)
-        .hasMessageContaining("Book not found");
-  }
-
-  @Test
-  void getAllLowStock_shouldReturnItems() {
-    var lowItem1 = InventoryItem.builder().quantityOnHand(2).reorderLevel(5).build();
-    var lowItem2 = InventoryItem.builder().quantityOnHand(0).reorderLevel(3).build();
-
-    given(inventoryItemRepository.findAllLowStock()).willReturn(List.of(lowItem1, lowItem2));
-
-    var result = bookService.getAllLowStock();
-
-    assertThat(result).hasSize(2);
-    then(inventoryItemRepository).should().findAllLowStock();
-  }
-
-  @Test
-  void getAllLowStock_whenEmpty_shouldReturnEmptyList() {
-    given(inventoryItemRepository.findAllLowStock()).willReturn(List.of());
-
-    var result = bookService.getAllLowStock();
-
-    assertThat(result).isEmpty();
-    then(inventoryItemRepository).should().findAllLowStock();
   }
 }

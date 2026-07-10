@@ -415,33 +415,6 @@ paths:
           content:
             application/json:
               schema: { type: integer }
-  /books/{bookId}/stock:
-    get:
-      tags: [Books]
-      summary: Get total stock of a book across all editions
-      parameters:
-        - in: path
-          name: bookId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: { type: integer }
-  /books/low-stock:
-    get:
-      tags: [Books]
-      summary: Get all low stock items
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/InventoryItemResponse' }
   /books/{id}/genres/{genreId}:
     post:
       tags: [Books]
@@ -941,6 +914,21 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/InventoryItemResponse' }
+  /inventory/books/{bookId}/stock:
+    get:
+      tags: [Inventory]
+      summary: Get total stock of a book across all editions
+      parameters:
+        - in: path
+          name: bookId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: integer }
   /inventory/low-stock:
     get:
       tags: [Inventory]
