@@ -13,6 +13,7 @@ import com.onlydevs.bookstore.model.InventoryMovement;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
+import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import java.util.Optional;
@@ -33,15 +34,19 @@ class InventoryServiceTest {
 
   @Mock private BookEditionRepository bookEditionRepository;
 
+  @Mock private BookRepository bookRepository;
+
   @InjectMocks private InventoryService inventoryService;
 
   private UUID editionId;
+  private UUID bookId;
   private BookEdition edition;
   private InventoryItem item;
 
   @BeforeEach
   void setUp() {
     editionId = UUID.randomUUID();
+    bookId = UUID.randomUUID();
     edition = BookEdition.builder().id(editionId).isbn("1234567890").build();
     item =
         InventoryItem.builder()
@@ -160,6 +165,27 @@ class InventoryServiceTest {
 
     assertThat(result).isEmpty();
     then(inventoryMovementRepository).should().findByBookEditionId(editionId);
+  }
+
+  @Test
+  void getBookStock_shouldReturnTotalStock() {
+    given(bookRepository.existsById(bookId)).willReturn(true);
+    given(inventoryItemRepository.sumQuantityByBookId(bookId)).willReturn(25);
+
+    Integer result = inventoryService.getBookStock(bookId);
+
+    assertThat(result).isEqualTo(25);
+    then(bookRepository).should().existsById(bookId);
+    then(inventoryItemRepository).should().sumQuantityByBookId(bookId);
+  }
+
+  @Test
+  void getBookStock_whenBookNotFound_shouldThrow() {
+    given(bookRepository.existsById(bookId)).willReturn(false);
+
+    assertThatThrownBy(() -> inventoryService.getBookStock(bookId))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining("Book not found");
   }
 
   @Test

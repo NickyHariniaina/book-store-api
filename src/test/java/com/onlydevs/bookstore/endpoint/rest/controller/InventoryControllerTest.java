@@ -30,6 +30,17 @@ class InventoryControllerTest {
   @MockBean private InventoryMapper inventoryMapper;
 
   private final UUID editionId = UUID.randomUUID();
+  private final UUID bookId = UUID.randomUUID();
+
+  @Test
+  void get_book_stock_should_return_stock() throws Exception {
+    given(inventoryService.getBookStock(bookId)).willReturn(100);
+
+    mockMvc
+        .perform(get("/inventory/books/{bookId}/stock", bookId))
+        .andExpect(status().isOk())
+        .andExpect(content().string("100"));
+  }
 
   @Test
   void get_edition_stock_should_return_stock() throws Exception {
