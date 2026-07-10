@@ -11,17 +11,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/inventory")
 @RequiredArgsConstructor
 public class InventoryController {
 
   private final InventoryService inventoryService;
   private final InventoryMapper inventoryMapper;
 
-  @PostMapping("/inventory/arrival")
+  @PostMapping("/arrival")
   public ResponseEntity<InventoryItemResponse> recordArrival(
       @RequestParam UUID editionId,
       @RequestParam Integer quantity,
@@ -30,7 +32,7 @@ public class InventoryController {
     return ResponseEntity.ok(inventoryMapper.toRest(item));
   }
 
-  @PostMapping("/inventory/adjustment")
+  @PostMapping("/adjustment")
   public ResponseEntity<InventoryItemResponse> adjustStock(
       @RequestParam UUID editionId,
       @RequestParam Integer quantity,
@@ -39,7 +41,7 @@ public class InventoryController {
     return ResponseEntity.ok(inventoryMapper.toRest(item));
   }
 
-  @PostMapping("/inventory/damaged")
+  @PostMapping("/damaged")
   public ResponseEntity<InventoryItemResponse> recordDamaged(
       @RequestParam UUID editionId,
       @RequestParam Integer quantity,
@@ -48,7 +50,7 @@ public class InventoryController {
     return ResponseEntity.ok(inventoryMapper.toRest(item));
   }
 
-  @PostMapping("/inventory/lost")
+  @PostMapping("/lost")
   public ResponseEntity<InventoryItemResponse> recordLost(
       @RequestParam UUID editionId,
       @RequestParam Integer quantity,
@@ -57,13 +59,13 @@ public class InventoryController {
     return ResponseEntity.ok(inventoryMapper.toRest(item));
   }
 
-  @GetMapping("/inventory/low-stock")
+  @GetMapping("/low-stock")
   public ResponseEntity<List<InventoryItemResponse>> getLowStock() {
     var items = inventoryService.getAllLowStock();
     return ResponseEntity.ok(inventoryMapper.toRestList(items));
   }
 
-  @GetMapping("/inventory/books/{bookId}/stock")
+  @GetMapping("/books/{bookId}/stock")
   public ResponseEntity<Integer> getBookStock(@PathVariable UUID bookId) {
     return ResponseEntity.ok(inventoryService.getBookStock(bookId));
   }
