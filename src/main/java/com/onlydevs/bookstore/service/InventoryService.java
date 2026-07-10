@@ -7,6 +7,7 @@ import com.onlydevs.bookstore.model.enums.InventoryMovementType;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
+import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.InventoryItemRepository;
 import com.onlydevs.bookstore.repository.InventoryMovementRepository;
 import java.util.List;
@@ -22,6 +23,7 @@ public class InventoryService {
   private final InventoryItemRepository inventoryItemRepository;
   private final InventoryMovementRepository inventoryMovementRepository;
   private final BookEditionRepository bookEditionRepository;
+  private final BookRepository bookRepository;
 
   @Transactional
   public InventoryItem recordArrival(UUID editionId, Integer quantity, String reference) {
@@ -115,6 +117,13 @@ public class InventoryService {
         .findByBookEditionId(editionId)
         .map(InventoryItem::getQuantityOnHand)
         .orElse(0);
+  }
+
+  public Integer getBookStock(UUID bookId) {
+    if (!bookRepository.existsById(bookId)) {
+      throw new NotFoundException("Book not found with id: " + bookId);
+    }
+    return inventoryItemRepository.sumQuantityByBookId(bookId);
   }
 
   public List<InventoryMovement> getMovementsByEdition(UUID editionId) {
