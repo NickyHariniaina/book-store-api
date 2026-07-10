@@ -400,7 +400,7 @@ paths:
       responses:
         '204': { description: Deleted }
         '404': { description: Not found }
-  /editions/{editionId}/stock:
+  /inventory/editions/{editionId}/stock:
     get:
       tags: [Inventory]
       summary: Get stock of an edition
@@ -941,7 +941,7 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/InventoryItemResponse' }
-  /editions/{editionId}/movements:
+  /inventory/editions/{editionId}/movements:
     get:
       tags: [Inventory]
       summary: Inventory movements for an edition

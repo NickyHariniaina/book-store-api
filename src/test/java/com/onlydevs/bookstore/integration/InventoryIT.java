@@ -21,7 +21,7 @@ class InventoryIT extends FacadeIT {
   void get_stock_by_edition_should_return_zero_when_not_found() {
     webTestClient
         .get()
-        .uri("/editions/{editionId}/stock", java.util.UUID.randomUUID())
+        .uri("/inventory/editions/{editionId}/stock", java.util.UUID.randomUUID())
         .exchange()
         .expectStatus()
         .isOk()
