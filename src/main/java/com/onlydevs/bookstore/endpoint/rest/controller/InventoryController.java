@@ -63,6 +63,11 @@ public class InventoryController {
     return ResponseEntity.ok(inventoryMapper.toRestList(items));
   }
 
+  @GetMapping("/inventory/books/{bookId}/stock")
+  public ResponseEntity<Integer> getBookStock(@PathVariable UUID bookId) {
+    return ResponseEntity.ok(inventoryService.getBookStock(bookId));
+  }
+
   @GetMapping("/editions/{editionId}/stock")
   public ResponseEntity<Integer> getEditionStock(@PathVariable UUID editionId) {
     return ResponseEntity.ok(inventoryService.getEditionStock(editionId));
