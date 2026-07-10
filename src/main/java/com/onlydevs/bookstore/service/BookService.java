@@ -3,7 +3,6 @@ package com.onlydevs.bookstore.service;
 import com.onlydevs.bookstore.endpoint.rest.mapper.BookMapper;
 import com.onlydevs.bookstore.model.Book;
 import com.onlydevs.bookstore.model.BookAuthor;
-import com.onlydevs.bookstore.model.InventoryItem;
 import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
@@ -17,8 +16,6 @@ import com.onlydevs.bookstore.repository.BookAuthorRepository;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.GenreRepository;
-import com.onlydevs.bookstore.repository.InventoryItemRepository;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,7 +32,6 @@ public class BookService {
   private final GenreRepository genreRepository;
   private final BookAuthorRepository bookAuthorRepository;
   private final BookEditionRepository bookEditionRepository;
-  private final InventoryItemRepository inventoryItemRepository;
 
   public Page<BookSummaryResponse> getAllBooks(Pageable pageable) {
     return bookRepository.findAll(pageable).map(bookMapper::toBookSummaryResponse);
@@ -90,17 +86,6 @@ public class BookService {
       throw new NotFoundException("Book not found with id: " + id);
     }
     bookRepository.deleteById(id);
-  }
-
-  public Integer getBookTotalStock(UUID bookId) {
-    if (!bookRepository.existsById(bookId)) {
-      throw new NotFoundException("Book not found with id: " + bookId);
-    }
-    return inventoryItemRepository.sumQuantityByBookId(bookId);
-  }
-
-  public List<InventoryItem> getAllLowStock() {
-    return inventoryItemRepository.findAllLowStock();
   }
 
   @Transactional
