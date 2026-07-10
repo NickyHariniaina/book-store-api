@@ -47,7 +47,7 @@ class InventoryControllerTest {
     given(inventoryService.getEditionStock(editionId)).willReturn(42);
 
     mockMvc
-        .perform(get("/editions/{editionId}/stock", editionId))
+        .perform(get("/inventory/editions/{editionId}/stock", editionId))
         .andExpect(status().isOk())
         .andExpect(content().string("42"));
   }
@@ -67,7 +67,7 @@ class InventoryControllerTest {
     given(inventoryMapper.toMovementRestList(any())).willReturn(List.of(response));
 
     mockMvc
-        .perform(get("/editions/{editionId}/movements", editionId))
+        .perform(get("/inventory/editions/{editionId}/movements", editionId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].type").value("ARRIVAL"));
   }
