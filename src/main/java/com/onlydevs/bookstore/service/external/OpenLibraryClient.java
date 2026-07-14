@@ -1,30 +1,31 @@
 package com.onlydevs.bookstore.service.external;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
+import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse;
+import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.AuthorEntry;
+import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.Cover;
+import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.PublisherEntry;
+import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.SubjectEntry;
 import java.util.ArrayList;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
-@Component
-@RequiredArgsConstructor
 public class OpenLibraryClient {
 
-  private final RestTemplate externalRestTemplate;
-  private final ExternalApiConf externalApiConf;
+  private final String apiUrl;
+  private final RestTemplate restTemplate;
 
-  public Optional<ExternalBookResponse> findByIsbn(String isbn) {
+  public OpenLibraryClient(String apiUrl) {
+    this.apiUrl = apiUrl;
+    this.restTemplate = new RestTemplate();
+  }
+
+  public Optional<OpenLibraryBookResponse> findByIsbn(String isbn) {
     try {
-      var url =
-          externalApiConf.getOpenLibraryUrl()
-              + "/api/books?bibkeys=ISBN:"
-              + isbn
-              + "&format=json&jscmd=data";
-      var root = externalRestTemplate.getForObject(url, JsonNode.class);
+      var url = apiUrl + "/api/books?bibkeys=ISBN:" + isbn + "&format=json&jscmd=data";
+      var root = restTemplate.getForObject(url, JsonNode.class);
 
       if (root == null || root.isEmpty()) {
         return Optional.empty();
@@ -41,88 +42,87 @@ public class OpenLibraryClient {
         return Optional.empty();
       }
 
-      return Optional.of(toResponse(details, isbn, bookNode));
+      return Optional.of(toResponse(details, isbn));
     } catch (Exception e) {
       log.warn("OpenLibrary lookup failed for ISBN {}: {}", isbn, e.getMessage());
       return Optional.empty();
     }
   }
 
-  private ExternalBookResponse toResponse(JsonNode details, String isbn, JsonNode bookNode) {
+  private OpenLibraryBookResponse toResponse(JsonNode details, String isbn) {
     var title = details.has("title") ? details.get("title").asText() : null;
+    var subtitle = details.has("subtitle") ? details.get("subtitle").asText() : null;
 
-    var authors = new ArrayList<String>();
+    var authors = new ArrayList<AuthorEntry>();
     var authorNodes = details.get("authors");
     if (authorNodes != null && authorNodes.isArray()) {
       for (var author : authorNodes) {
         var name = author.get("name");
         if (name != null) {
-          authors.add(name.asText());
+          authors.add(AuthorEntry.builder().name(name.asText()).build());
         }
       }
     }
 
-    var publisher = extractFirstField(details, "publishers", "name");
-    var publishedDate = details.has("publish_date") ? details.get("publish_date").asText() : null;
+    var publishers = new ArrayList<PublisherEntry>();
+    var publisherNodes = details.get("publishers");
+    if (publisherNodes != null && publisherNodes.isArray()) {
+      for (var pub : publisherNodes) {
+        var name = pub.get("name");
+        if (name != null) {
+          publishers.add(PublisherEntry.builder().name(name.asText()).build());
+        }
+      }
+    }
+
+    var publishDate = details.has("publish_date") ? details.get("publish_date").asText() : null;
+
     var description =
         details.has("description")
             ? details.get("description").asText()
-            : details.has("subtitle") ? details.get("subtitle").asText() : null;
-    var pageCount = details.has("number_of_pages") ? details.get("number_of_pages").asInt() : null;
+            : subtitle != null ? subtitle : null;
 
-    var categories = new ArrayList<String>();
+    var numberOfPages =
+        details.has("number_of_pages") ? details.get("number_of_pages").asInt() : null;
+
+    var subjects = new ArrayList<SubjectEntry>();
     var subjectNodes = details.get("subjects");
     if (subjectNodes != null && subjectNodes.isArray()) {
       for (var subject : subjectNodes) {
         var name = subject.get("name");
         if (name != null) {
-          categories.add(name.asText());
+          subjects.add(SubjectEntry.builder().name(name.asText()).build());
         }
       }
     }
 
-    var thumbnailUrl = extractThumbnail(details, bookNode);
+    var cover = buildCover(details);
 
-    return ExternalBookResponse.builder()
+    return OpenLibraryBookResponse.builder()
         .title(title)
+        .subtitle(subtitle)
         .authors(authors.isEmpty() ? null : authors)
-        .publisher(publisher)
-        .publishedDate(publishedDate)
+        .publishers(publishers.isEmpty() ? null : publishers)
+        .publishDate(publishDate)
         .description(description)
-        .pageCount(pageCount)
-        .categories(categories.isEmpty() ? null : categories)
-        .thumbnailUrl(thumbnailUrl)
+        .numberOfPages(numberOfPages)
+        .subjects(subjects.isEmpty() ? null : subjects)
+        .cover(cover)
         .isbn(isbn)
         .build();
   }
 
-  private String extractFirstField(JsonNode parent, String fieldName, String subField) {
-    var field = parent.get(fieldName);
-    if (field != null && field.isArray() && field.size() > 0) {
-      var first = field.get(0);
-      if (first != null && first.has(subField)) {
-        return first.get(subField).asText();
-      }
+  private Cover buildCover(JsonNode details) {
+    var coverNode = details.get("cover");
+    if (coverNode == null) {
+      return null;
     }
-    return null;
-  }
-
-  private String extractThumbnail(JsonNode details, JsonNode bookNode) {
-    var cover = details.get("cover");
-    if (cover != null) {
-      if (cover.has("large")) {
-        return cover.get("large").asText();
-      }
-      if (cover.has("medium")) {
-        return cover.get("medium").asText();
-      }
-      if (cover.has("small")) {
-        return cover.get("small").asText();
-      }
+    var small = coverNode.has("small") ? coverNode.get("small").asText() : null;
+    var medium = coverNode.has("medium") ? coverNode.get("medium").asText() : null;
+    var large = coverNode.has("large") ? coverNode.get("large").asText() : null;
+    if (small == null && medium == null && large == null) {
+      return null;
     }
-    if (bookNode.has("thumbnail_url")) {
-      return bookNode.get("thumbnail_url").asText();
-    }
-    return null;
+    return Cover.builder().small(small).medium(medium).large(large).build();
   }
 }
