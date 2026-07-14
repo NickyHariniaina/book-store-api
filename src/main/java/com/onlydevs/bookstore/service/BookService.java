@@ -14,7 +14,6 @@ import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.AuthorRepository;
 import com.onlydevs.bookstore.repository.BookAuthorRepository;
-import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.GenreRepository;
 import com.onlydevs.bookstore.service.external.GoogleBooksClient;
@@ -34,7 +33,6 @@ public class BookService {
   private final AuthorRepository authorRepository;
   private final GenreRepository genreRepository;
   private final BookAuthorRepository bookAuthorRepository;
-  private final BookEditionRepository bookEditionRepository;
   private final OpenLibraryClient openLibraryClient;
   private final GoogleBooksClient googleBooksClient;
 
