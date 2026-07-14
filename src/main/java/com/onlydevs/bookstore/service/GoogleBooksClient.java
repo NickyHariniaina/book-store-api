@@ -1,11 +1,11 @@
-package com.onlydevs.bookstore.service.external;
+package com.onlydevs.bookstore.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.AuthorEntry;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.Cover;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.PublisherEntry;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.SubjectEntry;
+import com.onlydevs.bookstore.model.dto.response.BookResponse;
+import com.onlydevs.bookstore.model.dto.response.BookResponse.AuthorEntry;
+import com.onlydevs.bookstore.model.dto.response.BookResponse.Cover;
+import com.onlydevs.bookstore.model.dto.response.BookResponse.PublisherEntry;
+import com.onlydevs.bookstore.model.dto.response.BookResponse.SubjectEntry;
 import java.util.ArrayList;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ public class GoogleBooksClient {
     this.restTemplate = restTemplate;
   }
 
-  public Optional<ExternalBookResponse> findByIsbn(String isbn) {
+  public Optional<BookResponse> findByIsbn(String isbn) {
     try {
       var url = apiUrl + "/volumes?q=isbn:" + isbn + "&key=" + apiKey;
       var root = restTemplate.getForObject(url, JsonNode.class);
@@ -59,7 +59,7 @@ public class GoogleBooksClient {
     }
   }
 
-  private ExternalBookResponse toResponse(JsonNode volumeInfo, String isbn) {
+  private BookResponse toResponse(JsonNode volumeInfo, String isbn) {
     var title = volumeInfo.has("title") ? volumeInfo.get("title").asText() : null;
     var subtitle = volumeInfo.has("subtitle") ? volumeInfo.get("subtitle").asText() : null;
 
@@ -94,7 +94,7 @@ public class GoogleBooksClient {
 
     var cover = buildCover(volumeInfo);
 
-    return ExternalBookResponse.builder()
+    return BookResponse.builder()
         .title(title)
         .subtitle(subtitle)
         .authors(authors.isEmpty() ? null : authors)

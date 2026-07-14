@@ -4,8 +4,8 @@ import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
 import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
+import com.onlydevs.bookstore.model.dto.response.BookResponse;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
 import com.onlydevs.bookstore.service.BookService;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -51,7 +51,7 @@ public class BookController {
   }
 
   @GetMapping("/isbn/{isbn}")
-  public ResponseEntity<ExternalBookResponse> findByIsbn(@PathVariable String isbn) {
+  public ResponseEntity<BookResponse> findByIsbn(@PathVariable String isbn) {
     return ResponseEntity.status(HttpStatus.OK).body(bookService.findByIsbn(isbn));
   }
 

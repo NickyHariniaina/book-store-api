@@ -13,10 +13,10 @@ import com.onlydevs.bookstore.model.dto.request.CreateBookRequest;
 import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
 import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
+import com.onlydevs.bookstore.model.dto.response.BookResponse;
+import com.onlydevs.bookstore.model.dto.response.BookResponse.AuthorEntry;
+import com.onlydevs.bookstore.model.dto.response.BookResponse.PublisherEntry;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.AuthorEntry;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.PublisherEntry;
 import com.onlydevs.bookstore.model.enums.AuthorRole;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
@@ -26,8 +26,6 @@ import com.onlydevs.bookstore.repository.BookAuthorRepository;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.GenreRepository;
-import com.onlydevs.bookstore.service.external.GoogleBooksClient;
-import com.onlydevs.bookstore.service.external.OpenLibraryClient;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
@@ -81,8 +79,8 @@ class BookServiceTest {
   private UUID authorId;
   private UUID genreId;
   private String isbn;
-  private ExternalBookResponse openLibraryResponse;
-  private ExternalBookResponse googleBooksResponse;
+  private BookResponse openLibraryResponse;
+  private BookResponse googleBooksResponse;
   private UUID editionId;
   private Book book;
 
@@ -227,7 +225,7 @@ class BookServiceTest {
     isbn = "9780385472579";
 
     openLibraryResponse =
-        ExternalBookResponse.builder()
+        BookResponse.builder()
             .title("Things Fall Apart")
             .authors(List.of(AuthorEntry.builder().name("Chinua Achebe").build()))
             .publishers(List.of(PublisherEntry.builder().name("Anchor").build()))
@@ -237,7 +235,7 @@ class BookServiceTest {
             .build();
 
     googleBooksResponse =
-        ExternalBookResponse.builder()
+        BookResponse.builder()
             .title("The Great Gatsby")
             .authors(List.of(AuthorEntry.builder().name("F. Scott Fitzgerald").build()))
             .publishers(List.of(PublisherEntry.builder().name("Scribner").build()))

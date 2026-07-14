@@ -1,4 +1,4 @@
-package com.onlydevs.bookstore.service.external;
+package com.onlydevs.bookstore.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -74,20 +74,21 @@ class GoogleBooksClientTest {
     var result = client.findByIsbn(isbn);
 
     assertThat(result).isPresent();
-    assertThat(result.get().getTitle()).isEqualTo("Things Fall Apart");
-    assertThat(result.get().getAuthors()).hasSize(1);
-    assertThat(result.get().getAuthors().getFirst().getName()).isEqualTo("Chinua Achebe");
-    assertThat(result.get().getPublishers()).hasSize(1);
-    assertThat(result.get().getPublishers().getFirst().getName()).isEqualTo("Anchor");
-    assertThat(result.get().getPublishDate()).isEqualTo("1994");
-    assertThat(result.get().getDescription()).isEqualTo("A classic novel");
-    assertThat(result.get().getNumberOfPages()).isEqualTo(209);
-    assertThat(result.get().getSubjects()).hasSize(1);
-    assertThat(result.get().getSubjects().getFirst().getName()).isEqualTo("Fiction");
-    assertThat(result.get().getCover()).isNotNull();
-    assertThat(result.get().getCover().getSmall()).isEqualTo("http://books.google.com/s.jpg");
-    assertThat(result.get().getCover().getMedium()).isEqualTo("http://books.google.com/m.jpg");
-    assertThat(result.get().getIsbn()).isEqualTo(isbn);
+    var response = result.get();
+    assertThat(response.getTitle()).isEqualTo("Things Fall Apart");
+    assertThat(response.getAuthors()).hasSize(1);
+    assertThat(response.getAuthors().getFirst().getName()).isEqualTo("Chinua Achebe");
+    assertThat(response.getPublishers()).hasSize(1);
+    assertThat(response.getPublishers().getFirst().getName()).isEqualTo("Anchor");
+    assertThat(response.getPublishDate()).isEqualTo("1994");
+    assertThat(response.getDescription()).isEqualTo("A classic novel");
+    assertThat(response.getNumberOfPages()).isEqualTo(209);
+    assertThat(response.getSubjects()).hasSize(1);
+    assertThat(response.getSubjects().getFirst().getName()).isEqualTo("Fiction");
+    assertThat(response.getCover()).isNotNull();
+    assertThat(response.getCover().getSmall()).isEqualTo("http://books.google.com/s.jpg");
+    assertThat(response.getCover().getMedium()).isEqualTo("http://books.google.com/m.jpg");
+    assertThat(response.getIsbn()).isEqualTo(isbn);
   }
 
   @Test

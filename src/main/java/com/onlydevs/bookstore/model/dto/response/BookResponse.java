@@ -12,7 +12,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExternalBookResponse {
+public class BookResponse {
   private String title;
   private String subtitle;
   private List<AuthorEntry> authors;
