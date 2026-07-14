@@ -1,5 +1,7 @@
 package com.onlydevs.bookstore.service;
 
+import com.onlydevs.bookstore.service.external.GoogleBooksClient;
+import com.onlydevs.bookstore.service.external.OpenLibraryClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.onlydevs.bookstore.service;
+package com.onlydevs.bookstore.service.external;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -16,50 +16,53 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
-class OpenLibraryClientTest {
+class GoogleBooksClientTest {
 
   @Mock private RestTemplate restTemplate;
 
-  private OpenLibraryClient client;
+  private GoogleBooksClient client;
   private final ObjectMapper mapper = new ObjectMapper();
-  private final String apiUrl = "https://openlibrary.org";
+  private final String apiUrl = "https://www.googleapis.com/books/v1";
+  private final String apiKey = "test-key";
   private final String isbn = "9780385472579";
   private JsonNode foundResponse;
-  private JsonNode emptyResponse;
-  private JsonNode noDetailsResponse;
+  private JsonNode notFoundResponse;
 
   @BeforeEach
   void setUp() throws JsonProcessingException {
-    client = new OpenLibraryClient(apiUrl, restTemplate);
+    client = new GoogleBooksClient(apiUrl, apiKey, restTemplate);
 
     foundResponse =
         mapper.readTree(
             """
-{
-  "ISBN:9780385472579": {
-    "bib_key": "ISBN:9780385472579",
-    "details": {
-      "title": "Things Fall Apart",
-      "authors": [{"name": "Chinua Achebe"}],
-      "publishers": [{"name": "Anchor"}],
-      "publish_date": "1994",
-      "number_of_pages": 209,
-      "subjects": [{"name": "Fiction"}],
-      "cover": {"small": "http://covers.org/s.jpg", "medium": "http://covers.org/m.jpg", "large": "http://covers.org/l.jpg"}
-    }
-  }
-}
-""");
+            {
+              "totalItems": 1,
+              "items": [
+                {
+                  "volumeInfo": {
+                    "title": "Things Fall Apart",
+                    "authors": ["Chinua Achebe"],
+                    "publisher": "Anchor",
+                    "publishedDate": "1994",
+                    "description": "A classic novel",
+                    "pageCount": 209,
+                    "categories": ["Fiction"],
+                    "imageLinks": {
+                      "smallThumbnail": "http://books.google.com/s.jpg",
+                      "thumbnail": "http://books.google.com/m.jpg"
+                    }
+                  }
+                }
+              ]
+            }
+            """);
 
-    emptyResponse = mapper.readTree("{}");
-
-    noDetailsResponse =
+    notFoundResponse =
         mapper.readTree(
             """
             {
-              "ISBN:9780385472579": {
-                "bib_key": "ISBN:9780385472579"
-              }
+              "totalItems": 0,
+              "items": []
             }
             """);
   }
@@ -78,28 +81,19 @@ class OpenLibraryClientTest {
     assertThat(response.getPublishers()).hasSize(1);
     assertThat(response.getPublishers().getFirst().getName()).isEqualTo("Anchor");
     assertThat(response.getPublishDate()).isEqualTo("1994");
+    assertThat(response.getDescription()).isEqualTo("A classic novel");
     assertThat(response.getNumberOfPages()).isEqualTo(209);
     assertThat(response.getSubjects()).hasSize(1);
     assertThat(response.getSubjects().getFirst().getName()).isEqualTo("Fiction");
     assertThat(response.getCover()).isNotNull();
-    assertThat(response.getCover().getSmall()).isEqualTo("http://covers.org/s.jpg");
-    assertThat(response.getCover().getMedium()).isEqualTo("http://covers.org/m.jpg");
-    assertThat(response.getCover().getLarge()).isEqualTo("http://covers.org/l.jpg");
+    assertThat(response.getCover().getSmall()).isEqualTo("http://books.google.com/s.jpg");
+    assertThat(response.getCover().getMedium()).isEqualTo("http://books.google.com/m.jpg");
     assertThat(response.getIsbn()).isEqualTo(isbn);
   }
 
   @Test
   void findByIsbn_WhenNotFound_ShouldReturnEmpty() {
-    given(restTemplate.getForObject(anyString(), eq(JsonNode.class))).willReturn(emptyResponse);
-
-    var result = client.findByIsbn(isbn);
-
-    assertThat(result).isEmpty();
-  }
-
-  @Test
-  void findByIsbn_WhenNoDetails_ShouldReturnEmpty() {
-    given(restTemplate.getForObject(anyString(), eq(JsonNode.class))).willReturn(noDetailsResponse);
+    given(restTemplate.getForObject(anyString(), eq(JsonNode.class))).willReturn(notFoundResponse);
 
     var result = client.findByIsbn(isbn);
 
@@ -109,7 +103,7 @@ class OpenLibraryClientTest {
   @Test
   void findByIsbn_WhenApiThrows_ShouldReturnEmpty() {
     given(restTemplate.getForObject(anyString(), eq(JsonNode.class)))
-        .willThrow(new RuntimeException("Connection error"));
+        .willThrow(new RuntimeException("API error"));
 
     var result = client.findByIsbn(isbn);
 
