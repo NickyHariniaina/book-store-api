@@ -8,6 +8,7 @@ import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
 import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
@@ -16,6 +17,7 @@ import com.onlydevs.bookstore.repository.BookAuthorRepository;
 import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.GenreRepository;
+import com.onlydevs.bookstore.service.external.ExternalBookService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +34,7 @@ public class BookService {
   private final GenreRepository genreRepository;
   private final BookAuthorRepository bookAuthorRepository;
   private final BookEditionRepository bookEditionRepository;
+  private final ExternalBookService externalBookService;
 
   public Page<BookSummaryResponse> getAllBooks(Pageable pageable) {
     return bookRepository.findAll(pageable).map(bookMapper::toBookSummaryResponse);
@@ -43,6 +46,14 @@ public class BookService {
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Book not found with id: " + id));
     return bookMapper.toBookDetailResponse(book);
+  }
+
+  public ExternalBookResponse findByIsbn(String isbn) {
+    var result = externalBookService.findByIsbn(isbn);
+    if (result == null) {
+      throw new NotFoundException("Book not found with isbn: " + isbn);
+    }
+    return result;
   }
 
   @Transactional
