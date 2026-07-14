@@ -14,12 +14,51 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ExternalBookResponse {
   private String title;
-  private List<String> authors;
-  private String publisher;
-  private String publishedDate;
+  private String subtitle;
+  private List<AuthorEntry> authors;
+  private List<PublisherEntry> publishers;
+  private String publishDate;
+  private Integer numberOfPages;
+  private List<SubjectEntry> subjects;
+  private Cover cover;
   private String description;
-  private Integer pageCount;
-  private List<String> categories;
-  private String thumbnailUrl;
   private String isbn;
+
+  @Getter
+  @Setter
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class AuthorEntry {
+    private String name;
+  }
+
+  @Getter
+  @Setter
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class PublisherEntry {
+    private String name;
+  }
+
+  @Getter
+  @Setter
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class SubjectEntry {
+    private String name;
+  }
+
+  @Getter
+  @Setter
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class Cover {
+    private String small;
+    private String medium;
+    private String large;
+  }
 }

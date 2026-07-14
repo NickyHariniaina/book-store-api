@@ -1,11 +1,11 @@
 package com.onlydevs.bookstore.service.external;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.AuthorEntry;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.Cover;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.PublisherEntry;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.SubjectEntry;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.AuthorEntry;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.Cover;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.PublisherEntry;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.SubjectEntry;
 import java.util.ArrayList;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +19,16 @@ public class GoogleBooksClient {
   private final RestTemplate restTemplate;
 
   public GoogleBooksClient(String apiUrl, String apiKey) {
-    this.apiUrl = apiUrl;
-    this.apiKey = apiKey;
-    this.restTemplate = new RestTemplate();
+    this(apiUrl, apiKey, new RestTemplate());
   }
 
-  public Optional<OpenLibraryBookResponse> findByIsbn(String isbn) {
+  GoogleBooksClient(String apiUrl, String apiKey, RestTemplate restTemplate) {
+    this.apiUrl = apiUrl;
+    this.apiKey = apiKey;
+    this.restTemplate = restTemplate;
+  }
+
+  public Optional<ExternalBookResponse> findByIsbn(String isbn) {
     try {
       var url = apiUrl + "/volumes?q=isbn:" + isbn + "&key=" + apiKey;
       var root = restTemplate.getForObject(url, JsonNode.class);
@@ -55,7 +59,7 @@ public class GoogleBooksClient {
     }
   }
 
-  private OpenLibraryBookResponse toResponse(JsonNode volumeInfo, String isbn) {
+  private ExternalBookResponse toResponse(JsonNode volumeInfo, String isbn) {
     var title = volumeInfo.has("title") ? volumeInfo.get("title").asText() : null;
     var subtitle = volumeInfo.has("subtitle") ? volumeInfo.get("subtitle").asText() : null;
 
@@ -90,7 +94,7 @@ public class GoogleBooksClient {
 
     var cover = buildCover(volumeInfo);
 
-    return OpenLibraryBookResponse.builder()
+    return ExternalBookResponse.builder()
         .title(title)
         .subtitle(subtitle)
         .authors(authors.isEmpty() ? null : authors)

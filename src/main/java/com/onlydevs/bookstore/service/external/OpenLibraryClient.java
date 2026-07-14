@@ -1,11 +1,11 @@
 package com.onlydevs.bookstore.service.external;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.AuthorEntry;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.Cover;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.PublisherEntry;
-import com.onlydevs.bookstore.model.dto.response.OpenLibraryBookResponse.SubjectEntry;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.AuthorEntry;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.Cover;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.PublisherEntry;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.SubjectEntry;
 import java.util.ArrayList;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +18,15 @@ public class OpenLibraryClient {
   private final RestTemplate restTemplate;
 
   public OpenLibraryClient(String apiUrl) {
-    this.apiUrl = apiUrl;
-    this.restTemplate = new RestTemplate();
+    this(apiUrl, new RestTemplate());
   }
 
-  public Optional<OpenLibraryBookResponse> findByIsbn(String isbn) {
+  OpenLibraryClient(String apiUrl, RestTemplate restTemplate) {
+    this.apiUrl = apiUrl;
+    this.restTemplate = restTemplate;
+  }
+
+  public Optional<ExternalBookResponse> findByIsbn(String isbn) {
     try {
       var url = apiUrl + "/api/books?bibkeys=ISBN:" + isbn + "&format=json&jscmd=data";
       var root = restTemplate.getForObject(url, JsonNode.class);
@@ -49,7 +53,7 @@ public class OpenLibraryClient {
     }
   }
 
-  private OpenLibraryBookResponse toResponse(JsonNode details, String isbn) {
+  private ExternalBookResponse toResponse(JsonNode details, String isbn) {
     var title = details.has("title") ? details.get("title").asText() : null;
     var subtitle = details.has("subtitle") ? details.get("subtitle").asText() : null;
 
@@ -98,7 +102,7 @@ public class OpenLibraryClient {
 
     var cover = buildCover(details);
 
-    return OpenLibraryBookResponse.builder()
+    return ExternalBookResponse.builder()
         .title(title)
         .subtitle(subtitle)
         .authors(authors.isEmpty() ? null : authors)
