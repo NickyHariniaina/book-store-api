@@ -15,6 +15,9 @@ import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
 import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.AuthorEntry;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.PublisherEntry;
 import com.onlydevs.bookstore.service.BookService;
 import java.time.Instant;
 import java.util.List;
@@ -42,6 +45,36 @@ class BookControllerTest {
 
   private final UUID bookId = UUID.randomUUID();
   private final UUID editionId = UUID.randomUUID();
+
+  @Test
+  void findByIsbn_ShouldReturnBook() throws Exception {
+    var isbn = "9780385472579";
+    var response =
+        ExternalBookResponse.builder()
+            .title("Things Fall Apart")
+            .authors(List.of(AuthorEntry.builder().name("Chinua Achebe").build()))
+            .publishers(List.of(PublisherEntry.builder().name("Anchor").build()))
+            .isbn(isbn)
+            .build();
+
+    given(bookService.findByIsbn(isbn)).willReturn(response);
+
+    mockMvc
+        .perform(get("/books/isbn/{isbn}", isbn))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.title").value("Things Fall Apart"))
+        .andExpect(jsonPath("$.authors[0].name").value("Chinua Achebe"))
+        .andExpect(jsonPath("$.isbn").value(isbn));
+  }
+
+  @Test
+  void findByIsbn_WhenNotFound_ShouldReturn404() throws Exception {
+    var isbn = "9780000000000";
+    given(bookService.findByIsbn(isbn))
+        .willThrow(new com.onlydevs.bookstore.model.exception.NotFoundException("not found"));
+
+    mockMvc.perform(get("/books/isbn/{isbn}", isbn)).andExpect(status().isNotFound());
+  }
 
   @Test
   void getAllBooks_ShouldReturnPageOfBooks() throws Exception {
