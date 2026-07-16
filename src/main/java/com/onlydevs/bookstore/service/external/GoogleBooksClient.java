@@ -5,7 +5,6 @@ import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
 import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.AuthorEntry;
 import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.Cover;
 import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.PublisherEntry;
-import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.SubjectEntry;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -114,11 +113,11 @@ public class GoogleBooksClient {
 
     var numberOfPages = volumeInfo.has("pageCount") ? volumeInfo.get("pageCount").asInt() : null;
 
-    var subjects = new ArrayList<SubjectEntry>();
+    var subjects = new ArrayList<String>();
     var categoryNodes = volumeInfo.get("categories");
     if (categoryNodes != null && categoryNodes.isArray()) {
       for (var category : categoryNodes) {
-        subjects.add(SubjectEntry.builder().name(category.asText()).build());
+        subjects.add(category.asText());
       }
     }
 

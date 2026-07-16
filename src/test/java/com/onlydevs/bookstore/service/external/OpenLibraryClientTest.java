@@ -73,7 +73,7 @@ class OpenLibraryClientTest {
     assertThat(response.getPublishDate()).isEqualTo("1994");
     assertThat(response.getNumberOfPages()).isEqualTo(209);
     assertThat(response.getSubjects()).hasSize(1);
-    assertThat(response.getSubjects().getFirst().getName()).isEqualTo("Fiction");
+    assertThat(response.getSubjects().getFirst()).isEqualTo("Fiction");
     assertThat(response.getCover()).isNotNull();
     assertThat(response.getCover().getSmall()).isEqualTo("http://covers.org/s.jpg");
     assertThat(response.getCover().getMedium()).isEqualTo("http://covers.org/m.jpg");

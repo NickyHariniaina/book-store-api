@@ -15,7 +15,7 @@ public class ExternalBookResponse {
   private final List<PublisherEntry> publishers;
   private final String publishDate;
   private final Integer numberOfPages;
-  private final List<SubjectEntry> subjects;
+  private final List<String> subjects;
   private final Cover cover;
   private final String description;
   private final String isbn;
@@ -31,13 +31,6 @@ public class ExternalBookResponse {
   @Builder
   @AllArgsConstructor
   public static class PublisherEntry {
-    private final String name;
-  }
-
-  @Getter
-  @Builder
-  @AllArgsConstructor
-  public static class SubjectEntry {
     private final String name;
   }
 

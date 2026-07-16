@@ -91,7 +91,7 @@ class GoogleBooksClientTest {
     assertThat(response.getDescription()).isEqualTo("A classic novel");
     assertThat(response.getNumberOfPages()).isEqualTo(209);
     assertThat(response.getSubjects()).hasSize(1);
-    assertThat(response.getSubjects().getFirst().getName()).isEqualTo("Fiction");
+    assertThat(response.getSubjects().getFirst()).isEqualTo("Fiction");
     assertThat(response.getCover()).isNotNull();
     assertThat(response.getCover().getSmall()).isEqualTo("http://books.google.com/s.jpg");
     assertThat(response.getCover().getMedium()).isEqualTo("http://books.google.com/m.jpg");
