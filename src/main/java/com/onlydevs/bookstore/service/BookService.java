@@ -49,6 +49,9 @@ public class BookService {
   }
 
   public ExternalBookResponse findByIsbn(String isbn) {
+    if (isbn == null || !isbn.matches("\\d{13}|\\d{9}[\\dXx]")) {
+      throw new BadRequestException("Invalid ISBN: " + isbn);
+    }
     var result = openLibraryClient.findByIsbn(isbn);
     if (result.isPresent()) {
       return result.get();

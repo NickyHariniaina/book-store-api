@@ -292,6 +292,28 @@ class BookServiceTest {
   }
 
   @Test
+  void findByIsbn_WhenInvalidIsbn_ShouldThrow() {
+    var invalidIsbn = "invalid";
+
+    assertThatThrownBy(() -> bookService.findByIsbn(invalidIsbn))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("Invalid ISBN");
+
+    then(openLibraryClient).shouldHaveNoInteractions();
+    then(googleBooksClient).shouldHaveNoInteractions();
+  }
+
+  @Test
+  void findByIsbn_WhenNullIsbn_ShouldThrow() {
+    assertThatThrownBy(() -> bookService.findByIsbn(null))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("Invalid ISBN");
+
+    then(openLibraryClient).shouldHaveNoInteractions();
+    then(googleBooksClient).shouldHaveNoInteractions();
+  }
+
+  @Test
   void getAllBooks_ShouldReturnPageOfBookSummaryResponses() {
     Page<Book> bookPage = new PageImpl<>(List.of(bookWithAuthor, bookWithoutAuthor), pageable, 2);
     given(bookRepository.findAll(pageable)).willReturn(bookPage);
