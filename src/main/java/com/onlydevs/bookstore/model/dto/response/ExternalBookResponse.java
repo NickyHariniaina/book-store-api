@@ -4,61 +4,49 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ExternalBookResponse {
-  private String title;
-  private String subtitle;
-  private List<AuthorEntry> authors;
-  private List<PublisherEntry> publishers;
-  private String publishDate;
-  private Integer numberOfPages;
-  private List<SubjectEntry> subjects;
-  private Cover cover;
-  private String description;
-  private String isbn;
+  private final String title;
+  private final String subtitle;
+  private final List<AuthorEntry> authors;
+  private final List<PublisherEntry> publishers;
+  private final String publishDate;
+  private final Integer numberOfPages;
+  private final List<SubjectEntry> subjects;
+  private final Cover cover;
+  private final String description;
+  private final String isbn;
 
   @Getter
-  @Setter
   @Builder
-  @NoArgsConstructor
   @AllArgsConstructor
   public static class AuthorEntry {
-    private String name;
+    private final String name;
   }
 
   @Getter
-  @Setter
   @Builder
-  @NoArgsConstructor
   @AllArgsConstructor
   public static class PublisherEntry {
-    private String name;
+    private final String name;
   }
 
   @Getter
-  @Setter
   @Builder
-  @NoArgsConstructor
   @AllArgsConstructor
   public static class SubjectEntry {
-    private String name;
+    private final String name;
   }
 
   @Getter
-  @Setter
   @Builder
-  @NoArgsConstructor
   @AllArgsConstructor
   public static class Cover {
-    private String small;
-    private String medium;
-    private String large;
+    private final String small;
+    private final String medium;
+    private final String large;
   }
 }
