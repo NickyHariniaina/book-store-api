@@ -9,27 +9,27 @@ import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.SubjectEnt
 import java.util.ArrayList;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 @Slf4j
 public class OpenLibraryClient {
 
   private final String apiUrl;
-  private final RestTemplate restTemplate;
+  private final RestClient restClient;
 
   public OpenLibraryClient(String apiUrl) {
-    this(apiUrl, new RestTemplate());
+    this(apiUrl, RestClient.create());
   }
 
-  OpenLibraryClient(String apiUrl, RestTemplate restTemplate) {
+  OpenLibraryClient(String apiUrl, RestClient restClient) {
     this.apiUrl = apiUrl;
-    this.restTemplate = restTemplate;
+    this.restClient = restClient;
   }
 
   public Optional<ExternalBookResponse> findByIsbn(String isbn) {
     try {
       var url = apiUrl + "/api/books?bibkeys=ISBN:" + isbn + "&format=json&jscmd=data";
-      var root = restTemplate.getForObject(url, JsonNode.class);
+      var root = restClient.get().uri(url).retrieve().body(JsonNode.class);
 
       if (root == null || root.isEmpty()) {
         return Optional.empty();

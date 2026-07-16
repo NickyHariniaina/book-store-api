@@ -1,9 +1,9 @@
 package com.onlydevs.bookstore.service.external;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,15 +11,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestClient;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleBooksClientTest {
 
-  @Mock private RestTemplate restTemplate;
-
+  private MockRestServiceServer server;
   private GoogleBooksClient client;
   private final ObjectMapper mapper = new ObjectMapper();
   private final String apiUrl = "https://www.googleapis.com/books/v1";
@@ -30,7 +30,9 @@ class GoogleBooksClientTest {
 
   @BeforeEach
   void setUp() throws JsonProcessingException {
-    client = new GoogleBooksClient(apiUrl, apiKey, restTemplate);
+    var builder = RestClient.builder();
+    server = MockRestServiceServer.bindTo(builder).build();
+    client = new GoogleBooksClient(apiUrl, apiKey, builder.build());
 
     foundResponse =
         mapper.readTree(
@@ -69,7 +71,11 @@ class GoogleBooksClientTest {
 
   @Test
   void findByIsbn_WhenFound_ShouldReturnResponse() {
-    given(restTemplate.getForObject(anyString(), eq(JsonNode.class))).willReturn(foundResponse);
+    var url = apiUrl + "/volumes?q=isbn:" + isbn + "&key=" + apiKey;
+
+    server
+        .expect(requestTo(url))
+        .andRespond(withSuccess(foundResponse.toString(), MediaType.APPLICATION_JSON));
 
     var result = client.findByIsbn(isbn);
 
@@ -89,24 +95,33 @@ class GoogleBooksClientTest {
     assertThat(response.getCover().getSmall()).isEqualTo("http://books.google.com/s.jpg");
     assertThat(response.getCover().getMedium()).isEqualTo("http://books.google.com/m.jpg");
     assertThat(response.getIsbn()).isEqualTo(isbn);
+
+    server.verify();
   }
 
   @Test
   void findByIsbn_WhenNotFound_ShouldReturnEmpty() {
-    given(restTemplate.getForObject(anyString(), eq(JsonNode.class))).willReturn(notFoundResponse);
+    var url = apiUrl + "/volumes?q=isbn:" + isbn + "&key=" + apiKey;
+
+    server
+        .expect(requestTo(url))
+        .andRespond(withSuccess(notFoundResponse.toString(), MediaType.APPLICATION_JSON));
 
     var result = client.findByIsbn(isbn);
 
     assertThat(result).isEmpty();
+    server.verify();
   }
 
   @Test
-  void findByIsbn_WhenApiThrows_ShouldReturnEmpty() {
-    given(restTemplate.getForObject(anyString(), eq(JsonNode.class)))
-        .willThrow(new RuntimeException("API error"));
+  void findByIsbn_WhenApiError_ShouldReturnEmpty() {
+    var url = apiUrl + "/volumes?q=isbn:" + isbn + "&key=" + apiKey;
+
+    server.expect(requestTo(url)).andRespond(withServerError());
 
     var result = client.findByIsbn(isbn);
 
     assertThat(result).isEmpty();
+    server.verify();
   }
 }

@@ -9,29 +9,29 @@ import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.SubjectEnt
 import java.util.ArrayList;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 @Slf4j
 public class GoogleBooksClient {
 
   private final String apiUrl;
   private final String apiKey;
-  private final RestTemplate restTemplate;
+  private final RestClient restClient;
 
   public GoogleBooksClient(String apiUrl, String apiKey) {
-    this(apiUrl, apiKey, new RestTemplate());
+    this(apiUrl, apiKey, RestClient.create());
   }
 
-  GoogleBooksClient(String apiUrl, String apiKey, RestTemplate restTemplate) {
+  GoogleBooksClient(String apiUrl, String apiKey, RestClient restClient) {
     this.apiUrl = apiUrl;
     this.apiKey = apiKey;
-    this.restTemplate = restTemplate;
+    this.restClient = restClient;
   }
 
   public Optional<ExternalBookResponse> findByIsbn(String isbn) {
     try {
       var url = apiUrl + "/volumes?q=isbn:" + isbn + "&key=" + apiKey;
-      var root = restTemplate.getForObject(url, JsonNode.class);
+      var root = restClient.get().uri(url).retrieve().body(JsonNode.class);
 
       if (root == null) {
         return Optional.empty();
