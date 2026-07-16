@@ -6,10 +6,15 @@ import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.AuthorEntr
 import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.Cover;
 import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.PublisherEntry;
 import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.SubjectEntry;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 public class OpenLibraryClient {
@@ -18,7 +23,7 @@ public class OpenLibraryClient {
   private final RestClient restClient;
 
   public OpenLibraryClient(String apiUrl) {
-    this(apiUrl, RestClient.create());
+    this(apiUrl, buildRestClient());
   }
 
   OpenLibraryClient(String apiUrl, RestClient restClient) {
@@ -26,10 +31,20 @@ public class OpenLibraryClient {
     this.restClient = restClient;
   }
 
+  private static RestClient buildRestClient() {
+    var factory = new SimpleClientHttpRequestFactory();
+    factory.setConnectTimeout(5000);
+    factory.setReadTimeout(10000);
+    return RestClient.builder()
+        .requestFactory(factory)
+        .defaultHeader("User-Agent", "BookStoreAPI/1.0")
+        .build();
+  }
+
   public Optional<ExternalBookResponse> findByIsbn(String isbn) {
     try {
-      var url = apiUrl + "/api/books?bibkeys=ISBN:" + isbn + "&format=json&jscmd=data";
-      var root = restClient.get().uri(url).retrieve().body(JsonNode.class);
+      var uri = buildUri(isbn);
+      var root = restClient.get().uri(uri).retrieve().body(JsonNode.class);
 
       if (root == null || root.isEmpty()) {
         return Optional.empty();
@@ -41,16 +56,28 @@ public class OpenLibraryClient {
         return Optional.empty();
       }
 
-      var details = bookNode.get("details");
-      if (details == null) {
-        return Optional.empty();
-      }
-
-      return Optional.of(toResponse(details, isbn));
-    } catch (Exception e) {
-      log.warn("OpenLibrary lookup failed for ISBN {}: {}", isbn, e.getMessage());
+      return Optional.of(toResponse(bookNode, isbn));
+    } catch (RestClientResponseException e) {
+      log.warn(
+          "OpenLibrary request failed for ISBN {}: {} - {}",
+          isbn,
+          e.getStatusCode(),
+          e.getMessage());
+      return Optional.empty();
+    } catch (ResourceAccessException e) {
+      log.warn("OpenLibrary connection failed for ISBN {}: {}", isbn, e.getMessage());
       return Optional.empty();
     }
+  }
+
+  private URI buildUri(String isbn) {
+    return UriComponentsBuilder.fromHttpUrl(apiUrl)
+        .path("/api/books")
+        .queryParam("bibkeys", "ISBN:" + isbn)
+        .queryParam("format", "json")
+        .queryParam("jscmd", "data")
+        .build()
+        .toUri();
   }
 
   private ExternalBookResponse toResponse(JsonNode details, String isbn) {
@@ -81,10 +108,7 @@ public class OpenLibraryClient {
 
     var publishDate = details.has("publish_date") ? details.get("publish_date").asText() : null;
 
-    var description =
-        details.has("description")
-            ? details.get("description").asText()
-            : subtitle != null ? subtitle : null;
+    var description = details.has("description") ? details.get("description").asText() : null;
 
     var numberOfPages =
         details.has("number_of_pages") ? details.get("number_of_pages").asInt() : null;

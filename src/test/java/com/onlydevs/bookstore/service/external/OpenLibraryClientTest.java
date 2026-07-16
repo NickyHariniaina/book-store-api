@@ -2,6 +2,8 @@ package com.onlydevs.bookstore.service.external;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,7 +27,6 @@ class OpenLibraryClientTest {
   private final String isbn = "9780385472579";
   private JsonNode foundResponse;
   private JsonNode emptyResponse;
-  private JsonNode noDetailsResponse;
 
   @BeforeEach
   void setUp() throws JsonProcessingException {
@@ -38,31 +39,18 @@ class OpenLibraryClientTest {
             """
 {
   "ISBN:9780385472579": {
-    "bib_key": "ISBN:9780385472579",
-    "details": {
-      "title": "Things Fall Apart",
-      "authors": [{"name": "Chinua Achebe"}],
-      "publishers": [{"name": "Anchor"}],
-      "publish_date": "1994",
-      "number_of_pages": 209,
-      "subjects": [{"name": "Fiction"}],
-      "cover": {"small": "http://covers.org/s.jpg", "medium": "http://covers.org/m.jpg", "large": "http://covers.org/l.jpg"}
-    }
+    "title": "Things Fall Apart",
+    "authors": [{"name": "Chinua Achebe"}],
+    "publishers": [{"name": "Anchor"}],
+    "publish_date": "1994",
+    "number_of_pages": 209,
+    "subjects": [{"name": "Fiction"}],
+    "cover": {"small": "http://covers.org/s.jpg", "medium": "http://covers.org/m.jpg", "large": "http://covers.org/l.jpg"}
   }
 }
 """);
 
     emptyResponse = mapper.readTree("{}");
-
-    noDetailsResponse =
-        mapper.readTree(
-            """
-            {
-              "ISBN:9780385472579": {
-                "bib_key": "ISBN:9780385472579"
-              }
-            }
-            """);
   }
 
   @Test
@@ -110,12 +98,10 @@ class OpenLibraryClientTest {
   }
 
   @Test
-  void findByIsbn_WhenNoDetails_ShouldReturnEmpty() {
+  void findByIsbn_WhenApiError_ShouldReturnEmpty() {
     var url = apiUrl + "/api/books?bibkeys=ISBN:" + isbn + "&format=json&jscmd=data";
 
-    server
-        .expect(requestTo(url))
-        .andRespond(withSuccess(noDetailsResponse.toString(), MediaType.APPLICATION_JSON));
+    server.expect(requestTo(url)).andRespond(withServerError());
 
     var result = client.findByIsbn(isbn);
 
@@ -124,14 +110,10 @@ class OpenLibraryClientTest {
   }
 
   @Test
-  void findByIsbn_WhenApiError_ShouldReturnEmpty() {
+  void findByIsbn_WhenClientError_ShouldReturnEmpty() {
     var url = apiUrl + "/api/books?bibkeys=ISBN:" + isbn + "&format=json&jscmd=data";
 
-    server
-        .expect(requestTo(url))
-        .andRespond(
-            org.springframework.test.web.client.response.MockRestResponseCreators
-                .withServerError());
+    server.expect(requestTo(url)).andRespond(withBadRequest());
 
     var result = client.findByIsbn(isbn);
 
