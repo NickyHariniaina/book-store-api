@@ -8,14 +8,16 @@ import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
 import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
 import com.onlydevs.bookstore.model.enums.BookLanguage;
 import com.onlydevs.bookstore.model.exception.BadRequestException;
 import com.onlydevs.bookstore.model.exception.NotFoundException;
 import com.onlydevs.bookstore.repository.AuthorRepository;
 import com.onlydevs.bookstore.repository.BookAuthorRepository;
-import com.onlydevs.bookstore.repository.BookEditionRepository;
 import com.onlydevs.bookstore.repository.BookRepository;
 import com.onlydevs.bookstore.repository.GenreRepository;
+import com.onlydevs.bookstore.service.external.GoogleBooksClient;
+import com.onlydevs.bookstore.service.external.OpenLibraryClient;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,7 +33,8 @@ public class BookService {
   private final AuthorRepository authorRepository;
   private final GenreRepository genreRepository;
   private final BookAuthorRepository bookAuthorRepository;
-  private final BookEditionRepository bookEditionRepository;
+  private final OpenLibraryClient openLibraryClient;
+  private final GoogleBooksClient googleBooksClient;
 
   public Page<BookSummaryResponse> getAllBooks(Pageable pageable) {
     return bookRepository.findAll(pageable).map(bookMapper::toBookSummaryResponse);
@@ -43,6 +46,21 @@ public class BookService {
             .findById(id)
             .orElseThrow(() -> new NotFoundException("Book not found with id: " + id));
     return bookMapper.toBookDetailResponse(book);
+  }
+
+  public ExternalBookResponse findByIsbn(String isbn) {
+    if (isbn == null || !isbn.matches("\\d{13}|\\d{9}[\\dXx]")) {
+      throw new BadRequestException("Invalid ISBN: " + isbn);
+    }
+    var result = openLibraryClient.findByIsbn(isbn);
+    if (result.isPresent()) {
+      return result.get();
+    }
+    result = googleBooksClient.findByIsbn(isbn);
+    if (result.isPresent()) {
+      return result.get();
+    }
+    throw new NotFoundException("Book not found with isbn: " + isbn);
   }
 
   @Transactional

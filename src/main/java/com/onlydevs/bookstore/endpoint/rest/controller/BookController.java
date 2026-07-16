@@ -5,6 +5,7 @@ import com.onlydevs.bookstore.model.dto.request.UpdateBookRequest;
 import com.onlydevs.bookstore.model.dto.response.BookAuthorResponse;
 import com.onlydevs.bookstore.model.dto.response.BookDetailResponse;
 import com.onlydevs.bookstore.model.dto.response.BookSummaryResponse;
+import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse;
 import com.onlydevs.bookstore.service.BookService;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -47,6 +48,11 @@ public class BookController {
   @GetMapping("/{id}")
   public ResponseEntity<BookDetailResponse> getBookById(@PathVariable UUID id) {
     return ResponseEntity.status(HttpStatus.OK).body(bookService.getBookById(id));
+  }
+
+  @GetMapping("/isbn/{isbn}")
+  public ResponseEntity<ExternalBookResponse> findByIsbn(@PathVariable String isbn) {
+    return ResponseEntity.status(HttpStatus.OK).body(bookService.findByIsbn(isbn));
   }
 
   @PostMapping
