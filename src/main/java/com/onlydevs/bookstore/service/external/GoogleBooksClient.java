@@ -6,10 +6,15 @@ import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.AuthorEntr
 import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.Cover;
 import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.PublisherEntry;
 import com.onlydevs.bookstore.model.dto.response.ExternalBookResponse.SubjectEntry;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 public class GoogleBooksClient {
@@ -19,7 +24,7 @@ public class GoogleBooksClient {
   private final RestClient restClient;
 
   public GoogleBooksClient(String apiUrl, String apiKey) {
-    this(apiUrl, apiKey, RestClient.create());
+    this(apiUrl, apiKey, buildRestClient());
   }
 
   GoogleBooksClient(String apiUrl, String apiKey, RestClient restClient) {
@@ -28,10 +33,20 @@ public class GoogleBooksClient {
     this.restClient = restClient;
   }
 
+  private static RestClient buildRestClient() {
+    var factory = new SimpleClientHttpRequestFactory();
+    factory.setConnectTimeout(5000);
+    factory.setReadTimeout(10000);
+    return RestClient.builder()
+        .requestFactory(factory)
+        .defaultHeader("User-Agent", "BookStoreAPI/1.0")
+        .build();
+  }
+
   public Optional<ExternalBookResponse> findByIsbn(String isbn) {
     try {
-      var url = apiUrl + "/volumes?q=isbn:" + isbn + "&key=" + apiKey;
-      var root = restClient.get().uri(url).retrieve().body(JsonNode.class);
+      var uri = buildUri(isbn);
+      var root = restClient.get().uri(uri).retrieve().body(JsonNode.class);
 
       if (root == null) {
         return Optional.empty();
@@ -53,10 +68,26 @@ public class GoogleBooksClient {
       }
 
       return Optional.of(toResponse(volumeInfo, isbn));
-    } catch (Exception e) {
-      log.warn("Google Books lookup failed for ISBN {}: {}", isbn, e.getMessage());
+    } catch (RestClientResponseException e) {
+      log.warn(
+          "Google Books request failed for ISBN {}: {} - {}",
+          isbn,
+          e.getStatusCode(),
+          e.getMessage());
+      return Optional.empty();
+    } catch (ResourceAccessException e) {
+      log.warn("Google Books connection failed for ISBN {}: {}", isbn, e.getMessage());
       return Optional.empty();
     }
+  }
+
+  private URI buildUri(String isbn) {
+    return UriComponentsBuilder.fromHttpUrl(apiUrl)
+        .path("/volumes")
+        .queryParam("q", "isbn:" + isbn)
+        .queryParam("key", apiKey)
+        .build()
+        .toUri();
   }
 
   private ExternalBookResponse toResponse(JsonNode volumeInfo, String isbn) {
@@ -79,8 +110,7 @@ public class GoogleBooksClient {
     var publishDate =
         volumeInfo.has("publishedDate") ? volumeInfo.get("publishedDate").asText() : null;
 
-    var description =
-        volumeInfo.has("description") ? volumeInfo.get("description").asText() : subtitle;
+    var description = volumeInfo.has("description") ? volumeInfo.get("description").asText() : null;
 
     var numberOfPages = volumeInfo.has("pageCount") ? volumeInfo.get("pageCount").asInt() : null;
 

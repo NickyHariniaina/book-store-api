@@ -2,6 +2,7 @@ package com.onlydevs.bookstore.service.external;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -118,6 +119,18 @@ class GoogleBooksClientTest {
     var url = apiUrl + "/volumes?q=isbn:" + isbn + "&key=" + apiKey;
 
     server.expect(requestTo(url)).andRespond(withServerError());
+
+    var result = client.findByIsbn(isbn);
+
+    assertThat(result).isEmpty();
+    server.verify();
+  }
+
+  @Test
+  void findByIsbn_WhenClientError_ShouldReturnEmpty() {
+    var url = apiUrl + "/volumes?q=isbn:" + isbn + "&key=" + apiKey;
+
+    server.expect(requestTo(url)).andRespond(withBadRequest());
 
     var result = client.findByIsbn(isbn);
 
